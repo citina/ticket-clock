@@ -1,0 +1,625 @@
+<title>USC Ticket Clock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    color-scheme:light;
+    --plane:#f2f2ef; --surface:#fcfcfb; --well:#e8e8e2;
+    --ink:#14140f; --ink-2:#56554f; --ink-3:#8a8880;
+    --rule:#e1e0d9; --edge:#c9c8c0;
+    --accent:#2a78d6; --accent-ink:#1c5cab;
+    --panel:#1a1a19; --panel-ink:#fcfcfb; --panel-ink-2:#b6b5ab; --panel-rule:rgba(255,255,255,.12);
+    --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a;
+    --sign:#ffffff; --sign-red:#c8102e; --sign-ink:#111111;
+    --map-filter:none; --halo:rgba(20,20,15,.28);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme:dark;
+      --plane:#0d0d0d; --surface:#1a1a19; --well:#262625;
+      --ink:#ffffff; --ink-2:#c3c2b7; --ink-3:#898781;
+      --rule:#2c2c2a; --edge:#3d3d3a;
+      --accent:#3987e5; --accent-ink:#86b6ef;
+      --panel:#262625; --panel-ink:#ffffff; --panel-ink-2:#a9a89e; --panel-rule:rgba(255,255,255,.10);
+      --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+      --sign:#ebeae5; --sign-red:#b50e29; --sign-ink:#111111;
+      --map-filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.86); --halo:rgba(255,255,255,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --plane:#0d0d0d; --surface:#1a1a19; --well:#262625;
+    --ink:#ffffff; --ink-2:#c3c2b7; --ink-3:#898781;
+    --rule:#2c2c2a; --edge:#3d3d3a;
+    --accent:#3987e5; --accent-ink:#86b6ef;
+    --panel:#262625; --panel-ink:#ffffff; --panel-ink-2:#a9a89e; --panel-rule:rgba(255,255,255,.10);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+    --sign:#ebeae5; --sign-red:#b50e29; --sign-ink:#111111;
+    --map-filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.86); --halo:rgba(255,255,255,.35);
+  }
+
+  *{box-sizing:border-box}
+  body{background:var(--plane);color:var(--ink);font-family:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+       font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  main{max-width:760px;margin:0 auto;padding:26px 20px 72px}
+  a{color:var(--accent-ink)}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+  .mast{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+        color:var(--ink-3);display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
+  h1{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:clamp(44px,8vw,66px);
+     line-height:.92;margin:20px 0 12px;text-wrap:balance}
+  .lede{font-size:18.5px;line-height:1.5;color:var(--ink-2);max-width:62ch;margin:0 0 22px}
+  h2{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:34px;line-height:1.02;margin:8px 0 14px;text-wrap:balance}
+  p{max-width:65ch;margin:0 0 14px}
+  .code{display:inline-flex;gap:10px;align-items:center;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+        font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+  .code b{font-weight:600;color:var(--ink-2);border:1px solid var(--edge);border-radius:3px;padding:1px 6px;letter-spacing:.04em}
+  section{margin-top:56px;padding-top:28px;border-top:1px solid var(--rule)}
+  figure{margin:24px 0 30px}
+  figcaption{font-size:13.5px;line-height:1.5;color:var(--ink-2);margin-top:10px;max-width:72ch}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .wide{width:min(1080px,calc(100vw - 40px));margin-left:calc(50% - min(540px,calc(50vw - 20px)))}
+  svg{display:block;max-width:100%;height:auto;overflow:visible}
+  .fig-title{font-weight:600;font-size:15.5px;margin:0 0 2px}
+  .fig-sub{font-size:13.5px;color:var(--ink-2);margin:0 0 12px}
+  .tick{font:11px "IBM Plex Mono",ui-monospace,Menlo,monospace;fill:var(--ink-3)}
+  .tick.strong{fill:var(--ink);font-weight:600}
+  .lab{font:500 12.5px "Barlow",system-ui,sans-serif;fill:var(--ink-2)}
+  .lab.strong{fill:var(--ink);font-weight:600}
+  .gridl{stroke:var(--rule);stroke-width:1}
+  .axis{stroke:var(--edge);stroke-width:1}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin:10px 0 0;padding:0;list-style:none}
+  .legend li{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:12px;height:12px;border-radius:3px;display:inline-block;flex:none}
+  .sw.bar{width:18px;height:4px;border-radius:2px}
+  .sw.line{height:0;width:18px;border-top:2px solid var(--accent);border-radius:0}
+  .sw.dash{height:0;width:18px;border-top:2px dashed var(--ink-3);border-radius:0}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{appearance:none;cursor:pointer;border:1px solid var(--edge);background:var(--surface);color:var(--ink);
+        font:500 14px "Barlow",system-ui,sans-serif;padding:5px 12px;border-radius:999px;min-height:34px}
+  .chip:hover{border-color:var(--ink-3)}
+  .chip[aria-pressed="true"]{background:var(--ink);color:var(--plane);border-color:var(--ink)}
+  .chip.sm{font-size:13px;padding:3px 10px;min-height:28px}
+  .ctl-label{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+  input[type=search]{font:15px "Barlow",system-ui,sans-serif;color:var(--ink);background:var(--surface);border:1px solid var(--edge);
+        border-radius:8px;padding:7px 10px;min-height:38px;width:min(300px,100%)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* ---------- explorer ---------- */
+  .explorer{width:min(1240px,calc(100vw - 40px));margin-left:calc(50% - min(620px,calc(50vw - 20px)));
+            display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:20px;align-items:start}
+  .mapcol{position:sticky;top:12px}
+  @media (max-width:1000px){ .explorer{grid-template-columns:1fr} .mapcol{position:static} }
+  .mapbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:0 0 10px}
+  .mapwrap{position:relative;background:var(--surface);border:1px solid var(--rule);border-radius:12px;overflow:hidden;
+           touch-action:none;user-select:none;-webkit-user-select:none}
+  .mapwrap svg{width:100%;height:100%;display:block;max-width:none}
+  .basemap{filter:var(--map-filter)}
+  .zoom{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:4px}
+  .zoom button{width:34px;height:34px;border-radius:8px;border:1px solid var(--edge);background:var(--surface);color:var(--ink);
+               font:600 18px/1 "Barlow",sans-serif;cursor:pointer}
+  .zoom button.fit{font-size:11px;font-family:"IBM Plex Mono",monospace}
+  .maptag{position:absolute;bottom:6px;font-size:11px;padding:1px 6px;border-radius:4px;color:var(--ink-2);
+          background:color-mix(in oklab,var(--surface) 88%,transparent)}
+  .maptag.r{right:8px} .maptag.l{left:8px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-3)}
+  .seg{fill:none;stroke-linecap:round}
+  .hit{fill:none;stroke:transparent;stroke-width:16;cursor:pointer}
+
+  .panel{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px 18px 6px}
+  .p-eyebrow{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+  .p-title{font-family:"Barlow Condensed","Barlow",sans-serif;font-weight:700;font-size:32px;line-height:1;margin:4px 0 6px}
+  .p-sub{font-size:14px;color:var(--ink-2)}
+  .p-nav{display:flex;gap:6px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:thin}
+  .p-nav .chip{flex:none}
+  .insights{list-style:none;padding:12px 14px;margin:14px 0 2px;display:grid;gap:9px;background:var(--well);border-radius:10px}
+  .insights li{padding-left:15px;position:relative;font-size:14.5px;line-height:1.45}
+  .insights li::before{content:"";position:absolute;left:0;top:.52em;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .card{border-top:1px solid var(--rule);padding:16px 0 14px;margin-top:14px}
+  .card h4{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:11px;font-weight:500;letter-spacing:.1em;
+           text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+  .side + .side{margin-top:18px;padding-top:16px;border-top:1px dashed var(--rule)}
+  .side-head{display:grid;grid-template-columns:132px 1fr;gap:14px;align-items:center}
+  .side-name{font-weight:600;font-size:15px;margin:0 0 4px}
+  .side-txt{font-size:14px;color:var(--ink-2);line-height:1.45}
+  .side-txt b{color:var(--ink);font-weight:600}
+  .empty{font-size:14px;color:var(--ink-2)}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:13.5px;margin-top:10px}
+  .kv dt{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding-top:2px}
+  .kv dd{margin:0}
+
+  .sign{background:var(--sign);border-radius:7px;padding:5px;box-shadow:0 1px 2px rgba(0,0,0,.14),0 6px 18px rgba(0,0,0,.10)}
+  .sign-in{border:2.5px solid var(--sign-red);border-radius:4px;padding:8px 5px 9px;text-align:center;color:var(--sign-red);
+           font-family:"Barlow Condensed","Barlow",sans-serif;font-weight:700;text-transform:uppercase;line-height:1}
+  .sign-in svg{margin:0 auto 5px;width:32px;height:32px}
+  .sign .s1{font-size:18px} .sign .s2{font-size:14.5px;margin-top:4px} .sign .s3{font-size:18px;margin-top:4px} .sign .s4{font-size:12.5px;margin-top:5px;letter-spacing:.04em}
+  .sign .s5{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:9.5px;letter-spacing:.06em;margin-top:6px;color:var(--sign-ink)}
+
+  .mheat{display:grid;grid-template-columns:30px repeat(24,minmax(0,1fr));gap:2px;margin:4px 0 0}
+  .mheat .hl{font:10px "IBM Plex Mono",monospace;color:var(--ink-3);white-space:nowrap}
+  .mheat .c{height:15px;border-radius:2px}
+  .passes{display:grid;grid-template-columns:34px 1fr;gap:3px 10px;font-size:13.5px;margin:12px 0 0}
+  .passes dt{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3);padding-top:1px}
+  .passes dd{margin:0}
+  .odds-ctl{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:16px 0 6px}
+  .readout{display:flex;flex-wrap:wrap;gap:8px 26px;margin:6px 0 4px}
+  .readout .k{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+  .readout .v{font-family:"IBM Plex Mono",monospace;font-size:22px;font-weight:600;line-height:1.15}
+  .readout .v small{font-size:12px;font-weight:400;color:var(--ink-2);margin-left:5px}
+
+  .kinds{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px 12px;font-size:14px}
+  .kinds .nm{font-weight:500}
+  .kinds .meta{font-size:12.5px;color:var(--ink-2)}
+  .kinds .bar{height:6px;border-radius:3px;background:var(--accent);margin-top:7px}
+  .kinds .n{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-2);text-align:right}
+
+  /* ---------- verdict + evidence ---------- */
+  .verdict{background:var(--panel);color:var(--panel-ink);border-radius:12px;padding:4px 24px}
+  .vrow{display:grid;grid-template-columns:1fr auto;gap:6px 28px;padding:18px 0;align-items:end}
+  .vrow + .vrow{border-top:1px solid var(--panel-rule)}
+  .vq{grid-column:1/-1;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--panel-ink-2)}
+  .va{font-size:16px;line-height:1.45;max-width:56ch}
+  .vn{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:28px;font-weight:600;text-align:right;line-height:1;white-space:nowrap}
+  .vn small{display:block;font-size:11px;font-weight:400;color:var(--panel-ink-2);margin-top:7px}
+  @media (max-width:560px){ .vrow{grid-template-columns:1fr} .vn{text-align:left} }
+  .c-miss{fill:none;stroke:var(--edge);stroke-width:1}
+  .c-hol{fill:var(--well);stroke:none}
+  .heat{display:grid;grid-template-columns:44px repeat(12,minmax(40px,1fr));gap:3px;min-width:560px}
+  .heat .hl{font:11px "IBM Plex Mono",monospace;color:var(--ink-3);display:flex;align-items:center}
+  .heat .hc{justify-content:center}
+  .heat .cell{height:34px;border-radius:3px;display:flex;align-items:center;justify-content:center;
+              font:500 11.5px "IBM Plex Mono",monospace;color:var(--ink);font-variant-numeric:tabular-nums}
+  .heat .cell.hi{color:#ffffff}
+  .notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px 24px;margin:16px 0 0;padding:0;list-style:none;font-size:14px;color:var(--ink-2)}
+  .notes b{color:var(--ink);font-weight:600;display:block}
+  .tool{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px}
+  .method{display:grid;grid-template-columns:160px 1fr;gap:12px 22px;font-size:14.5px;margin:18px 0 0}
+  .method dt{font-weight:600}
+  .method dd{margin:0;color:var(--ink-2);max-width:62ch}
+  @media (max-width:560px){ .method{grid-template-columns:1fr;gap:4px} .method dd{margin-bottom:12px} }
+  footer{margin-top:44px;font-size:13px;color:var(--ink-3)}
+  footer ul{padding-left:18px;margin:6px 0 0}
+  #tip{position:fixed;z-index:20;pointer-events:none;background:var(--panel);color:var(--panel-ink);font-size:12.5px;line-height:1.45;
+       padding:8px 10px;border-radius:6px;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+  #tip b{font-weight:600}
+  @media (prefers-reduced-motion:no-preference){ .chip{transition:background-color .15s,border-color .15s} }
+</style>
+
+<main>
+  <div class="mast"><span>Curb Log · Citations</span><span id="mastRange">LADOT tickets</span></div>
+  <h1>USC Ticket Clock</h1>
+  <p class="lede" id="lede">Click a street on the map to see when parking enforcement comes by: the street-sweeping schedule and when the officer really shows up, how often meter officers walk past, and what else gets ticketed there.</p>
+
+  <div class="explorer" id="explorer">
+    <div class="mapcol">
+      <div class="mapbar">
+        <div class="chips" id="modeChips" role="group" aria-label="Color the map by">
+          <button class="chip" aria-pressed="true" data-mode="sweep">Street sweeping</button>
+          <button class="chip" aria-pressed="false" data-mode="meter">Meter patrols</button>
+        </div>
+        <input type="search" id="q" list="qlist" placeholder="Find a street, e.g. 28th St" autocomplete="off" aria-label="Find a street">
+        <datalist id="qlist"></datalist>
+      </div>
+      <div class="mapwrap" id="mapwrap">
+        <div class="zoom"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button><button id="zfit" class="fit" aria-label="Show whole area">ALL</button></div>
+        <span class="maptag l">drag to move · pinch or ⌘/ctrl-scroll to zoom</span>
+        <span class="maptag r">© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</span>
+      </div>
+      <ul class="legend" id="mapLegend"></ul>
+    </div>
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+
+  <section id="answers">
+    <div class="code"><b>Summary</b> Short answers</div>
+    <h2>Across campus</h2>
+    <div class="verdict">
+      <div class="vrow">
+        <div class="vq">Thursday, meter not paid</div>
+        <div class="va" id="vMeter"></div>
+        <div class="vn" id="vMeterN"></div>
+      </div>
+      <div class="vrow">
+        <div class="vq">Parked during street sweeping</div>
+        <div class="va" id="vSweep"></div>
+        <div class="vn">2 of 4<small>weeks a month</small></div>
+      </div>
+      <div class="vrow">
+        <div class="vq">So is there a patrol schedule?</div>
+        <div class="va">Yes. Sweeping enforcement shows up at the same time on the same weeks. Meter patrols come in waves late morning, early afternoon and around 4 pm, with a clear gap at 3 pm.</div>
+        <div class="vn">3 pm<small>the quiet hour</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="sweep">
+    <div class="code"><b>80.69BS</b> No park / street clean</div>
+    <h2>Street sweeping runs every other week, almost to the minute</h2>
+    <p id="sweepIntro"></p>
+    <figure>
+      <div class="fig-title">One block, every Tuesday for two years</div>
+      <div class="fig-sub">600 block of W 28th St, even-numbered side. Posted for Tuesdays, 8–10 am. Each square is one Tuesday.</div>
+      <div class="scroll" id="cal"></div>
+      <ul class="legend">
+        <li><span class="sw" style="background:var(--accent)"></span>sweeping tickets written (darker = more)</li>
+        <li><span class="sw" style="border:1px solid var(--edge)"></span>none written</li>
+        <li><span class="sw" style="background:var(--well)"></span>city holiday</li>
+      </ul>
+      <figcaption id="calCap"></figcaption>
+    </figure>
+    <figure>
+      <div class="fig-title">When the sweeping officer reaches a block</div>
+      <div class="fig-sub">Time of the first ticket on each block on each sweep day, in minutes after the posted window opens.</div>
+      <div id="lag"></div>
+      <figcaption id="lagCap"></figcaption>
+    </figure>
+  </section>
+
+  <section id="meters">
+    <div class="code"><b>88.13B+</b> Meter expired</div>
+    <h2>Meters get three waves a day, plus Saturday mornings</h2>
+    <p>Meters near campus are enforced Monday to Saturday, 8 am to 8 pm. No meter tickets were written here on a Sunday. Across all the metered blocks, tickets come in waves: late morning, early afternoon and around 4 pm. The 3 pm hour is quiet every day. On weekdays, 8–10 am is nearly empty, but on Saturday it is one of the busiest times of the week.</p>
+    <figure>
+      <div class="chips" id="heatToggle" style="margin-bottom:12px">
+        <button class="chip" aria-pressed="true" data-k="term">Class weeks</button>
+        <button class="chip" aria-pressed="false" data-k="off">Summer &amp; breaks</button>
+      </div>
+      <div class="fig-title">Meter tickets per hour, all blocks near campus</div>
+      <div class="fig-sub">Average number written in each hour, per day. Holidays excluded.</div>
+      <div class="scroll"><div class="heat" id="heat"></div></div>
+    </figure>
+    <div class="aside" style="border-left:3px solid var(--accent);padding:4px 0 4px 16px;margin:26px 0;font-size:15px;color:var(--ink-2)">
+      <b style="color:var(--ink)">Checking against Curb Log's sensors.</b> Meter tickets record the space ID, like <span class="mono">C964</span>, and those are the same IDs Curb Log's sensors use. From 12 May to 30 June 2026, 168 meter tickets were written on sensored spaces. For 83% of them, the sensor showed the space occupied at that moment. The ticketed cars had been parked for a median of 2 h 20 min, and half of them drove off within an hour of the ticket.
+    </div>
+  </section>
+
+  <section id="method">
+    <div class="code"><b>Method</b> How this was measured</div>
+    <h2>How this was measured, and what it can't tell you</h2>
+    <dl class="method">
+      <dt>Data</dt>
+      <dd id="mData"></dd>
+      <dt>Blocks and sides</dt>
+      <dd>I grouped addresses by hundred block and split each block by odd and even street numbers. Each block's line on the map is fitted through its ticket locations. Where odd and even addresses geocode clearly to opposite sides of that line, the panel names the compass side. Otherwise it only says "even" or "odd".</dd>
+      <dt>Sweeping schedule</dt>
+      <dd>For each side, the posted day is the weekday with the most sweeping tickets. The window starts at the hour of the earliest 5% of tickets and is assumed to run 2 hours. The weeks are whichever of 1st &amp; 3rd or 2nd &amp; 4th have more tickets. "Ticketed on X% of sweep days" counts posted days with at least one ticket. It excludes holidays and any day with no sweeping tickets anywhere nearby. Each dot in the arrival strip is one sweep day's first ticket.</dd>
+      <dt>Meter patrols</dt>
+      <dd>Uses USC class weeks only (fall and spring, spring break excluded), Monday to Saturday. A visit is a group of meter tickets on one block with no gap over 10 minutes. An officer who finds every meter paid leaves no ticket, so I adjust for those empty visits. The adjustment assumes the number of expired cars an officer finds on a visit is random (Poisson), so the average number of tickets per visit we can see tells us what share of visits wrote nothing. The dashed line and the "at least" figures skip that adjustment.</dd>
+      <dt>Limits</dt>
+      <dd>A ticket only appears when someone broke the rule, so quiet blocks look less patrolled than they really are. The meter odds assume you never paid. Officers may skip cars. USC term dates are approximate. Routes and staffing change, and none of this is a promise about next Thursday. Always read the posted sign.</dd>
+    </dl>
+    <footer>
+      Sources
+      <ul>
+        <li><a href="https://data.lacity.org/Transportation/Parking-Citations/4f5p-udkv/about_data">LADOT Parking Citations</a>, data.lacity.org</li>
+        <li>Basemap © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</li>
+        <li><a href="https://abc7.com/post/street-sweeping-la-streetsla-schedule/10375577/">ABC7</a> and <a href="https://ktla.com/news/local-news/city-of-l-a-to-switch-street-sweeping-to-every-other-week-starting-monday/">KTLA</a> on the switch to sweeping every other week; the city's own lookup is at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a></li>
+        <li><a href="https://citina.github.io/curb-log/">Curb Log</a>, sensor occupancy on Vermont 36xx and W 36th St</li>
+      </ul>
+    </footer>
+  </section>
+</main>
+<div id="tip" hidden></div>
+
+<script id="data" type="application/json">__DATA__</script>
+<script>
+(function(){
+const D = JSON.parse(document.getElementById('data').textContent);
+const BASEMAP = "__BASEMAP__";
+const NS='http://www.w3.org/2000/svg', $=s=>document.querySelector(s);
+function S(tag, attrs, parent){ const e=document.createElementNS(NS,tag); for(const k in (attrs||{})) e.setAttribute(k, attrs[k]); if(parent) parent.appendChild(e); return e; }
+function T(tag, attrs, parent, text){ const e=S(tag, attrs, parent); e.textContent=text; return e; }
+function H(tag, props, parent){ const e=document.createElement(tag); Object.assign(e, props||{}); if(parent) parent.appendChild(e); return e; }
+const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], DAYLONG=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const pct=x=>Math.round(x*100)+'%';
+function fmtT(m){ m=Math.round(m); const h=Math.floor(m/60)%24, mm=m%60, ap=h>=12?'pm':'am', h12=h%12||12; return mm?`${h12}:${String(mm).padStart(2,'0')} ${ap}`:`${h12} ${ap}`; }
+function fmtRange(a,b){ const s=fmtT(a), e=fmtT(b); return s.slice(-2)===e.slice(-2) ? s.slice(0,-3)+'–'+e : s+'–'+e; }
+function fmtDate(s, y){ return new Date(s+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',day:'numeric',month:'short',year:y?'numeric':undefined}); }
+function ord(n){ return n+({1:'st',2:'nd',3:'rd'}[n]||'th'); }
+const median=a=>{ const s=[...a].sort((x,y)=>x-y); return s.length? s[Math.floor(s.length/2)] : 0; };
+const q=(a,p)=>{ const s=[...a].sort((x,y)=>x-y); return s.length? s[Math.min(s.length-1,Math.floor(p*s.length))] : 0; };
+function barPath(x,y0,w,h,r){ if(h<=0) return ''; r=Math.min(r,w/2,h); return `M${x},${y0}V${y0-h+r}Q${x},${y0-h} ${x+r},${y0-h}H${x+w-r}Q${x+w},${y0-h} ${x+w},${y0-h+r}V${y0}Z`; }
+const tip=$('#tip');
+function showTip(e, html){ tip.innerHTML=html; tip.hidden=false; const r=tip.getBoundingClientRect(); let x=e.clientX+14, y=e.clientY+14;
+  if(x+r.width>innerWidth-8) x=e.clientX-r.width-14; if(y+r.height>innerHeight-8) y=e.clientY-r.height-14; tip.style.left=x+'px'; tip.style.top=y+'px'; }
+function hideTip(){ tip.hidden=true; }
+function hover(el, fn){ el.addEventListener('pointermove', e=>showTip(e, fn())); el.addEventListener('pointerleave', hideTip); }
+
+const W=D.frame.W, Hh=D.frame.H, BL=D.blocks;
+const DAYCOL={1:'var(--s1)',2:'var(--s2)',3:'var(--s3)'};
+const dayCol=d=>DAYCOL[d]||'var(--ink-3)';
+const OPP={north:'south',south:'north',east:'west',west:'east',northeast:'southwest',southwest:'northeast',northwest:'southeast',southeast:'northwest'};
+const name=b=>`${b.street}, ${b.block} block`;
+const phaseTxt=on=>on===1?'1st & 3rd':'2nd & 4th';
+function sideName(b, side){ const dir = b.even ? (side==='even' ? b.even : OPP[b.even]) : null;
+  return dir ? `${dir[0].toUpperCase()+dir.slice(1)} side` : `${side[0].toUpperCase()+side.slice(1)}-numbered side`; }
+function sideNote(b, side){ return b.even ? `${side} numbers` : ''; }
+
+/* meter maths: r = visible visits per half hour per class day; c scales in the visits that wrote nothing */
+function stayP(m, dw, i, k, f){ let s=0; for(let j=i;j<Math.min(24,i+k);j++) s+=m.r[dw][j]; return 1-Math.exp(-f*s); }
+const allDay=(m,dw,f)=>stayP(m,dw,0,24,f);
+const visitsPerDay=m=>{ let s=0; for(let d=0; d<5; d++) for(let j=0;j<24;j++) s+=m.r[d][j]; return m.c*s/5; };
+
+/* ============ header bits ============ */
+$('#mastRange').textContent=`LADOT tickets · 2014 – ${fmtDate(D.end,true).replace(/^\w+, /,'')}`;
+$('#mData').textContent=`LADOT parking citations (data.lacity.org, dataset 4f5p-udkv). I kept all ${D.total.toLocaleString()} tickets inside a box of about 2.5 × 2.5 km around campus, from 2014 to ${fmtDate(D.end,true)}. Everything on the page uses the ${D.window.toLocaleString()} tickets written from ${fmtDate(D.start,true)} on, so it reflects how enforcement works now.`;
+
+/* ============ map ============ */
+const wrap=$('#mapwrap'); wrap.style.aspectRatio=`${W} / ${Hh}`;
+const svg=S('svg',{viewBox:`0 0 ${W} ${Hh}`,preserveAspectRatio:'xMidYMid meet',role:'img','aria-label':'Map of streets near USC; click a street for its enforcement schedule'});
+wrap.insertBefore(svg, wrap.firstChild);
+S('image',{href:BASEMAP,x:0,y:0,width:W,height:Hh,class:'basemap'},svg);
+const gBase=S('g',{},svg), gCol=S('g',{},svg), gSel=S('g',{},svg), gHit=S('g',{},svg);
+let mode='sweep', selected=null, vb={x:0,y:0,w:W,h:Hh};
+const OFF=4.2;
+function segD(b, o){ const [x1,y1,x2,y2]=b.seg, [nx,ny]=b.nrm; return `M${x1+nx*o},${y1+ny*o}L${x2+nx*o},${y2+ny*o}`; }
+const sideOff=(b,side)=>(b.sgn||1)*(side==='even'?1:-1)*OFF;
+BL.forEach((b,i)=>{
+  S('path',{d:segD(b,0),class:'seg',stroke:'var(--ink-3)','stroke-width':2,'stroke-opacity':.55,'vector-effect':'non-scaling-stroke'},gBase);
+  const h=S('path',{d:segD(b,0),class:'hit','vector-effect':'non-scaling-stroke',tabindex:0,'aria-label':name(b)},gHit);
+  h.addEventListener('click',()=>{ if(!dragged) select(i,false); });
+  h.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); select(i,false); } });
+  hover(h,()=>`<b>${name(b)}</b><br>${quick(b)}`);
+});
+function quick(b){
+  const sw=b.sweep.map(s=>`${DAYS[s.dow]} ${fmtRange(s.h*60,s.h*60+120)} (${phaseTxt(s.on)})`);
+  const u=[...new Set(sw)];
+  const parts=[u.length?'Sweeping '+u.join(' · '):'No sweeping tickets'];
+  if(b.meter) parts.push(`meter officer ≈ ${visitsPerDay(b.meter).toFixed(1)} visits a weekday`);
+  parts.push(`${b.n} tickets since ${fmtDate(D.start).replace(/^\w+, /,'')}`);
+  return parts.join('<br>');
+}
+function drawColor(){
+  gCol.innerHTML='';
+  const lg=$('#mapLegend'); lg.innerHTML='';
+  if(mode==='sweep'){
+    // one line when both sides share a schedule; two offset lines when they differ
+    BL.forEach(b=>{ const groups=sweepGroups(b);
+      groups.forEach(g=>{ const s=g[0], n=g.reduce((a,x)=>a+x.n,0), o=groups.length>1?sideOff(b,s.side):0;
+        S('path',{d:segD(b,o),class:'seg',stroke:dayCol(s.dow),'stroke-width':n>=20?4:3,'stroke-opacity':n>=20?1:.7,'vector-effect':'non-scaling-stroke'},gCol); }); });
+    const cnt={}; BL.forEach(b=>b.sweep.forEach(s=>cnt[s.dow]=(cnt[s.dow]||0)+1));
+    Object.keys(cnt).sort().forEach(d=>{ const li=H('li',{},lg); H('span',{className:'sw bar'},li).style.background=dayCol(+d); li.append(`${DAYLONG[d]} (${cnt[d]} sides)`); });
+    const li=H('li',{},lg); H('span',{className:'sw bar'},li).style.background='var(--ink-3)'; li.append('no sweeping tickets');
+  } else {
+    const mb=BL.filter(b=>b.meter), vmax=Math.max(...mb.map(b=>visitsPerDay(b.meter)));
+    mb.forEach(b=>{ const s=visitsPerDay(b.meter)/vmax;
+      const p=S('path',{d:segD(b,0),class:'seg','stroke-width':3+4*s,'vector-effect':'non-scaling-stroke'},gCol);
+      p.style.stroke=`color-mix(in oklab, var(--accent) ${Math.round(35+65*s)}%, var(--surface))`; });
+    const li=H('li',{},lg); const g=H('span',{className:'sw bar'},li); g.style.width='54px'; g.style.background='linear-gradient(90deg, color-mix(in oklab, var(--accent) 35%, var(--surface)), var(--accent))';
+    li.append(`fewer → more meter-officer visits a weekday (${mb.length} metered blocks)`);
+    const l2=H('li',{},lg); H('span',{className:'sw bar'},l2).style.background='var(--ink-3)'; l2.append('no meter tickets');
+  }
+}
+function drawSel(){
+  gSel.innerHTML=''; if(selected===null) return; const b=BL[selected];
+  S('path',{d:segD(b,0),class:'seg',stroke:'var(--halo)','stroke-width':22,'vector-effect':'non-scaling-stroke'},gSel);
+  const [x1,y1,x2,y2]=b.seg;
+  [[x1,y1],[x2,y2]].forEach(([x,y])=>S('circle',{cx:x,cy:y,r:3.5*vb.w/W+2,fill:'var(--ink)',stroke:'var(--surface)','stroke-width':1.5,'vector-effect':'non-scaling-stroke'},gSel));
+}
+/* pan & zoom */
+function setVB(){ vb.w=Math.min(W,Math.max(W/10,vb.w)); vb.h=vb.w*Hh/W; vb.x=Math.max(0,Math.min(W-vb.w,vb.x)); vb.y=Math.max(0,Math.min(Hh-vb.h,vb.y));
+  svg.setAttribute('viewBox',`${vb.x} ${vb.y} ${vb.w} ${vb.h}`); drawSel(); }
+function toImg(e){ const r=svg.getBoundingClientRect(); return {x:vb.x+(e.clientX-r.left)/r.width*vb.w, y:vb.y+(e.clientY-r.top)/r.height*vb.h}; }
+function zoomAt(f, cx, cy){ const nw=Math.min(W,Math.max(W/10,vb.w*f)), k=nw/vb.w; vb.x=cx-(cx-vb.x)*k; vb.y=cy-(cy-vb.y)*k; vb.w=nw; setVB(); }
+wrap.addEventListener('wheel',e=>{ if(!(e.ctrlKey||e.metaKey)) return; e.preventDefault(); const p=toImg(e); zoomAt(Math.exp(e.deltaY*0.01),p.x,p.y); },{passive:false});
+const ptrs=new Map(); let dragged=false, down=null, pinch=null;
+wrap.addEventListener('pointerdown',e=>{ if(e.target.closest('.zoom')||e.target.closest('a')) return; ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); down={x:e.clientX,y:e.clientY}; dragged=false;
+  if(ptrs.size===2){ const [a,b]=[...ptrs.values()]; pinch={d:Math.hypot(a.x-b.x,a.y-b.y)}; } });
+wrap.addEventListener('pointermove',e=>{ if(!ptrs.has(e.pointerId)) return; const prev=ptrs.get(e.pointerId), r=svg.getBoundingClientRect();
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===2 && pinch){ const [a,b]=[...ptrs.values()], d=Math.hypot(a.x-b.x,a.y-b.y); const mid={clientX:(a.x+b.x)/2,clientY:(a.y+b.y)/2}; const p=toImg(mid); zoomAt(pinch.d/d,p.x,p.y); pinch.d=d; dragged=true; return; }
+  if(Math.hypot(e.clientX-down.x,e.clientY-down.y)>4){ dragged=true; if(!wrap.hasPointerCapture(e.pointerId)) wrap.setPointerCapture(e.pointerId); }
+  if(dragged){ vb.x-=(e.clientX-prev.x)/r.width*vb.w; vb.y-=(e.clientY-prev.y)/r.height*vb.h; setVB(); hideTip(); } });
+const endPtr=e=>{ ptrs.delete(e.pointerId); if(ptrs.size<2) pinch=null; setTimeout(()=>{ if(!ptrs.size) dragged=false; },0); };
+wrap.addEventListener('pointerup',endPtr); wrap.addEventListener('pointercancel',endPtr);
+svg.addEventListener('dblclick',e=>{ const p=toImg(e); zoomAt(0.5,p.x,p.y); });
+$('#zin').onclick=()=>zoomAt(0.6,vb.x+vb.w/2,vb.y+vb.h/2);
+$('#zout').onclick=()=>zoomAt(1/0.6,vb.x+vb.w/2,vb.y+vb.h/2);
+$('#zfit').onclick=()=>{ vb={x:0,y:0,w:W,h:Hh}; setVB(); };
+function focusBlock(b){ const [x1,y1,x2,y2]=b.seg; vb.w=W/3.2; vb.h=vb.w*Hh/W; vb.x=(x1+x2)/2-vb.w/2; vb.y=(y1+y2)/2-vb.h/2; setVB(); }
+
+$('#modeChips').addEventListener('click',e=>{ const c=e.target.closest('.chip'); if(!c) return; mode=c.dataset.mode;
+  $('#modeChips').querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x===c)); drawColor(); });
+
+/* search */
+const ql=$('#qlist'), byLabel={}, streets={};
+BL.forEach((b,i)=>{ byLabel[name(b).toLowerCase()]=i; (streets[b.street]=streets[b.street]||[]).push(i); });
+Object.keys(streets).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).forEach(s=>{
+  H('option',{value:s},ql); streets[s].sort((a,b)=>BL[a].block-BL[b].block).forEach(i=>H('option',{value:name(BL[i])},ql)); });
+$('#q').addEventListener('change',e=>{ const v=e.target.value.trim().toLowerCase(); if(!v) return;
+  let i=byLabel[v];
+  if(i===undefined){ const st=Object.keys(streets).find(s=>s.toLowerCase()===v) || Object.keys(streets).find(s=>s.toLowerCase().includes(v));
+    if(st) i=streets[st].reduce((a,j)=>BL[j].n>BL[a].n?j:a, streets[st][0]); }
+  if(i!==undefined) select(i,true); });
+
+/* ============ the panel ============ */
+function sweepGroups(b){ const g={}; b.sweep.forEach(s=>{ const k=`${s.dow}|${s.h}|${s.on}`; (g[k]=g[k]||[]).push(s); }); return Object.values(g); }
+function nextDays(s, n){ const out=[], js=(s.dow+1)%7, d=new Date(); d.setHours(12,0,0,0);
+  for(let k=0;k<75&&out.length<n;k++){ const x=new Date(d.getTime()+k*864e5), nth=Math.floor((x.getDate()-1)/7)+1;
+    if(x.getDay()===js && (nth===s.on||nth===s.on+2)) out.push(x.toLocaleDateString('en-US',{weekday:'short',day:'numeric',month:'short'})); } return out; }
+function insights(b){
+  const out=[];
+  const groups=sweepGroups(b);
+  if(groups.length){
+    groups.forEach(g=>{ const s=g[0], arr=g.flatMap(x=>x.arr), t0=s.h*60;
+      const who = g.length===2 ? 'both sides' : sideName(b,s.side).toLowerCase();
+      out.push(`<b>Sweeping, ${who}:</b> ${phaseTxt(s.on)} ${DAYLONG[s.dow]} of the month, ${fmtRange(t0,t0+120)}. The officer's first ticket usually lands around <b>${fmtT(t0+median(arr))}</b>${arr.length>=6?` (between ${fmtT(t0+q(arr,.1))} and ${fmtT(t0+q(arr,.9))} on most days)`:''}.`); });
+  } else out.push('<b>No sweeping tickets</b> here in two years. Either there\'s no posted sweeping, or nobody parks during it.');
+  if(b.meter){ const m=b.meter, avg=Array.from({length:24},(_,j)=>[0,1,2,3,4].reduce((a,d)=>a+m.r[d][j],0)/5);
+    const win=i=>avg.slice(i,i+4).reduce((a,v)=>a+v,0); let hi=0, lo=0; for(let i=0;i<=20;i++){ if(win(i)>win(hi)) hi=i; if(win(i)<win(lo)) lo=i; }
+    const ad=[0,1,2,3,4,5].map(d=>allDay(m,d,m.c)), best=ad.indexOf(Math.min(...ad)), worst=ad.indexOf(Math.max(...ad));
+    out.push(`<b>Meter officers</b> come by most often ${fmtRange(480+hi*30,600+hi*30)} on weekdays. The quietest stretch is ${fmtRange(480+lo*30,600+lo*30)}.`);
+    out.push(`If you never pay for a whole day here, the chance of a ticket runs from <b>${pct(ad[best])}</b> on ${DAYLONG[best]} to <b>${pct(ad[worst])}</b> on ${DAYLONG[worst]}.`); }
+  const other=b.top.find(t=>t[0]!=='Street cleaning'&&t[0]!=='Meter expired');
+  if(other && other[1]>=8) out.push(`Also ticketed here: <b>${other[0]}</b> (${other[1]} tickets), usually ${other[6]>=.85?'weekdays':DAYS[other[3]]+'s and other days'} ${fmtRange(other[4],other[5])}.`);
+  return out;
+}
+function signHTML(s){ const t0=s.h*60;
+  return `<div class="sign" role="img" aria-label="No parking ${fmtRange(t0,t0+120)} ${DAYLONG[s.dow]}, street cleaning"><div class="sign-in">
+    <svg viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="23" fill="none" stroke="var(--sign-red)" stroke-width="5"/>
+    <text x="27" y="37" text-anchor="middle" font-family="Barlow Condensed, Barlow, sans-serif" font-weight="700" font-size="30" fill="var(--sign-ink)">P</text>
+    <line x1="11" y1="11" x2="43" y2="43" stroke="var(--sign-red)" stroke-width="5"/></svg>
+    <div class="s1">No parking</div><div class="s2">${fmtT(t0).toUpperCase()} TO ${fmtT(t0+120).toUpperCase()}</div><div class="s3">${DAYLONG[s.dow]}</div><div class="s4">Street cleaning</div>
+    <div class="s5">${phaseTxt(s.on).toUpperCase()} ONLY*</div></div></div>`; }
+function arrivalStrip(host, s, arr){
+  const Wd=380, Hd=78, l=10, r=10, base=50, t0=s.h*60, x=m=>l+Math.min(m,150)/150*(Wd-l-r);
+  const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,role:'img','aria-label':'First sweeping ticket time on each sweep day'},host);
+  const band=S('rect',{x:x(0),y:6,width:x(120)-x(0),height:base-2,rx:4},g); band.style.fill='var(--well)';
+  S('line',{x1:l,x2:Wd-r,y1:base+4,y2:base+4,class:'axis'},g);
+  [0,30,60,90,120].forEach(m=>{ S('line',{x1:x(m),x2:x(m),y1:base+4,y2:base+8,class:'axis'},g); T('text',{x:x(m),y:base+20,'text-anchor':'middle',class:'tick'},g,fmtT(t0+m).replace(' am','a').replace(' pm','p')); });
+  const stack={};
+  arr.forEach(m=>{ const k=Math.floor(Math.min(m,150)/4); const n=stack[k]=(stack[k]||0)+1;
+    const c=S('circle',{cx:x(m),cy:base-3-((n-1)%6)*7,r:3.3},g); c.style.fill='var(--accent)'; });
+  const md=median(arr); S('line',{x1:x(md),x2:x(md),y1:4,y2:base+4,stroke:'var(--ink)','stroke-width':1.5},g);
+  T('text',{x:Math.min(x(md)+5,Wd-120),y:13,class:'lab strong'},g,`usually ${fmtT(t0+md)}`);
+  const hit=S('rect',{x:0,y:0,width:Wd,height:Hd,fill:'transparent'},g);
+  hover(hit,()=>`${arr.length} sweep days with tickets · each dot is that day's first ticket<br>Shaded: the posted window`);
+}
+function meterCard(host, b){
+  const m=b.meter, c=m.c;
+  H('h4',{textContent:'Meter patrols · class weeks'},host);
+  H('div',{className:'side-txt',innerHTML:`<b>${m.n}</b> meter tickets since ${fmtDate(D.start).replace(/^\w+, /,'')} across ${m.spaces} meters. Chance an officer walks by in each half hour:`},host);
+  const hm=H('div',{className:'mheat'},host);
+  H('div',{className:'hl'},hm); for(let j=0;j<24;j++){ const e=H('div',{className:'hl',textContent:j%4===0?fmtT(480+j*30).replace(' am','a').replace(' pm','p'):''},hm); }
+  let pmax=0; for(let d=0;d<6;d++) for(let j=0;j<24;j++) pmax=Math.max(pmax,1-Math.exp(-c*m.r[d][j]));
+  for(let d=0;d<6;d++){ H('div',{className:'hl',textContent:DAYS[d]},hm);
+    for(let j=0;j<24;j++){ const p=1-Math.exp(-c*m.r[d][j]), cell=H('div',{className:'c'},hm);
+      cell.style.background = p>0 ? `color-mix(in oklab, var(--accent) ${Math.round(12+88*p/pmax)}%, var(--surface))` : 'var(--well)';
+      hover(cell,()=>`<b>${DAYLONG[d]} ${fmtRange(480+j*30,510+j*30)}</b><br>An officer comes by on about ${pct(p)} of ${DAYLONG[d]}s`); } }
+  const ps=H('dl',{className:'passes'},host);
+  for(let d=0;d<6;d++){ const row=m.r[d].map((v,j)=>[1-Math.exp(-c*v),j]).filter(x=>x[0]>=0.1).sort((a,b)=>b[0]-a[0]).slice(0,3).sort((a,b)=>a[1]-b[1]);
+    H('dt',{textContent:DAYS[d]},ps); H('dd',{textContent: row.length? row.map(([p,j])=>`${fmtT(480+j*30)} (${pct(p)})`).join(' · ') : 'no regular pass'},ps); }
+  // unpaid odds
+  const st={day:3, stay:1};
+  const ctl=H('div',{className:'odds-ctl'},host);
+  H('span',{className:'ctl-label',textContent:'If unpaid'},ctl);
+  const dc=H('div',{className:'chips'},ctl), sc=H('div',{className:'chips'},ctl);
+  const ro=H('div',{className:'readout'},host), ch=H('div',{},host);
+  DAYS.slice(0,6).forEach((dn,i)=>{ const bt=H('button',{className:'chip sm',textContent:dn},dc); bt.setAttribute('aria-pressed',i===st.day); bt.onclick=()=>{ st.day=i; dc.querySelectorAll('.chip').forEach((x,k)=>x.setAttribute('aria-pressed',k===i)); draw(); }; });
+  ['30 min','1 hr','2 hr'].forEach((dn,i)=>{ const bt=H('button',{className:'chip sm',textContent:dn},sc); bt.setAttribute('aria-pressed',i===st.stay); bt.onclick=()=>{ st.stay=i; sc.querySelectorAll('.chip').forEach((x,k)=>x.setAttribute('aria-pressed',k===i)); draw(); }; });
+  function draw(){ const k=[1,2,4][st.stay], est=[], low=[];
+    for(let i=0;i<24;i++){ est.push(stayP(m,st.day,i,k,c)); low.push(stayP(m,st.day,i,k,1)); }
+    const pk=est.indexOf(Math.max(...est));
+    ro.innerHTML=`<div><div class="k">All day, ${DAYS[st.day]}</div><div class="v">${pct(allDay(m,st.day,c))}<small>at least ${pct(allDay(m,st.day,1))}</small></div></div>
+      <div><div class="k">Riskiest arrival</div><div class="v">${pct(est[pk])}<small>at ${fmtT(480+pk*30)}</small></div></div>`;
+    ch.innerHTML=''; const Wd=390, Hd=120, l=32, r=8, t=8, bb=20, ymax=Math.max(0.2,Math.ceil(Math.max(...est)*10+0.05)/10);
+    const x=i=>l+i*(Wd-l-r)/23, y=v=>t+(Hd-t-bb)*(1-v/ymax);
+    const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,role:'img','aria-label':'Chance of a meter ticket by arrival time'},ch);
+    for(let v=0; v<=ymax+1e-9; v+=0.1){ S('line',{x1:l,x2:Wd-r,y1:y(v),y2:y(v),class:v===0?'axis':'gridl'},g); T('text',{x:l-5,y:y(v)+4,'text-anchor':'end',class:'tick'},g,Math.round(v*100)+'%'); }
+    for(let i=0;i<24;i+=4) T('text',{x:x(i),y:Hd-4,'text-anchor':'middle',class:'tick'},g,fmtT(480+i*30).replace(' am','a').replace(' pm','p'));
+    let band=`M${x(0)},${y(est[0])}`; est.forEach((v,i)=>band+=`L${x(i)},${y(v)}`); for(let i=23;i>=0;i--) band+=`L${x(i)},${y(low[i])}`;
+    S('path',{d:band+'Z'},g).style.fill='color-mix(in oklab, var(--accent) 16%, transparent)';
+    S('path',{d:low.map((v,i)=>(i?'L':'M')+x(i)+','+y(v)).join(''),fill:'none',stroke:'var(--ink-3)','stroke-width':1.3,'stroke-dasharray':'4 3'},g);
+    S('path',{d:est.map((v,i)=>(i?'L':'M')+x(i)+','+y(v)).join(''),fill:'none',stroke:'var(--accent)','stroke-width':2.2,'stroke-linejoin':'round'},g);
+    const cross=S('line',{y1:t,y2:y(0),stroke:'var(--ink-3)'},g); cross.style.display='none';
+    const hit=S('rect',{x:l,y:t,width:Wd-l-r,height:Hd-t-bb,fill:'transparent'},g);
+    hit.addEventListener('pointermove',e=>{ const bbx=g.getBoundingClientRect(), vx=(e.clientX-bbx.left)*Wd/bbx.width, i=Math.max(0,Math.min(23,Math.round((vx-l)/((Wd-l-r)/23))));
+      cross.setAttribute('x1',x(i)); cross.setAttribute('x2',x(i)); cross.style.display='';
+      showTip(e,`<b>Arrive ${fmtT(480+i*30)}, stay ${['30 min','1 hr','2 hr'][st.stay]}</b><br>Estimate ${pct(est[i])} · at least ${pct(low[i])}`); });
+    hit.addEventListener('pointerleave',()=>{ cross.style.display='none'; hideTip(); });
+  }
+  draw();
+  H('ul',{className:'legend',innerHTML:'<li><span class="sw line"></span>estimate</li><li><span class="sw dash"></span>at least (visits that wrote a ticket)</li>'},host);
+}
+function select(i, focus){
+  selected=i; const b=BL[i], p=$('#panel'); p.innerHTML='';
+  const busiest=b.dow.indexOf(Math.max(...b.dow));
+  H('div',{className:'p-eyebrow',textContent:'Selected block'},p);
+  H('div',{className:'p-title',textContent:name(b)},p);
+  H('div',{className:'p-sub',textContent:`${b.n} tickets since ${fmtDate(D.start,true).replace(/^\w+, /,'')} · busiest day ${DAYLONG[busiest]}`},p);
+  const sib=streets[b.street];
+  if(sib.length>1){ const nav=H('div',{className:'p-nav'},p);
+    sib.forEach(j=>{ const c=H('button',{className:'chip sm',textContent:`${BL[j].block}`},nav); c.setAttribute('aria-pressed',j===i); c.title=name(BL[j]); c.onclick=()=>select(j,true); }); }
+  const ul=H('ul',{className:'insights'},p); insights(b).forEach(t=>H('li',{innerHTML:t},ul));
+  // sweeping
+  const sc=H('div',{className:'card'},p); H('h4',{textContent:'Street sweeping'},sc);
+  if(!b.sweep.length) H('div',{className:'empty',textContent:'No sweeping tickets here since '+fmtDate(D.start,true).replace(/^\w+, /,'')+'.'},sc);
+  sweepGroups(b).forEach(g=>{ const s=g[0], arr=g.flatMap(x=>x.arr), rate=g.reduce((a,x)=>a+x.rate*x.days,0)/g.reduce((a,x)=>a+x.days,0), n=g.reduce((a,x)=>a+x.n,0);
+    const box=H('div',{className:'side'},sc);
+    const head=H('div',{className:'side-head'},box);
+    H('div',{innerHTML:signHTML(s)},head);
+    const txt=H('div',{},head);
+    H('div',{className:'side-name',textContent: g.length===2?'Both sides':sideName(b,s.side)+(b.even?` (${s.side} numbers)`:'')},txt);
+    H('div',{className:'side-txt',innerHTML:`Ticketed on <b>${pct(rate)}</b> of ${g[0].days} sweep days, about ${(n/Math.max(1,arr.length/g.length)).toFixed(0)} tickets each time.<br>Next: <b>${nextDays(s,2).join(' · ')}</b>`},txt);
+    H('div',{className:'fig-sub',style:'margin:12px 0 2px',textContent:'When the officer\'s first ticket lands (one dot per sweep day)'},box);
+    arrivalStrip(box, s, arr);
+    if(n<20) H('div',{className:'empty',style:'font-size:12.5px',textContent:`Only ${n} tickets on this side, so treat the schedule as rough.`},box); });
+  if(b.sweep.length) H('div',{className:'empty',style:'font-size:12px;margin-top:10px',innerHTML:'*Worked out from where and when tickets were written. Always check the posted sign or <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.'},sc);
+  if(b.meter) meterCard(H('div',{className:'card'},p), b);
+  // everything ticketed here
+  const kc=H('div',{className:'card'},p); H('h4',{textContent:'What gets ticketed here'},kc);
+  const kg=H('div',{className:'kinds'},kc), kmax=b.top[0][1];
+  b.top.forEach(t=>{ const a=H('div',{},kg); H('div',{className:'nm',textContent:t[0]},a);
+    H('div',{className:'meta',textContent:`$${t[2]} · usually ${t[6]>=.85?'weekdays':'busiest '+DAYS[t[3]]} ${fmtRange(t[4],t[5])}`},a);
+    const r=H('div',{},kg); H('div',{className:'n',textContent:t[1]},r); const bar=H('div',{className:'bar'},r); bar.style.width=Math.max(4,100*t[1]/kmax)+'%'; });
+  drawSel(); if(focus) focusBlock(b);
+  try{ history.replaceState(null,'','#'+b.id); }catch(e){}
+}
+drawColor();
+let start=BL.findIndex(b=>'#'+b.id===location.hash);
+if(start<0){ const both=BL.map((b,i)=>[b,i]).filter(([b])=>b.meter&&b.sweep.some(s=>s.n>=20)).sort((a,b)=>b[0].meter.n-a[0].meter.n); start=both.length?both[0][1]:0; }
+select(start,false);
+
+/* ============ verdict ============ */
+(function(){
+  const mb=BL.filter(b=>b.meter&&b.meter.n>=100);
+  const hour=b=>{ let s=0; for(let i=0;i<23;i++) s+=stayP(b.meter,3,i,2,b.meter.c); return s/23; };
+  const typ=median(mb.map(hour));
+  const v=BL.find(b=>b.block===3600&&b.street==='Vermont Ave');
+  let txt=`On a typical metered block near campus, an unpaid hour on a Thursday carries about a ${pct(typ)} chance of a ticket.`;
+  if(v&&v.meter){ const all=allDay(v.meter,3,v.meter.c); let pk=0, pv=0; for(let i=0;i<23;i++){ const p=stayP(v.meter,3,i,2,v.meter.c); if(p>pv){pv=p;pk=i;} }
+    txt+=` On Vermont 36xx it's ${pct(pv)} if you arrive at ${fmtT(480+pk*30)}, and ${pct(all)} if you leave the car unpaid all day.`;
+    $('#vMeterN').innerHTML=`${pct(all)}<small>all day, Vermont 36xx</small>`; }
+  $('#vMeter').textContent=txt+` The ticket is $${D.fines.meter}.`;
+  const sides=BL.flatMap(b=>b.sweep).filter(s=>s.n>=20), busy=sides.filter(s=>s.tpd>=4);
+  $('#vSweep').textContent=`Each street is swept on only two posted weeks a month, and ${pct(D.phase)} of sweeping tickets fall on those weeks. On a sweep day, the busiest student blocks are ticketed ${pct(median(busy.map(s=>s.rate)))} of the time, and a typical block ${pct(median(sides.map(s=>s.rate)))}. The officer usually arrives in the first hour of the window. The ticket is $${D.fines.sweep}.`;
+})();
+
+/* ============ sweeping evidence ============ */
+$('#sweepIntro').innerHTML=`In March 2021, LA cut street sweeping to every other week. Each posted route is now swept on either the 1st and 3rd or the 2nd and 4th time its weekday comes up in a month. The tickets follow that exactly: <b>${(D.phase*100).toFixed(1)}%</b> of sweeping tickets near campus since ${fmtDate(D.start,true).replace(/^\w+, /,'')} fell on a side's posted weeks. Street cleaning is ${pct(D.share.sweep)} of all tickets here, and meters are ${pct(D.share.meter)}.`;
+(function(){
+  const cal=D.cal, months=[]; cal.forEach(c=>{ const m=c[0].slice(0,7); if(!months.includes(m)) months.push(m); });
+  const cw=22, gap=4, left=64, top=38; const Wd=left+months.length*(cw+gap), Hd=top+5*(cw+gap);
+  const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,width:Wd,role:'img','aria-label':'Every Tuesday for two years on one block'},$('#cal'));
+  months.forEach((m,i)=>{ const x=left+i*(cw+gap)+cw/2, mo=+m.slice(5); T('text',{x,y:top-9,'text-anchor':'middle',class:'tick'},g,'JFMAMJJASOND'[mo-1]);
+    if(mo===1||i===0) T('text',{x:x-cw/2,y:top-25,class:'tick strong'},g,m.slice(0,4)); });
+  const hitRows=new Set(cal.filter(c=>c[2]>0).map(c=>c[1]));
+  for(let r=1;r<=5;r++) T('text',{x:left-10,y:top+(r-1)*(cw+gap)+cw/2+4,'text-anchor':'end',class:'tick'+(hitRows.has(r)?' strong':'')},g,ord(r)+' Tue');
+  const maxN=Math.max(...cal.map(c=>c[2]));
+  cal.forEach(([d,nth,n,hol])=>{ const i=months.indexOf(d.slice(0,7)); const r=S('rect',{x:left+i*(cw+gap),y:top+(nth-1)*(cw+gap),width:cw,height:cw,rx:3,class:hol?'c-hol':n>0?'':'c-miss'},g);
+    if(n>0&&!hol) r.style.fill=`color-mix(in oklab, var(--accent) ${45+Math.round(55*n/maxN)}%, var(--surface))`;
+    hover(r,()=>`<b>${fmtDate(d,true)}</b> · ${ord(nth)} Tuesday<br>${hol?'City holiday':n?n+' sweeping ticket'+(n>1?'s':''):'No sweeping tickets'}`); });
+  const on=cal.filter(c=>(c[1]===1||c[1]===3)&&!c[3]), off=cal.filter(c=>c[1]!==1&&c[1]!==3&&!c[3]);
+  $('#calCap').textContent=`Tickets were written on ${on.filter(c=>c[2]>0).length} of ${on.length} non-holiday 1st and 3rd Tuesdays, and on ${off.filter(c=>c[2]>0).length} of ${off.length} other Tuesdays.`;
+})();
+(function(){
+  const h=D.lag_hist, tot=h.reduce((a,b)=>a+b,0), sh=h.map(v=>v/tot), Wd=720, Hd=220, l=40, r=14, t=18, b=34, bw=(Wd-l-r)/h.length;
+  const ymax=Math.ceil(Math.max(...sh)*100/5)*5/100, y=v=>t+(Hd-t-b)*(1-v/ymax);
+  const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,role:'img','aria-label':'Officer arrival after the sweeping window opens'},$('#lag'));
+  for(let v=0; v<=ymax+1e-9; v+=0.05){ S('line',{x1:l,x2:Wd-r,y1:y(v),y2:y(v),class:v===0?'axis':'gridl'},g); T('text',{x:l-8,y:y(v)+4,'text-anchor':'end',class:'tick'},g,Math.round(v*100)+'%'); }
+  let cum=0; sh.forEach((v,i)=>{ const p=S('path',{d:barPath(l+i*bw+1.5,y(0),bw-3,y(0)-y(v),4)},g); p.style.fill=i<6?'var(--accent)':'color-mix(in oklab, var(--accent) 40%, var(--surface))';
+    cum+=v; const c=cum; const hit=S('rect',{x:l+i*bw,y:t,width:bw,height:Hd-t-b,fill:'transparent'},g);
+    hover(hit,()=>`<b>${i<12?`+${i*10}–${i*10+10} min`:'120+ min'}</b><br>${pct(v)} of first tickets · ${pct(c)} by then`); });
+  [0,3,6,9,12].forEach(i=>T('text',{x:l+i*bw,y:Hd-b+18,'text-anchor':i===0?'start':'middle',class:'tick'},g,'+'+i*10));
+  T('text',{x:Wd-r,y:Hd-b+18,'text-anchor':'end',class:'tick'},g,'min');
+  const c60=sh.slice(0,6).reduce((a,b)=>a+b,0), c30=sh.slice(0,3).reduce((a,b)=>a+b,0), xm=l+6*bw;
+  S('line',{x1:xm,x2:xm,y1:t-4,y2:y(0),stroke:'var(--ink)','stroke-width':1.5,'stroke-dasharray':'3 3'},g);
+  T('text',{x:xm+8,y:t+8,class:'lab strong'},g,`${pct(c60)} have arrived by +60 min`);
+  $('#lagCap').textContent=`${pct(c30)} of first tickets come in the first half hour and ${pct(c60)} in the first hour. If you're parked during a 2-hour window, the first hour is when the risk is.`;
+})();
+
+/* ============ meter heatmap ============ */
+(function(){
+  const box=$('#heat'), max=Math.max(...D.heat.term.flat(),...D.heat.off.flat());
+  function draw(k){ box.innerHTML=''; H('div',{className:'hl'},box);
+    for(let h=8;h<20;h++) H('div',{className:'hl hc',textContent:(h%12||12)+(h<12?'a':'p')},box);
+    D.heat[k].forEach((row,d)=>{ H('div',{className:'hl',textContent:DAYS[d]},box);
+      row.forEach((v,j)=>{ const s=v/max, c=H('div',{className:'cell'+(s>0.55?' hi':''),textContent:v>=0.05?v.toFixed(1):''},box);
+        c.style.background=`color-mix(in oklab, var(--accent) ${Math.round(8+92*s)}%, var(--surface))`;
+        hover(c,()=>`<b>${DAYLONG[d]}, ${fmtRange((8+j)*60,(9+j)*60)}</b><br>${v.toFixed(2)} meter tickets per day`); }); }); }
+  $('#heatToggle').addEventListener('click',e=>{ const b=e.target.closest('.chip'); if(!b) return; $('#heatToggle').querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x===b)); draw(b.dataset.k); });
+  draw('term');
+})();
+
+})();
+</script>
