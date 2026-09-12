@@ -31,6 +31,15 @@ free spaces on Vermont 36xx with LADOT's sensors.
 Python 3 with pandas, numpy, scipy and Pillow. The raw CSV and the tile cache are
 not committed; both regenerate from the commands above.
 
+## Weekly update
+
+`.github/workflows/weekly.yml` reruns fetch, analyze and build every Monday on GitHub
+Actions, commits the new `data/bundle.json` and `docs/index.html`, and starts
+`pages.yml` to publish `docs/`. Run it by hand with `gh workflow run weekly.yml`. If
+the ticket count falls more than 1% from the last build, it stops without publishing.
+USC term dates in `citations.py` run through fall 2027; the run log warns once the
+newest ticket is past them.
+
 | File | What it is |
 |---|---|
 | `citations.py` | shared loading: address parsing, street-name cleanup, holidays, USC term dates, map projection |
@@ -39,8 +48,8 @@ not committed; both regenerate from the commands above.
 
 ## Method in brief
 
-- **Window.** Patterns use the last two years (from 1 Sep 2024), so they describe
-  how enforcement works now.
+- **Window.** Patterns use the two years up to the newest ticket (a rolling window),
+  so they describe how enforcement works now.
 - **Blocks.** Hundred block of each address; odd and even numbers are the two sides.
   A block's map line is fitted through its ticket locations. Where the two sides
   geocode to clearly opposite sides of it (13 blocks), the page names the compass side.

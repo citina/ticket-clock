@@ -41,8 +41,11 @@ F = frame()
 MPP = F["m_per_px"]
 d["x"], d["y"] = to_px(d.lat.values, d.lon.values)
 d["kind"] = np.where(d.meter, "Meter expired", d.viol.map(lambda v: LABELS.get(v, v.capitalize())))
+START = END - WINDOW + pd.Timedelta(days=1)
 w = d[(d.date >= START) & (d.date <= END)].copy()
-hol = holidays()
+hol = holidays(START, END)
+if END > pd.Timestamp(TERMS[-1][1]):
+    print(f"warning: USC term dates in citations.py stop at {TERMS[-1][1]}; add the next semester or meter stats lose class weeks")
 print(f"{len(d):,} tickets; window {START.date()} to {END.date()}: {len(w):,}")
 
 
@@ -50,6 +53,34 @@ def compass(vx, vy):
     """Direction of a pixel-space vector (+x east, +y south) as one of 8 compass words."""
     ang = (math.degrees(math.atan2(-vy, vx)) + 360) % 360
     return ["east", "northeast", "north", "northwest", "west", "southwest", "south", "southeast"][int((ang + 22.5) // 45) % 8]
+
+
+def usual_hours(mins, share=.5):
+    """Clock-hour ranges holding the busiest `share` of tickets, as [[start, end], ...] in minutes.
+
+    One quartile range misleads when tickets come at two times of day (fire hydrant:
+    1-4 am and midday gives "3:34 am-1:58 pm"). Instead take the fewest hours that
+    cover `share`, join runs split by one quiet hour, and keep the two biggest runs.
+    """
+    c = np.bincount(np.asarray(mins, dtype=int) // 60 % 24, minlength=24)
+    pick = np.zeros(24, bool)
+    for hr in np.argsort(-c, kind="stable"):
+        if c[pick].sum() >= share * c.sum():
+            break
+        pick[hr] = True
+    pick |= np.roll(pick, 1) & np.roll(pick, -1)
+    if pick.all():
+        return [[0, 1440]]
+    s0 = int(np.argmin(pick))  # an unpicked hour, so no run wraps past the scan start
+    runs, a = [], None
+    for i in range(s0, s0 + 25):
+        if i < s0 + 24 and pick[i % 24]:
+            a = i if a is None else a
+        elif a is not None:
+            runs.append((int(c[[j % 24 for j in range(a, i)]].sum()), a % 24, i - a))
+            a = None
+    runs = sorted(sorted(runs, reverse=True)[:2], key=lambda r: r[1])
+    return [[h * 60, (h + n) * 60] for _, h, n in runs]
 
 
 # ---------- block geometry: all years, for a steadier line ----------
@@ -93,8 +124,7 @@ for (st, bl), g in w.dropna(subset=["street", "block"]).groupby(["street", "bloc
     for kind, h in g.groupby("kind"):
         wk = h[h.dow < 5]
         top.append([kind, len(h), int(h.fine.median()) if h.fine.notna().any() else 0,
-                    int(h.dow.mode()[0]), int(h.mins.quantile(.25)), int(h.mins.quantile(.75)),
-                    round(len(wk) / len(h), 2)])
+                    int(h.dow.mode()[0]), usual_hours(h.mins), round(len(wk) / len(h), 2)])
     top.sort(key=lambda r: -r[1])
     index[(st, bl)] = len(blocks)
     blocks.append(dict(id=f"{int(bl)}-{st.replace(' ', '-')}", street=nice_street(st), block=int(bl), n=len(g),

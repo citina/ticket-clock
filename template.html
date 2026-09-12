@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>USC Ticket Clock</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -314,6 +315,7 @@ const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], DAYLONG=['Monday','Tuesd
 const pct=x=>Math.round(x*100)+'%';
 function fmtT(m){ m=Math.round(m); const h=Math.floor(m/60)%24, mm=m%60, ap=h>=12?'pm':'am', h12=h%12||12; return mm?`${h12}:${String(mm).padStart(2,'0')} ${ap}`:`${h12} ${ap}`; }
 function fmtRange(a,b){ const s=fmtT(a), e=fmtT(b); return s.slice(-2)===e.slice(-2) ? s.slice(0,-3)+'–'+e : s+'–'+e; }
+function usual(r){ return r.map(([a,b])=>fmtRange(a,b)).join(' or '); }
 function fmtDate(s, y){ return new Date(s+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',day:'numeric',month:'short',year:y?'numeric':undefined}); }
 function ord(n){ return n+({1:'st',2:'nd',3:'rd'}[n]||'th'); }
 const median=a=>{ const s=[...a].sort((x,y)=>x-y); return s.length? s[Math.floor(s.length/2)] : 0; };
@@ -341,8 +343,8 @@ const allDay=(m,dw,f)=>stayP(m,dw,0,24,f);
 const visitsPerDay=m=>{ let s=0; for(let d=0; d<5; d++) for(let j=0;j<24;j++) s+=m.r[d][j]; return m.c*s/5; };
 
 /* ============ header bits ============ */
-$('#mastRange').textContent=`LADOT tickets · 2014 – ${fmtDate(D.end,true).replace(/^\w+, /,'')}`;
-$('#mData').textContent=`LADOT parking citations (data.lacity.org, dataset 4f5p-udkv). I kept all ${D.total.toLocaleString()} tickets inside a box of about 2.5 × 2.5 km around campus, from 2014 to ${fmtDate(D.end,true)}. Everything on the page uses the ${D.window.toLocaleString()} tickets written from ${fmtDate(D.start,true)} on, so it reflects how enforcement works now.`;
+$('#mastRange').textContent=`LADOT tickets · 2014 – ${fmtDate(D.end,true).replace(/^\w+, /,'')} · updated weekly`;
+$('#mData').textContent=`LADOT parking citations (data.lacity.org, dataset 4f5p-udkv). I kept all ${D.total.toLocaleString()} tickets inside a box of about 2.5 × 2.5 km around campus, from 2014 to ${fmtDate(D.end,true)}. Everything on the page uses the ${D.window.toLocaleString()} tickets written in the two years from ${fmtDate(D.start,true)}, so it reflects how enforcement works now. The page is rebuilt every week from LADOT's latest data, and the two-year window moves with it.`;
 
 /* ============ map ============ */
 const wrap=$('#mapwrap'); wrap.style.aspectRatio=`${W} / ${Hh}`;
@@ -451,7 +453,7 @@ function insights(b){
     out.push(`<b>Meter officers</b> come by most often ${fmtRange(480+hi*30,600+hi*30)} on weekdays. The quietest stretch is ${fmtRange(480+lo*30,600+lo*30)}.`);
     out.push(`If you never pay for a whole day here, the chance of a ticket runs from <b>${pct(ad[best])}</b> on ${DAYLONG[best]} to <b>${pct(ad[worst])}</b> on ${DAYLONG[worst]}.`); }
   const other=b.top.find(t=>t[0]!=='Street cleaning'&&t[0]!=='Meter expired');
-  if(other && other[1]>=8) out.push(`Also ticketed here: <b>${other[0]}</b> (${other[1]} tickets), usually ${other[6]>=.85?'weekdays':DAYS[other[3]]+'s and other days'} ${fmtRange(other[4],other[5])}.`);
+  if(other && other[1]>=8) out.push(`Also ticketed here: <b>${other[0]}</b> (${other[1]} tickets), usually ${other[5]>=.85?'weekdays':DAYS[other[3]]+'s and other days'} ${usual(other[4])}.`);
   return out;
 }
 function signHTML(s){ const t0=s.h*60;
@@ -550,7 +552,7 @@ function select(i, focus){
   const kc=H('div',{className:'card'},p); H('h4',{textContent:'What gets ticketed here'},kc);
   const kg=H('div',{className:'kinds'},kc), kmax=b.top[0][1];
   b.top.forEach(t=>{ const a=H('div',{},kg); H('div',{className:'nm',textContent:t[0]},a);
-    H('div',{className:'meta',textContent:`$${t[2]} · usually ${t[6]>=.85?'weekdays':'busiest '+DAYS[t[3]]} ${fmtRange(t[4],t[5])}`},a);
+    H('div',{className:'meta',textContent:`$${t[2]} · usually ${t[5]>=.85?'weekdays':'busiest '+DAYS[t[3]]} ${usual(t[4])}`},a);
     const r=H('div',{},kg); H('div',{className:'n',textContent:t[1]},r); const bar=H('div',{className:'bar'},r); bar.style.width=Math.max(4,100*t[1]/kmax)+'%'; });
   drawSel(); if(focus) focusBlock(b);
   try{ history.replaceState(null,'','#'+b.id); }catch(e){}

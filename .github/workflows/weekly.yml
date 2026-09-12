@@ -1,0 +1,69 @@
+name: weekly update
+
+# LADOT refreshes the citation feed (data.lacity.org 4f5p-udkv) daily; the page is
+# rebuilt once a week. GitHub's cron is best-effort, which is fine here: a late run
+# only publishes a few hours later.
+on:
+  schedule:
+    - cron: "17 14 * * 1"   # Mondays 14:17 UTC (7:17 am PDT, 6:17 am PST)
+  workflow_dispatch:
+
+concurrency:
+  group: weekly
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: write            # to start the Pages deploy after pushing docs/
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash         # -eo pipefail, so a failing analyze.py isn't hidden by tee
+    steps:
+      - uses: actions/checkout@v4
+
+      # The versions the analysis was written and checked with
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - run: pip install pandas==1.3.4 numpy==1.26.4 scipy==1.12.0
+
+      - name: Fetch citations
+        run: python3 fetch_citations.py
+
+      - name: Analyze and build
+        run: |
+          python3 analyze.py | tee analyze.log
+          sed -n 's/^warning: /::warning::/p' analyze.log
+          python3 build.py
+
+      # A short or broken download shouldn't replace the page with a thinner one.
+      - name: Check the ticket count
+        run: |
+          old=$(git show HEAD:data/bundle.json | python3 -c "import json, sys; print(json.load(sys.stdin)['total'])")
+          new=$(python3 -c "import json; print(json.load(open('data/bundle.json'))['total'])")
+          echo "tickets: $old -> $new"
+          if [ "$new" -lt $((old * 99 / 100)) ]; then
+            echo "::error::ticket count fell from $old to $new; not publishing"; exit 1
+          fi
+
+      - name: Commit and push
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name  "ticket-clock bot"
+          git config user.email "noreply@github.com"
+          git add data/bundle.json docs/index.html
+          if git diff --cached --quiet; then
+            echo "nothing new"; exit 0
+          fi
+          end=$(python3 -c "import json; print(json.load(open('data/bundle.json'))['end'])")
+          git commit -m "data: tickets through $end"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          # A push made with this token doesn't trigger pages.yml, so start it.
+          gh workflow run pages.yml --ref "${GITHUB_REF_NAME}"

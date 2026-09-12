@@ -16,13 +16,15 @@ CSV = DATA / "citations_usc.csv"
 BOX = dict(s=34.012, n=34.035, w=-118.300, e=-118.272)
 ZOOM, TILE = 16, 256
 
-# Patterns use the last two years, so they describe how enforcement works now
-START = pd.Timestamp("2024-09-01")
+# Patterns use the two years up to the newest ticket, so they describe how enforcement works now
+WINDOW = pd.DateOffset(years=2)
 
-# USC class periods (approximate, from the academic calendar), spring break removed
+# USC class periods (from the academic calendar), spring break removed. Add each new
+# semester once USC posts it; analyze.py warns when the newest ticket is past the last one.
 TERMS = [("2024-08-26", "2024-12-06"), ("2025-01-13", "2025-03-14"), ("2025-03-24", "2025-05-02"),
          ("2025-08-25", "2025-12-05"), ("2026-01-12", "2026-03-13"), ("2026-03-23", "2026-05-01"),
-         ("2026-08-24", "2026-12-04")]
+         ("2026-08-24", "2026-12-04"), ("2027-01-11", "2027-03-12"), ("2027-03-22", "2027-04-30"),
+         ("2027-08-23", "2027-12-03")]
 
 SUFFIX = {"AV": "AVE", "AVENUE": "AVE", "BL": "BLVD", "BLV": "BLVD", "BOULEVARD": "BLVD",
           "STREET": "ST", "PLACE": "PL", "DRIVE": "DR", "WY": "WAY"}
@@ -98,7 +100,7 @@ def end_date(d):
     return per_day[per_day >= 20].index.max()
 
 
-def holidays(start=START, end=pd.Timestamp("2027-01-01")):
+def holidays(start, end):
     h = set(USFederalHolidayCalendar().holidays(start, end))
     for y in range(start.year, end.year + 1):
         tg = pd.Timestamp(f"{y}-11-01") + pd.offsets.WeekOfMonth(week=3, weekday=3)
