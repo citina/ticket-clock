@@ -62,7 +62,9 @@ newest ticket is past them.
 - **Blocks.** Hundred block of each address; odd and even numbers are the two sides.
   A block's map line is fitted through its ticket locations. Where the two sides
   geocode to clearly opposite sides of it (13 blocks), the page names the compass side.
-- **Sweeping.** LA sweeps every other week since March 2021 (1st & 3rd or 2nd & 4th
+- **Sweeping.** Street-cleaning tickets are code 80.69BS (a few handhelds write it
+  8069BS; both count). A block side needs 8 of them in the window to get a schedule;
+  the map calls the rest "no sweeping schedule found". LA sweeps every other week since March 2021 (1st & 3rd or 2nd & 4th
   weekday of the month). Per side: posted day = most common ticket weekday; window
   = the hour of the earliest 5% of tickets, 2 hours long; phase = whichever week pair
   holds more tickets (98% of sweeping tickets match). "Ticketed on X% of sweep days"

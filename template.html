@@ -284,7 +284,7 @@
       <dt>Data</dt>
       <dd id="mData"></dd>
       <dt>Blocks and sides</dt>
-      <dd>I grouped addresses by hundred block and split each block by odd and even street numbers. Each block's line on the map is fitted through its ticket locations. Where odd and even addresses geocode clearly to opposite sides of that line, the panel names the compass side. Otherwise it only says "even" or "odd".</dd>
+      <dd>I grouped addresses by hundred block and split each block by odd and even street numbers. Each block's line on the map is fitted through its ticket locations. Where odd and even addresses geocode clearly to opposite sides of that line, the panel names the compass side. Otherwise it only says "even" or "odd". A block needs at least 20 tickets of any kind in the two years to get a line on the map.</dd>
       <dt>Sweeping schedule</dt>
       <dd>For each side, the posted day is the weekday with the most sweeping tickets. The window starts at the hour of the earliest 5% of tickets and is assumed to run 2 hours. The weeks are whichever of 1st &amp; 3rd or 2nd &amp; 4th have more tickets. "Ticketed on X% of sweep days" counts posted days with at least one ticket. It excludes holidays and any day with no sweeping tickets anywhere nearby. The arrival strip shows each sweep day's first and last ticket.</dd>
       <dt>Meter patrols</dt>
@@ -366,10 +366,14 @@ BL.forEach((b,i)=>{
   h.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); select(i,false); } });
   hover(h,()=>`<b>${name(b)}</b><br>${quick(b)}`);
 });
+// a block with no inferred schedule: none at all, or too few to tell
+function fewSweep(b){ return b.sweep_n ? `only ${b.sweep_n} sweeping ticket${b.sweep_n>1?'s':''}, too few to work out a schedule` : 'no sweeping tickets'; }
+function legendNote(lg, txt){ const li=H('li',{textContent:txt},lg); li.style.cssText='flex-basis:100%;font-size:12px;color:var(--ink-3)'; }
 function quick(b){
   const sw=b.sweep.map(s=>`${DAYS[s.dow]} ${fmtRange(s.h*60,s.h*60+120)} (${phaseTxt(s.on)})`);
   const u=[...new Set(sw)];
-  const parts=[u.length?'Sweeping '+u.join(' · '):(b.mspaces?`Metered (${b.mspaces} spaces) · no sweeping tickets`:'No sweeping tickets')];
+  const fs=fewSweep(b);
+  const parts=[u.length?'Sweeping '+u.join(' · '):(b.mspaces?`Metered (${b.mspaces} spaces) · ${fs}`:fs[0].toUpperCase()+fs.slice(1))];
   if(b.meter) parts.push(`meter officer ≈ ${visitsPerDay(b.meter).toFixed(1)} visits a weekday`);
   parts.push(`${b.n} tickets since ${fmtDate(D.start).replace(/^\w+, /,'')}`);
   return parts.join('<br>');
@@ -388,8 +392,10 @@ function drawColor(){
         S('path',{d:segD(b,o),class:'seg',stroke:dayCol(s.dow),'stroke-width':n>=20?4:3,'stroke-opacity':n>=20?1:.7,'vector-effect':'non-scaling-stroke'},gCol); }); });
     const cnt={}; BL.forEach(b=>b.sweep.forEach(s=>cnt[s.dow]=(cnt[s.dow]||0)+1));
     Object.keys(cnt).sort().forEach(d=>{ const li=H('li',{},lg); H('span',{className:'sw bar'},li).style.background=dayCol(+d); li.append(`${DAYLONG[d]} (${cnt[d]} sides)`); });
-    metLegend(lg, `metered, no sweeping tickets (${BL.filter(b=>!b.sweep.length&&b.mspaces).length} blocks)`);
-    const li=H('li',{},lg); H('span',{className:'sw bar'},li).style.background='var(--ink-3)'; li.append('no sweeping tickets');
+    const ns=BL.filter(b=>!b.sweep.length), nm=ns.filter(b=>b.mspaces).length;
+    metLegend(lg, `metered, no sweeping schedule found (${nm} blocks)`);
+    const li=H('li',{},lg); H('span',{className:'sw bar'},li).style.background='var(--ink-3)'; li.append(`no sweeping schedule found (${ns.length-nm} blocks)`);
+    legendNote(lg, `No schedule found means fewer than ${D.rules.sweep_min} sweeping tickets on either side in two years (${ns.filter(b=>!b.sweep_n).length} of these ${ns.length} blocks had none). Streets with no line had fewer than ${D.rules.min_tix} tickets of any kind, too few to show.`);
   } else {
     const mb=BL.filter(b=>b.meter), vmax=Math.max(...mb.map(b=>visitsPerDay(b.meter)));
     mb.forEach(b=>{ const s=visitsPerDay(b.meter)/vmax;
@@ -400,6 +406,7 @@ function drawColor(){
     const few=BL.filter(b=>!b.meter&&b.mspaces); few.forEach(metDots);
     metLegend(lg, `metered, too few meter tickets to model (${few.length})`);
     const l2=H('li',{},lg); H('span',{className:'sw bar'},l2).style.background='var(--ink-3)'; l2.append('no meters');
+    legendNote(lg, `Streets with no line had fewer than ${D.rules.min_tix} tickets of any kind in two years, too few to show.`);
   }
 }
 function drawSel(){
@@ -460,7 +467,10 @@ function insights(b){
     groups.forEach(g=>{ const s=g[0], arr=g.flatMap(x=>x.arr), fin=g.flatMap(x=>x.last), t0=s.h*60;
       const who = g.length===2 ? 'both sides' : sideName(b,s.side).toLowerCase();
       out.push(`<b>Sweeping, ${who}:</b> ${phaseTxt(s.on)} ${DAYLONG[s.dow]} of the month, ${fmtRange(t0,t0+120)}. The officer's first ticket usually lands around <b>${fmtT(t0+median(arr))}</b>${arr.length>=6?` (between ${fmtT(t0+q(arr,.1))} and ${fmtT(t0+q(arr,.9))} on most days)`:''} and the last around <b>${fmtT(t0+median(fin))}</b>.`); });
-  } else out.push(`<b>No sweeping tickets</b> here in two years.${b.mspaces?` It's a metered block (${b.mspaces} spaces).`:''} Either there's no posted sweeping, or nobody parks during it.`);
+  } else { const met=b.mspaces?` It's a metered block (${b.mspaces} spaces).`:'';
+    out.push(b.sweep_n
+      ? `Only <b>${b.sweep_n}</b> sweeping ticket${b.sweep_n>1?'s':''} here in two years, too few to work out a schedule.${met}`
+      : `<b>No sweeping tickets</b> here in two years.${met} Either there's no posted sweeping, or nobody parks during it.`); }
   if(b.meter){ const m=b.meter, avg=Array.from({length:24},(_,j)=>[0,1,2,3,4].reduce((a,d)=>a+m.r[d][j],0)/5);
     const win=i=>avg.slice(i,i+4).reduce((a,v)=>a+v,0); let hi=0, lo=0; for(let i=0;i<=20;i++){ if(win(i)>win(hi)) hi=i; if(win(i)<win(lo)) lo=i; }
     const ad=[0,1,2,3,4,5].map(d=>allDay(m,d,m.c)), best=ad.indexOf(Math.min(...ad)), worst=ad.indexOf(Math.max(...ad));
@@ -551,7 +561,8 @@ function select(i, focus){
   const ul=H('ul',{className:'insights'},p); insights(b).forEach(t=>H('li',{innerHTML:t},ul));
   // sweeping
   const sc=H('div',{className:'card'},p); H('h4',{textContent:'Street sweeping'},sc);
-  if(!b.sweep.length) H('div',{className:'empty',textContent:'No sweeping tickets here since '+fmtDate(D.start,true).replace(/^\w+, /,'')+'.'},sc);
+  if(!b.sweep.length){ const since=fmtDate(D.start,true).replace(/^\w+, /,'');
+    H('div',{className:'empty',textContent: b.sweep_n ? `Only ${b.sweep_n} sweeping ticket${b.sweep_n>1?'s':''} here since ${since}, too few to work out a schedule.` : `No sweeping tickets here since ${since}.`},sc); }
   sweepGroups(b).forEach(g=>{ const s=g[0], arr=g.flatMap(x=>x.arr), fin=g.flatMap(x=>x.last), rate=g.reduce((a,x)=>a+x.rate*x.days,0)/g.reduce((a,x)=>a+x.days,0), n=g.reduce((a,x)=>a+x.n,0);
     const box=H('div',{className:'side'},sc);
     const head=H('div',{className:'side-head'},box);

@@ -32,7 +32,7 @@ SUFFIX = {"AV": "AVE", "AVENUE": "AVE", "BL": "BLVD", "BLV": "BLVD", "BOULEVARD"
 SUFFIXES = {"ST", "AVE", "BLVD", "PL", "DR", "WAY", "CT", "LN", "RD", "TER", "WALK", "PARK", "SQ"}
 DIRS = {"N", "S", "E", "W", "NORTH", "SOUTH", "EAST", "WEST", "REAR", "OF"}
 ADDR = re.compile(r"(\d{2,5})\s+(.+)")
-METER = "88.13B"
+METER = "8813B"  # code 88.13B; some handhelds write it without dots (8813B+)
 
 
 def parse_loc(s):
@@ -91,7 +91,7 @@ def load(path=CSV):
     d["tno"] = pd.to_numeric(d.ticket_number, errors="coerce")
     d["fine"] = pd.to_numeric(d.fine_amount, errors="coerce")
     d["viol"] = d.violation_description.fillna("?").str.strip()
-    d["meter"] = d.violation_code.fillna("").str.startswith(METER)
+    d["meter"] = d.violation_code.fillna("").str.replace(".", "", regex=False).str.startswith(METER)
     return d
 
 

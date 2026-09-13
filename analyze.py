@@ -21,7 +21,7 @@ SEP_MIN, CONS_MIN = 4.0, 0.75  # metres / share: when odd and even addresses sit
 SLOT0, NSLOT = 8 * 60, 24      # half hours from 8:00 am to 8:00 pm (meter hours)
 
 LABELS = {
-    "NO PARK/STREET CLEAN": "Street cleaning", "RED ZONE": "Red zone", "NO STOP/STANDING": "No stopping",
+    "?": "Not recorded", "NO PARK/STREET CLEAN": "Street cleaning", "RED ZONE": "Red zone", "NO STOP/STANDING": "No stopping",
     "NO STOP/STAND": "No stopping", "STOP/STAND PROHIBIT": "No stopping", "DISPLAY OF TABS": "Expired tabs",
     "NO PARKING": "No parking", "DISPLAY OF PLATES": "Missing plates", "BLOCKING DRIVEWAY": "Blocking driveway",
     "18 IN. CURB/2 WAY": "Too far from curb", "FIRE HYDRANT": "Fire hydrant", "DOUBLE PARKING": "Double parking",
@@ -33,7 +33,10 @@ LABELS = {
     "PREFERENTIAL PARKING": "Permit district", "PREF PARKING": "Permit district", "COMM VEH OVER TIME LIMIT": "Commercial over limit",
     "EXCEED 72HRS-ST": "Parked over 72 hours", "OVERNIGHT PARKING": "Overnight parking", "HANDICAP/NO PLACARD": "Disabled space",
     "PARKED IN CROSSWALK": "In crosswalk", "WITHIN 15FT OF HYDRANT": "Fire hydrant", "LOADING ZONE": "Loading zone",
+    "8069B NO PARK ST CLN": "Street cleaning", "8056E4 RED ZONE": "Red zone", "8069A NO STOP/STAND": "No stopping",
 }
+# Street cleaning is code 80.69BS; a few handhelds write it as 8069BS with its own description
+SWEEP = {"NO PARK/STREET CLEAN", "8069B NO PARK ST CLN"}
 
 d = load()
 END = end_date(d)
@@ -41,6 +44,7 @@ F = frame()
 MPP = F["m_per_px"]
 d["x"], d["y"] = to_px(d.lat.values, d.lon.values)
 d["kind"] = np.where(d.meter, "Meter expired", d.viol.map(lambda v: LABELS.get(v, v.capitalize())))
+d["sweep"] = d.viol.isin(SWEEP)
 START = END - WINDOW + pd.Timedelta(days=1)
 w = d[(d.date >= START) & (d.date <= END)].copy()
 hol = holidays(START, END)
@@ -128,7 +132,7 @@ for (st, bl), g in w.dropna(subset=["street", "block"]).groupby(["street", "bloc
     top.sort(key=lambda r: -r[1])
     index[(st, bl)] = len(blocks)
     blocks.append(dict(id=f"{int(bl)}-{st.replace(' ', '-')}", street=nice_street(st), block=int(bl), n=len(g),
-                       dow=np.bincount(g.dow, minlength=7).tolist(), top=top[:6], sweep=[], meter=None, mspaces=0,
+                       dow=np.bincount(g.dow, minlength=7).tolist(), top=top[:6], sweep=[], sweep_n=int(g.sweep.sum()), meter=None, mspaces=0,
                        **geo[(st, bl)]))
 print(len(blocks), "blocks with a panel;", sum(b["even"] is not None for b in blocks), "with a known even side")
 
@@ -146,7 +150,7 @@ for key, n in inv.groupby(["street", "block"]).size().items():
 print(sum(b["mspaces"] > 0 for b in blocks), "blocks with metered spaces")
 
 # ---------- street sweeping, per side ----------
-sc = w[w.viol == "NO PARK/STREET CLEAN"].dropna(subset=["street", "block"])
+sc = w[w.sweep].dropna(subset=["street", "block"])
 program_days = set(sc.date.unique())  # a weekday with no sweeping ticket anywhere nearby = program off
 phase_hits = phase_all = 0
 for (st, bl, side), x in sc.groupby(["street", "block", "side"]):
@@ -215,8 +219,9 @@ for lab, dset in (("term", term_days), ("off", mdays.difference(term_days))):
 
 bundle = dict(frame=dict(W=F["W"], H=F["H"], mpp=round(MPP, 3)), start=str(START.date()), end=str(END.date()),
               total=len(d), window=len(w), phase=round(phase_hits / phase_all, 3),
-              share=dict(sweep=round(float((d.viol == "NO PARK/STREET CLEAN").mean()), 3), meter=round(float(d.meter.mean()), 3)),
-              fines=dict(sweep=int(w[w.viol == "NO PARK/STREET CLEAN"].fine.median()), meter=int(m.fine.median())),
+              share=dict(sweep=round(float(d.sweep.mean()), 3), meter=round(float(d.meter.mean()), 3)),
+              fines=dict(sweep=int(w[w.sweep].fine.median()), meter=int(m.fine.median())),
+              rules=dict(sweep_min=SWEEP_MIN, min_tix=MIN_TIX),
               blocks=blocks, cal=cal, lag_hist=lag_hist, heat=heat)
 out = DATA / "bundle.json"
 out.write_text(json.dumps(bundle, separators=(",", ":")))
