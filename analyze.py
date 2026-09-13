@@ -128,8 +128,22 @@ for (st, bl), g in w.dropna(subset=["street", "block"]).groupby(["street", "bloc
     top.sort(key=lambda r: -r[1])
     index[(st, bl)] = len(blocks)
     blocks.append(dict(id=f"{int(bl)}-{st.replace(' ', '-')}", street=nice_street(st), block=int(bl), n=len(g),
-                       dow=np.bincount(g.dow, minlength=7).tolist(), top=top[:6], sweep=[], meter=None, **geo[(st, bl)]))
+                       dow=np.bincount(g.dow, minlength=7).tolist(), top=top[:6], sweep=[], meter=None, mspaces=0,
+                       **geo[(st, bl)]))
 print(len(blocks), "blocks with a panel;", sum(b["even"] is not None for b in blocks), "with a known even side")
+
+# ---------- metered spaces per block, from LADOT's meter inventory ----------
+# Tickets alone miss metered blocks whose meters never drew a ticket (3800 Figueroa, 2600 Vermont).
+inv = pd.read_csv(METERS, dtype=str)
+p = inv.blockface.map(parse_loc)
+inv = inv.assign(num=p.str[0], street=p.str[1]).dropna(subset=["street"])
+names = pd.concat([d.street.dropna(), inv.street])
+inv["street"] = inv.street.map(dict(zip(names, canonical_streets(names))))
+inv["block"] = inv.num.astype(int) // 100 * 100
+for key, n in inv.groupby(["street", "block"]).size().items():
+    if key in index:
+        blocks[index[key]]["mspaces"] = int(n)
+print(sum(b["mspaces"] > 0 for b in blocks), "blocks with metered spaces")
 
 # ---------- street sweeping, per side ----------
 sc = w[w.viol == "NO PARK/STREET CLEAN"].dropna(subset=["street", "block"])

@@ -11,7 +11,7 @@
     --rule:#e1e0d9; --edge:#c9c8c0;
     --accent:#2a78d6; --accent-ink:#1c5cab;
     --panel:#1a1a19; --panel-ink:#fcfcfb; --panel-ink-2:#b6b5ab; --panel-rule:rgba(255,255,255,.12);
-    --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a;
+    --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#4a3aa7;
     --sign:#ffffff; --sign-red:#c8102e; --sign-ink:#111111;
     --map-filter:none; --halo:rgba(20,20,15,.28);
   }
@@ -23,7 +23,7 @@
       --rule:#2c2c2a; --edge:#3d3d3a;
       --accent:#3987e5; --accent-ink:#86b6ef;
       --panel:#262625; --panel-ink:#ffffff; --panel-ink-2:#a9a89e; --panel-rule:rgba(255,255,255,.10);
-      --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+      --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#6247cc;
       --sign:#ebeae5; --sign-red:#b50e29; --sign-ink:#111111;
       --map-filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.86); --halo:rgba(255,255,255,.35);
     }
@@ -35,7 +35,7 @@
     --rule:#2c2c2a; --edge:#3d3d3a;
     --accent:#3987e5; --accent-ink:#86b6ef;
     --panel:#262625; --panel-ink:#ffffff; --panel-ink-2:#a9a89e; --panel-rule:rgba(255,255,255,.10);
-    --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#6247cc;
     --sign:#ebeae5; --sign-red:#b50e29; --sign-ink:#111111;
     --map-filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.86); --halo:rgba(255,255,255,.35);
   }
@@ -51,8 +51,8 @@
   h1{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:clamp(44px,8vw,66px);
      line-height:.92;margin:20px 0 12px;text-wrap:balance}
   .lede{font-size:18.5px;line-height:1.5;color:var(--ink-2);max-width:62ch;margin:0 0 22px}
-  .note{font-size:14px;line-height:1.5;color:var(--ink-2);max-width:65ch;margin:-6px 0 24px;padding:2px 0 2px 14px;border-left:3px solid var(--sign-red)}
-  .note b{color:var(--ink);font-weight:600}
+  .note{font-size:12.5px;line-height:1.45;color:var(--ink-3);max-width:75ch;margin:-12px 0 20px}
+  .note b{color:var(--ink-2);font-weight:500}
   h2{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:34px;line-height:1.02;margin:8px 0 14px;text-wrap:balance}
   p{max-width:65ch;margin:0 0 14px}
   .code{display:inline-flex;gap:10px;align-items:center;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -295,7 +295,7 @@
     <footer>
       Sources
       <ul>
-        <li><a href="https://data.lacity.org/Transportation/Parking-Citations/4f5p-udkv/about_data">LADOT Parking Citations</a>, data.lacity.org</li>
+        <li><a href="https://data.lacity.org/Transportation/Parking-Citations/4f5p-udkv/about_data">LADOT Parking Citations</a> and <a href="https://data.lacity.org/Transportation/LADOT-Metered-Parking-Inventory-Policies/s49e-q6j2/about_data">Metered Parking Inventory</a>, data.lacity.org</li>
         <li>Basemap © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</li>
         <li><a href="https://abc7.com/post/street-sweeping-la-streetsla-schedule/10375577/">ABC7</a> and <a href="https://ktla.com/news/local-news/city-of-l-a-to-switch-street-sweeping-to-every-other-week-starting-monday/">KTLA</a> on the switch to sweeping every other week; the city's own lookup is at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a></li>
         <li><a href="https://citina.github.io/curb-log/">Curb Log</a>, sensor occupancy on Vermont Ave from W 36th St down to about W 37th St (both sides), and on W 36th St just west of Vermont</li>
@@ -331,7 +331,7 @@ function hideTip(){ tip.hidden=true; }
 function hover(el, fn){ el.addEventListener('pointermove', e=>showTip(e, fn())); el.addEventListener('pointerleave', hideTip); }
 
 const W=D.frame.W, Hh=D.frame.H, BL=D.blocks;
-const DAYCOL={1:'var(--s1)',2:'var(--s2)',3:'var(--s3)'};
+const DAYCOL={1:'var(--s1)',2:'var(--s2)',3:'var(--s3)',4:'var(--s4)'};
 const dayCol=d=>DAYCOL[d]||'var(--ink-3)';
 const OPP={north:'south',south:'north',east:'west',west:'east',northeast:'southwest',southwest:'northeast',northwest:'southeast',southeast:'northwest'};
 const name=b=>`${b.street}, ${b.block} block`;
@@ -347,7 +347,7 @@ const visitsPerDay=m=>{ let s=0; for(let d=0; d<5; d++) for(let j=0;j<24;j++) s+
 
 /* ============ header bits ============ */
 $('#mastRange').textContent=`LADOT tickets · 2014 – ${fmtDate(D.end,true).replace(/^\w+, /,'')} · updated weekly`;
-$('#mData').textContent=`LADOT parking citations (data.lacity.org, dataset 4f5p-udkv). I kept all ${D.total.toLocaleString()} tickets inside a box of about 2.5 × 2.5 km around campus, from 2014 to ${fmtDate(D.end,true)}. Everything on the page uses the ${D.window.toLocaleString()} tickets written in the two years from ${fmtDate(D.start,true)}, so it reflects how enforcement works now. The page is rebuilt every week from LADOT's latest data, and the two-year window moves with it.`;
+$('#mData').textContent=`LADOT parking citations (data.lacity.org, dataset 4f5p-udkv). I kept all ${D.total.toLocaleString()} tickets inside a box of about 2.5 × 2.5 km around campus, from 2014 to ${fmtDate(D.end,true)}. Everything on the page uses the ${D.window.toLocaleString()} tickets written in the two years from ${fmtDate(D.start,true)}, so it reflects how enforcement works now. The page is rebuilt every week from LADOT's latest data, and the two-year window moves with it. Which blocks have meters comes from LADOT's meter inventory (dataset s49e-q6j2), so blocks whose meters never drew a ticket still count.`;
 
 /* ============ map ============ */
 const wrap=$('#mapwrap'); wrap.style.aspectRatio=`${W} / ${Hh}`;
@@ -369,21 +369,26 @@ BL.forEach((b,i)=>{
 function quick(b){
   const sw=b.sweep.map(s=>`${DAYS[s.dow]} ${fmtRange(s.h*60,s.h*60+120)} (${phaseTxt(s.on)})`);
   const u=[...new Set(sw)];
-  const parts=[u.length?'Sweeping '+u.join(' · '):'No sweeping tickets'];
+  const parts=[u.length?'Sweeping '+u.join(' · '):(b.mspaces?`Metered (${b.mspaces} spaces) · no sweeping tickets`:'No sweeping tickets')];
   if(b.meter) parts.push(`meter officer ≈ ${visitsPerDay(b.meter).toFixed(1)} visits a weekday`);
   parts.push(`${b.n} tickets since ${fmtDate(D.start).replace(/^\w+, /,'')}`);
   return parts.join('<br>');
 }
+// metered blocks the current map mode has nothing else to say about: a dotted line
+const metDots=b=>S('path',{d:segD(b,0),class:'seg',stroke:'var(--ink-2)','stroke-width':3.5,'stroke-dasharray':'0 6','vector-effect':'non-scaling-stroke'},gCol);
+function metLegend(lg, txt){ const li=H('li',{},lg), sw=H('span',{className:'sw'},li); sw.style.cssText='width:18px;height:0;border-radius:0;border-top:3px dotted var(--ink-2)'; li.append(txt); }
 function drawColor(){
   gCol.innerHTML='';
   const lg=$('#mapLegend'); lg.innerHTML='';
   if(mode==='sweep'){
     // one line when both sides share a schedule; two offset lines when they differ
     BL.forEach(b=>{ const groups=sweepGroups(b);
+      if(!groups.length && b.mspaces) metDots(b);
       groups.forEach(g=>{ const s=g[0], n=g.reduce((a,x)=>a+x.n,0), o=groups.length>1?sideOff(b,s.side):0;
         S('path',{d:segD(b,o),class:'seg',stroke:dayCol(s.dow),'stroke-width':n>=20?4:3,'stroke-opacity':n>=20?1:.7,'vector-effect':'non-scaling-stroke'},gCol); }); });
     const cnt={}; BL.forEach(b=>b.sweep.forEach(s=>cnt[s.dow]=(cnt[s.dow]||0)+1));
     Object.keys(cnt).sort().forEach(d=>{ const li=H('li',{},lg); H('span',{className:'sw bar'},li).style.background=dayCol(+d); li.append(`${DAYLONG[d]} (${cnt[d]} sides)`); });
+    metLegend(lg, `metered, no sweeping tickets (${BL.filter(b=>!b.sweep.length&&b.mspaces).length} blocks)`);
     const li=H('li',{},lg); H('span',{className:'sw bar'},li).style.background='var(--ink-3)'; li.append('no sweeping tickets');
   } else {
     const mb=BL.filter(b=>b.meter), vmax=Math.max(...mb.map(b=>visitsPerDay(b.meter)));
@@ -392,7 +397,9 @@ function drawColor(){
       p.style.stroke=`color-mix(in oklab, var(--accent) ${Math.round(35+65*s)}%, var(--surface))`; });
     const li=H('li',{},lg); const g=H('span',{className:'sw bar'},li); g.style.width='54px'; g.style.background='linear-gradient(90deg, color-mix(in oklab, var(--accent) 35%, var(--surface)), var(--accent))';
     li.append(`fewer → more meter-officer visits a weekday (${mb.length} metered blocks)`);
-    const l2=H('li',{},lg); H('span',{className:'sw bar'},l2).style.background='var(--ink-3)'; l2.append('no meter tickets');
+    const few=BL.filter(b=>!b.meter&&b.mspaces); few.forEach(metDots);
+    metLegend(lg, `metered, too few meter tickets to model (${few.length})`);
+    const l2=H('li',{},lg); H('span',{className:'sw bar'},l2).style.background='var(--ink-3)'; l2.append('no meters');
   }
 }
 function drawSel(){
@@ -453,7 +460,7 @@ function insights(b){
     groups.forEach(g=>{ const s=g[0], arr=g.flatMap(x=>x.arr), fin=g.flatMap(x=>x.last), t0=s.h*60;
       const who = g.length===2 ? 'both sides' : sideName(b,s.side).toLowerCase();
       out.push(`<b>Sweeping, ${who}:</b> ${phaseTxt(s.on)} ${DAYLONG[s.dow]} of the month, ${fmtRange(t0,t0+120)}. The officer's first ticket usually lands around <b>${fmtT(t0+median(arr))}</b>${arr.length>=6?` (between ${fmtT(t0+q(arr,.1))} and ${fmtT(t0+q(arr,.9))} on most days)`:''} and the last around <b>${fmtT(t0+median(fin))}</b>.`); });
-  } else out.push('<b>No sweeping tickets</b> here in two years. Either there\'s no posted sweeping, or nobody parks during it.');
+  } else out.push(`<b>No sweeping tickets</b> here in two years.${b.mspaces?` It's a metered block (${b.mspaces} spaces).`:''} Either there's no posted sweeping, or nobody parks during it.`);
   if(b.meter){ const m=b.meter, avg=Array.from({length:24},(_,j)=>[0,1,2,3,4].reduce((a,d)=>a+m.r[d][j],0)/5);
     const win=i=>avg.slice(i,i+4).reduce((a,v)=>a+v,0); let hi=0, lo=0; for(let i=0;i<=20;i++){ if(win(i)>win(hi)) hi=i; if(win(i)<win(lo)) lo=i; }
     const ad=[0,1,2,3,4,5].map(d=>allDay(m,d,m.c)), best=ad.indexOf(Math.min(...ad)), worst=ad.indexOf(Math.max(...ad));

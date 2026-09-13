@@ -1,5 +1,6 @@
 # Raw citations (45 MB) — regenerate with ./fetch_citations.py
 data/citations_usc.csv
+data/meters_usc.csv
 data/*.part
 # OSM tile cache — regenerate with ./basemap.py
 .tilecache/

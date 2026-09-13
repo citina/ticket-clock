@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
 DOCS = ROOT / "docs"
 CSV = DATA / "citations_usc.csv"
+METERS = DATA / "meters_usc.csv"
 
 # The study area: a 2.5 x 2.5 km box around USC's University Park campus
 BOX = dict(s=34.012, n=34.035, w=-118.300, e=-118.272)

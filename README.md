@@ -17,7 +17,7 @@ Below the map: campus-wide evidence (every-other-week sweeping, officer arrival
 times, meter waves).
 
 A companion to [Curb Log](https://citina.github.io/curb-log/), which uses
-LADOT's sensors to measure free spaces on Vermont Ave from W 36th St down to about
+LADOT's sensors to measure available parking on Vermont Ave from W 36th St down to about
 W 37th St (both sides), and on W 36th St just west of Vermont.
 
 ## Disclaimer
@@ -31,14 +31,14 @@ in the data can still end in a ticket. Always follow the posted signs.
 ## Run it
 
 ```
-./fetch_citations.py   # data/citations_usc.csv (~45 MB, from data.lacity.org 4f5p-udkv)
+./fetch_citations.py   # data/citations_usc.csv (~45 MB, data.lacity.org 4f5p-udkv) and data/meters_usc.csv (meter inventory, s49e-q6j2)
 ./basemap.py           # docs/basemap.jpg (36 OpenStreetMap tiles at zoom 16, cached in .tilecache/)
 ./analyze.py           # data/bundle.json (every number the page shows)
 ./build.py             # docs/index.html (one self-contained file)
 ```
 
-Python 3 with pandas, numpy, scipy and Pillow. The raw CSV and the tile cache are
-not committed; both regenerate from the commands above.
+Python 3 with pandas, numpy, scipy and Pillow. The raw downloads and the tile cache
+are not committed; they regenerate from the commands above.
 
 ## Weekly update
 
@@ -67,6 +67,9 @@ newest ticket is past them.
   = the hour of the earliest 5% of tickets, 2 hours long; phase = whichever week pair
   holds more tickets (98% of sweeping tickets match). "Ticketed on X% of sweep days"
   excludes holidays and days with no sweeping tickets anywhere nearby.
+- **Metered blocks.** From LADOT's meter inventory, so blocks whose meters never drew
+  a ticket still count (tickets alone miss 3800 Figueroa and 2600 Vermont). On the
+  map they're dotted where the current view has nothing else to show for them.
 - **Meters.** USC class weeks, Monday–Saturday, 8 am–8 pm. A visit = meter tickets on
   one block with gaps ≤ 10 min. A visit that finds every meter paid leaves no trace,
   so the visit rate is scaled up assuming expired cars per visit are Poisson (the mean
