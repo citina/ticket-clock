@@ -45,16 +45,22 @@
   html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   body{background:var(--plane);color:var(--ink);font-family:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
        font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
-  main{max-width:760px;margin:0 auto;padding:26px 20px 72px}
+  main{max-width:1280px;margin:0 auto;padding:26px 20px 72px}
   a{color:var(--accent-ink)}
   .mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
   .mast{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
         color:var(--ink-3);display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
   h1{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:clamp(44px,8vw,66px);
      line-height:.92;margin:20px 0 12px;text-wrap:balance}
-  .lede{font-size:18.5px;line-height:1.5;color:var(--ink-2);max-width:62ch;margin:0 0 22px}
-  .note{font-size:12.5px;line-height:1.45;color:var(--ink-3);max-width:75ch;margin:-12px 0 20px}
+  .lede{font-size:18.5px;line-height:1.5;color:var(--ink-2);max-width:62ch;margin:0}
+  .note{font-size:12.5px;line-height:1.45;color:var(--ink-3);max-width:75ch;margin:0}
+  /* the intro sits on the explorer's grid: title and lede over the map, the disclaimer over the panel */
+  .intro{display:grid;grid-template-columns:minmax(0,1fr) 430px;grid-template-rows:auto 1fr;gap:0 20px;margin:0 0 26px}
+  .intro .note{grid-column:2;grid-row:1 / span 2;padding-top:24px}
+  @media (max-width:1000px){ .intro{grid-template-columns:minmax(0,1fr)} .intro .note{grid-column:1;grid-row:auto;padding-top:0;margin-top:16px} }
   .note b{color:var(--ink-2);font-weight:500}
+  .note p{margin:0 0 6px;max-width:none}
+  .note a{color:inherit}
   h2{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:34px;line-height:1.02;margin:8px 0 14px;text-wrap:balance}
   p{max-width:65ch;margin:0 0 14px}
   .code{display:inline-flex;gap:10px;align-items:center;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -64,7 +70,6 @@
   figure{margin:24px 0 30px}
   figcaption{font-size:13.5px;line-height:1.5;color:var(--ink-2);margin-top:10px;max-width:72ch}
   .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .wide{width:min(1080px,calc(100vw - 40px));margin-left:calc(50% - min(540px,calc(50vw - 20px)))}
   svg{display:block;max-width:100%;height:auto;overflow:visible}
   .fig-title{font-weight:600;font-size:15.5px;margin:0 0 2px}
   .fig-sub{font-size:13.5px;color:var(--ink-2);margin:0 0 12px;text-wrap:pretty}
@@ -92,8 +97,7 @@
   :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
   /* ---------- explorer ---------- */
-  .explorer{width:min(1240px,calc(100vw - 40px));margin-left:calc(50% - min(620px,calc(50vw - 20px)));
-            display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:20px;align-items:start}
+  .explorer{display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:20px;align-items:start}
   .mapcol{position:sticky;top:12px}
   @media (max-width:1000px){ .explorer{grid-template-columns:minmax(0,1fr)} .mapcol{position:static} }
   .mapbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:0 0 10px}
@@ -170,6 +174,14 @@
   .vn{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:28px;font-weight:600;text-align:right;line-height:1;white-space:nowrap}
   .vn small{display:block;font-size:11px;font-weight:400;color:var(--panel-ink-2);margin-top:7px}
   @media (max-width:560px){ .vrow{grid-template-columns:1fr} .vn{text-align:left} }
+  /* wide screens: the three answers side by side as cards, stat on top */
+  @media (min-width:1001px){
+    .verdict{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:0}
+    .vrow{display:flex;flex-direction:column;align-items:stretch;gap:12px;padding:22px 24px 24px}
+    .vrow + .vrow{border-top:0;border-left:1px solid var(--panel-rule)}
+    .vq{order:-2} .vn{order:-1;text-align:left;font-size:36px}
+  }
+  .aside{max-width:75ch}
   .c-miss{fill:none;stroke:var(--edge);stroke-width:1}
   .c-hol{fill:var(--well);stroke:none}
   #cal svg{max-width:none}
@@ -196,9 +208,14 @@
 
 <main>
   <div class="mast"><span>Curb Log · Citations</span><span id="mastRange">LADOT tickets</span></div>
+  <div class="intro">
   <h1>USC Ticket Clock</h1>
   <p class="lede" id="lede">Click a street on the map to see when parking enforcement comes by: the street-sweeping schedule and when the officer really shows up, how often meter officers walk past, and what else gets ticketed there.</p>
-  <p class="note"><b>Not a guide to parking illegally.</b> This page doesn't suggest parking anywhere, or at any time, the signs don't allow. It shows when and where LADOT has written tickets, so the rules on each block and how they're enforced are easier to understand. Past tickets don't predict the next one: an officer can come by at any time, and a quiet hour in the data can still end in a ticket. Always follow the posted signs.</p>
+  <div class="note">
+    <p><b>Not a guide to parking illegally.</b> This page doesn't suggest parking anywhere, or at any time, the rules don't allow. It shows when and where LADOT has written tickets, so the rules on each block and how they're enforced are easier to understand. Past tickets don't predict the next one: an officer can come by at any time, and a quiet hour in the data can still end in a ticket.</p>
+    <p><b>Street sweeping signs.</b> Since March 2021, LA sweeps each street every other week (the 1st &amp; 3rd or the 2nd &amp; 4th time its weekday comes up in a month), but many signs were never updated and still show only the day, like "No parking Thursday". LADOT says parking is legal on a street's off weeks and that it doesn't ticket then; a few tickets still get written, and LADOT says it dismisses those. The weeks on this page are worked out from the tickets themselves: <span id="notePhase">98%</span> of sweeping tickets near campus fell on the weeks shown. For the official schedule, look up your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.</p>
+  </div>
+  </div>
 
   <div class="explorer" id="explorer">
     <div class="mapcol">
@@ -296,7 +313,7 @@
       <dt>Meter patrols</dt>
       <dd>Uses USC class weeks only (fall and spring, spring break excluded), Monday to Saturday. A visit is a group of meter tickets on one block with no gap over 10 minutes. An officer who finds every meter paid leaves no ticket, so I adjust for those empty visits. The adjustment assumes the number of expired cars an officer finds on a visit is random (Poisson), so the average number of tickets per visit we can see tells us what share of visits wrote nothing. The dashed line and the "at least" figures skip that adjustment.</dd>
       <dt>Limits</dt>
-      <dd>A ticket only appears when someone broke the rule, so quiet blocks look less patrolled than they really are. The meter odds assume you never paid. Officers may skip cars. USC term dates are approximate. Routes and staffing change, and none of this is a promise about next Thursday. Always read the posted sign.</dd>
+      <dd>A ticket only appears when someone broke the rule, so quiet blocks look less patrolled than they really are. The meter odds assume you never paid. Officers may skip cars. USC term dates are approximate. Routes and staffing change, and none of this is a promise about next Thursday. Always read the posted sign, and for sweeping, the city's schedule.</dd>
     </dl>
     <footer>
       Sources
@@ -304,6 +321,7 @@
         <li><a href="https://data.lacity.org/Transportation/Parking-Citations/4f5p-udkv/about_data">LADOT Parking Citations</a> and <a href="https://data.lacity.org/Transportation/LADOT-Metered-Parking-Inventory-Policies/s49e-q6j2/about_data">Metered Parking Inventory</a>, data.lacity.org</li>
         <li>Basemap © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</li>
         <li><a href="https://abc7.com/post/street-sweeping-la-streetsla-schedule/10375577/">ABC7</a> and <a href="https://ktla.com/news/local-news/city-of-l-a-to-switch-street-sweeping-to-every-other-week-starting-monday/">KTLA</a> on the switch to sweeping every other week; the city's own lookup is at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a></li>
+        <li><a href="https://larchmontchronicle.com/to-adhere-to-parking-signs-or-not-to-adhere/">Larchmont Chronicle</a> on LADOT's policy for sweeping signs that still show every week, and <a href="https://lamaterial.com/p/la-wrongful-street-sweeping-tickets">L.A. Material</a> on sweeping tickets written on off weeks</li>
         <li><a href="https://citina.github.io/curb-log/">Curb Log</a>, sensor occupancy on Vermont Ave from W 36th St down to about W 37th St (both sides), and on W 36th St just west of Vermont</li>
       </ul>
     </footer>
@@ -352,6 +370,7 @@ const allDay=(m,dw,f)=>stayP(m,dw,0,24,f);
 const visitsPerDay=m=>{ let s=0; for(let d=0; d<5; d++) for(let j=0;j<24;j++) s+=m.r[d][j]; return m.c*s/5; };
 
 /* ============ header bits ============ */
+$('#notePhase').textContent=pct(D.phase);
 $('#mastRange').textContent=`LADOT tickets · 2014 – ${fmtDate(D.end,true).replace(/^\w+, /,'')} · updated weekly`;
 $('#mData').textContent=`LADOT parking citations (data.lacity.org, dataset 4f5p-udkv). I kept all ${D.total.toLocaleString()} tickets inside a box of about 2.5 × 2.5 km around campus, from 2014 to ${fmtDate(D.end,true)}. Everything on the page uses the ${D.window.toLocaleString()} tickets written in the two years from ${fmtDate(D.start,true)}, so it reflects how enforcement works now. The page is rebuilt every week from LADOT's latest data, and the two-year window moves with it. Which blocks have meters comes from LADOT's meter inventory (dataset s49e-q6j2), so blocks whose meters never drew a ticket still count.`;
 
@@ -382,12 +401,12 @@ function quick(b){
   const fs=fewSweep(b);
   const parts=[u.length?'Sweeping '+u.join(' · '):(b.mspaces?`Metered (${b.mspaces} spaces) · ${fs}`:fs[0].toUpperCase()+fs.slice(1))];
   if(b.meter) parts.push(`meter officer ≈ ${visitsPerDay(b.meter).toFixed(1)} visits a weekday`);
-  parts.push(`${b.n} tickets since ${fmtDate(D.start).replace(/^\w+, /,'')}`);
+  parts.push(`${b.n} tickets since ${fmtDate(D.start,true).replace(/^\w+, /,'')}`);
   return parts.join('<br>');
 }
 // metered blocks the current map mode has nothing else to say about: a dotted line
-const metDots=b=>S('path',{d:segD(b,0),class:'seg',stroke:'var(--ink-2)','stroke-width':3.5,'stroke-dasharray':'0 6','vector-effect':'non-scaling-stroke'},gCol);
-function metLegend(lg, txt){ const li=H('li',{},lg), sw=H('span',{className:'sw'},li); sw.style.cssText='width:18px;height:0;border-radius:0;border-top:3px dotted var(--ink-2)'; li.append(txt); }
+const metDots=b=>S('path',{d:segD(b,0),class:'seg',stroke:'var(--accent-ink)','stroke-width':3.5,'stroke-dasharray':'0 6','vector-effect':'non-scaling-stroke'},gCol);
+function metLegend(lg, txt){ const li=H('li',{},lg), sw=H('span',{className:'sw'},li); sw.style.cssText='width:18px;height:0;border-radius:0;border-top:3px dotted var(--accent-ink)'; li.append(txt); }
 function drawColor(){
   gCol.innerHTML='';
   const lg=$('#mapLegend'); lg.innerHTML='';
@@ -535,7 +554,7 @@ function arrivalStrip(host, s, arr, fin){
 function meterCard(host, b){
   const m=b.meter, c=m.c;
   H('h4',{textContent:'Meter patrols · class weeks'},host);
-  H('div',{className:'side-txt',innerHTML:`<b>${m.n}</b> meter tickets since ${fmtDate(D.start).replace(/^\w+, /,'')} across ${m.spaces} meters. Chance an officer walks by in each half hour:`},host);
+  H('div',{className:'side-txt',innerHTML:`<b>${m.n}</b> meter tickets since ${fmtDate(D.start,true).replace(/^\w+, /,'')} across ${m.spaces} meters. Chance an officer walks by in each half hour:`},host);
   const hm=H('div',{className:'mheat'},host);
   H('div',{className:'hl'},hm); for(let j=0;j<24;j++){ const e=H('div',{className:'hl',textContent:j%4===0?fmtT(480+j*30).replace(' am','a').replace(' pm','p'):''},hm); }
   let pmax=0; for(let d=0;d<6;d++) for(let j=0;j<24;j++) pmax=Math.max(pmax,1-Math.exp(-c*m.r[d][j]));
@@ -609,7 +628,7 @@ function select(i, focus){
     arrivalStrip(box, s, arr, fin);
     if(n<20) H('div',{className:'empty',style:'font-size:12.5px',textContent:`Only ${n} tickets on this side, so treat the schedule as rough.`},box); });
   if(sweepGroups(b).some(g=>g.length===1)) H('div',{className:'empty',style:'font-size:12.5px;margin-top:12px',textContent:'Odd and even mean house numbers: one side of the street has the odd addresses, the other side the even ones, and each side can have its own sweeping day.'},sc);
-  if(b.sweep.length) H('div',{className:'empty',style:'font-size:12px;margin-top:10px',innerHTML:'*Worked out from where and when tickets were written. Always check the posted sign or <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.'},sc);
+  if(b.sweep.length) H('div',{className:'empty',style:'font-size:12px;margin-top:10px',innerHTML:'*Real signs often show only the day. The weeks here are worked out from where and when tickets were written; the city\'s schedule is at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.'},sc);
   if(b.meter) meterCard(H('div',{className:'card'},p), b);
   // everything ticketed here
   const kc=H('div',{className:'card'},p); H('h4',{textContent:'What gets ticketed here'},kc);
@@ -642,10 +661,13 @@ select(start,true);
 
 /* ============ sweeping evidence ============ */
 $('#sweepIntro').innerHTML=`In March 2021, LA cut street sweeping to every other week. Each posted route is now swept on either the 1st and 3rd or the 2nd and 4th time its weekday comes up in a month. The tickets follow that exactly: <b>${(D.phase*100).toFixed(1)}%</b> of sweeping tickets near campus since ${fmtDate(D.start,true).replace(/^\w+, /,'')} fell on a side's posted weeks. Street cleaning is ${pct(D.share.sweep)} of all tickets here, and meters are ${pct(D.share.meter)}.`;
-(function(){
+// squares grow to fill the column (22-44px); on narrow screens they stay 22px and the box scrolls
+function drawCal(){
+  const host=$('#cal'); host.innerHTML='';
   const cal=D.cal, months=[]; cal.forEach(c=>{ const m=c[0].slice(0,7); if(!months.includes(m)) months.push(m); });
-  const cw=22, gap=4, left=64, top=38; const Wd=left+months.length*(cw+gap), Hd=top+5*(cw+gap);
-  const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,width:Wd,role:'img','aria-label':'Every Tuesday for two years on one block'},$('#cal'));
+  const gap=4, left=64, top=38, cw=Math.max(22,Math.min(44,Math.floor((host.clientWidth-left)/months.length)-gap));
+  const Wd=left+months.length*(cw+gap), Hd=top+5*(cw+gap);
+  const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,width:Wd,role:'img','aria-label':'Every Tuesday for two years on one block'},host);
   months.forEach((m,i)=>{ const x=left+i*(cw+gap)+cw/2, mo=+m.slice(5); T('text',{x,y:top-9,'text-anchor':'middle',class:'tick'},g,'JFMAMJJASOND'[mo-1]);
     if(mo===1||i===0) T('text',{x:x-cw/2,y:top-25,class:'tick strong'},g,m.slice(0,4)); });
   const hitRows=new Set(cal.filter(c=>c[2]>0).map(c=>c[1]));
@@ -656,12 +678,13 @@ $('#sweepIntro').innerHTML=`In March 2021, LA cut street sweeping to every other
     hover(r,()=>`<b>${fmtDate(d,true)}</b> · ${ord(nth)} Tuesday<br>${hol?'City holiday':n?n+' sweeping ticket'+(n>1?'s':''):'No sweeping tickets'}`); });
   const on=cal.filter(c=>(c[1]===1||c[1]===3)&&!c[3]), off=cal.filter(c=>c[1]!==1&&c[1]!==3&&!c[3]);
   $('#calCap').textContent=`Tickets were written on ${on.filter(c=>c[2]>0).length} of ${on.length} non-holiday 1st and 3rd Tuesdays, and on ${off.filter(c=>c[2]>0).length} of ${off.length} other Tuesdays.`;
-})();
-// drawn at the column's real width (300-720px) so the labels don't shrink on phones
+}
+drawCal();
+// drawn at the column's real width (300-1240px) so the labels keep their size
 function drawLag(){
   const host=$('#lag'); host.innerHTML='';
-  const h=D.lag_hist, tot=h.reduce((a,b)=>a+b,0), sh=h.map(v=>v/tot), Wd=Math.max(300,Math.min(720,Math.round(host.clientWidth)||720)), narrow=Wd<500;
-  const Hd=narrow?180:220, l=40, r=14, t=18, b=34, bw=(Wd-l-r)/h.length;
+  const h=D.lag_hist, tot=h.reduce((a,b)=>a+b,0), sh=h.map(v=>v/tot), Wd=Math.max(300,Math.min(1240,Math.round(host.clientWidth)||720)), narrow=Wd<500;
+  const Hd=narrow?180:Wd>900?250:220, l=40, r=14, t=18, b=34, bw=(Wd-l-r)/h.length;
   const ymax=Math.ceil(Math.max(...sh)*100/5)*5/100, y=v=>t+(Hd-t-b)*(1-v/ymax);
   const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,role:'img','aria-label':'Officer arrival after the sweeping window opens'},host);
   for(let v=0; v<=ymax+1e-9; v+=0.05){ S('line',{x1:l,x2:Wd-r,y1:y(v),y2:y(v),class:v===0?'axis':'gridl'},g); T('text',{x:l-8,y:y(v)+4,'text-anchor':'end',class:'tick'},g,Math.round(v*100)+'%'); }
@@ -694,7 +717,7 @@ drawLag();
 // charts are drawn at their real width, so redraw when the width changes (not on height-only changes like a phone's URL bar)
 let lastW=innerWidth, rt=0;
 addEventListener('resize',()=>{ if(innerWidth===lastW) return; lastW=innerWidth; clearTimeout(rt);
-  rt=setTimeout(()=>{ sizeMap(); if(selected!==null) select(selected,false); drawLag(); },150); });
+  rt=setTimeout(()=>{ sizeMap(); if(selected!==null) select(selected,false); drawLag(); drawCal(); },150); });
 
 })();
 </script>

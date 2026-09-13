@@ -25,8 +25,20 @@ W 37th St (both sides), and on W 36th St just west of Vermont.
 This project is not meant to encourage anyone to break parking rules or park
 illegally. It shows when and where LADOT has written tickets, so the rules on each
 block, and how they're enforced, are easier to understand. Past tickets don't
-predict the next one: an officer can come by at any time, and a quiet hour or week
-in the data can still end in a ticket. Always follow the posted signs.
+predict the next one: an officer can come by at any time, and a quiet hour in the
+data can still end in a ticket.
+
+**Street sweeping signs.** LA has swept each street every other week since March 2021
+(the 1st & 3rd or the 2nd & 4th time its weekday comes up in a month), but many signs
+were never updated and still show only the day, like "No parking Thursday". LADOT says
+parking is legal on a street's off weeks and that it doesn't ticket then
+([Larchmont Chronicle, March 2025](https://larchmontchronicle.com/to-adhere-to-parking-signs-or-not-to-adhere/)).
+Some tickets are still written on off weeks
+([L.A. Material, July 2026](https://lamaterial.com/p/la-wrongful-street-sweeping-tickets)),
+and LADOT says it dismisses those. The weeks this project shows are worked out from
+the tickets themselves (about 98% of sweeping tickets near campus fall on them), so
+they're evidence, not the official schedule. For that, look up your street at
+[streets.lacity.gov](https://streets.lacity.gov/services/street-sweeping).
 
 ## Run it
 
