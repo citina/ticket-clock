@@ -1,4 +1,5 @@
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>USC Ticket Clock</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,6 +42,7 @@
   }
 
   *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   body{background:var(--plane);color:var(--ink);font-family:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
        font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
   main{max-width:760px;margin:0 auto;padding:26px 20px 72px}
@@ -65,7 +67,7 @@
   .wide{width:min(1080px,calc(100vw - 40px));margin-left:calc(50% - min(540px,calc(50vw - 20px)))}
   svg{display:block;max-width:100%;height:auto;overflow:visible}
   .fig-title{font-weight:600;font-size:15.5px;margin:0 0 2px}
-  .fig-sub{font-size:13.5px;color:var(--ink-2);margin:0 0 12px}
+  .fig-sub{font-size:13.5px;color:var(--ink-2);margin:0 0 12px;text-wrap:pretty}
   .tick{font:11px "IBM Plex Mono",ui-monospace,Menlo,monospace;fill:var(--ink-3)}
   .tick.strong{fill:var(--ink);font-weight:600}
   .lab{font:500 12.5px "Barlow",system-ui,sans-serif;fill:var(--ink-2)}
@@ -93,7 +95,7 @@
   .explorer{width:min(1240px,calc(100vw - 40px));margin-left:calc(50% - min(620px,calc(50vw - 20px)));
             display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:20px;align-items:start}
   .mapcol{position:sticky;top:12px}
-  @media (max-width:1000px){ .explorer{grid-template-columns:1fr} .mapcol{position:static} }
+  @media (max-width:1000px){ .explorer{grid-template-columns:minmax(0,1fr)} .mapcol{position:static} }
   .mapbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:0 0 10px}
   .mapwrap{position:relative;background:var(--surface);border:1px solid var(--rule);border-radius:12px;overflow:hidden;
            touch-action:none;user-select:none;-webkit-user-select:none}
@@ -109,7 +111,7 @@
   .seg{fill:none;stroke-linecap:round}
   .hit{fill:none;stroke:transparent;stroke-width:16;cursor:pointer}
 
-  .panel{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px 18px 6px}
+  .panel{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px 18px 6px;scroll-margin-top:12px}
   .p-eyebrow{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
   .p-title{font-family:"Barlow Condensed","Barlow",sans-serif;font-weight:700;font-size:32px;line-height:1;margin:4px 0 6px}
   .p-sub{font-size:14px;color:var(--ink-2)}
@@ -137,6 +139,9 @@
   .sign-in svg{margin:0 auto 5px;width:32px;height:32px}
   .sign .s1{font-size:18px} .sign .s2{font-size:14.5px;margin-top:4px} .sign .s3{font-size:18px;margin-top:4px} .sign .s4{font-size:12.5px;margin-top:5px;letter-spacing:.04em}
   .sign .s5{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:9.5px;letter-spacing:.06em;margin-top:6px;color:var(--sign-ink)}
+  /* posted sweeping window behind the arrival dots; mixed from ink so it holds up in dark mode */
+  .win{fill:color-mix(in oklab, var(--ink) 10%, var(--surface))}
+  .sw.win{background:color-mix(in oklab, var(--ink) 10%, var(--surface))}
 
   .mheat{display:grid;grid-template-columns:30px repeat(24,minmax(0,1fr));gap:2px;margin:4px 0 0}
   .mheat .hl{font:10px "IBM Plex Mono",monospace;color:var(--ink-3);white-space:nowrap}
@@ -167,6 +172,7 @@
   @media (max-width:560px){ .vrow{grid-template-columns:1fr} .vn{text-align:left} }
   .c-miss{fill:none;stroke:var(--edge);stroke-width:1}
   .c-hol{fill:var(--well);stroke:none}
+  #cal svg{max-width:none}
   .heat{display:grid;grid-template-columns:44px repeat(12,minmax(40px,1fr));gap:3px;min-width:560px}
   .heat .hl{font:11px "IBM Plex Mono",monospace;color:var(--ink-3);display:flex;align-items:center}
   .heat .hc{justify-content:center}
@@ -354,16 +360,17 @@ const wrap=$('#mapwrap'); wrap.style.aspectRatio=`${W} / ${Hh}`;
 const svg=S('svg',{viewBox:`0 0 ${W} ${Hh}`,preserveAspectRatio:'xMidYMid meet',role:'img','aria-label':'Map of streets near USC; click a street for its enforcement schedule'});
 wrap.insertBefore(svg, wrap.firstChild);
 S('image',{href:BASEMAP,x:0,y:0,width:W,height:Hh,class:'basemap'},svg);
-const gBase=S('g',{},svg), gCol=S('g',{},svg), gSel=S('g',{},svg), gHit=S('g',{},svg);
-let mode='sweep', selected=null, hlStreet=null, vb={x:0,y:0,w:W,h:Hh};
+// halos sit under the colored lines so a selected block keeps its own colors; endpoint dots go on top in gSel
+const gHalo=S('g',{},svg), gBase=S('g',{},svg), gCol=S('g',{},svg), gSel=S('g',{},svg), gHit=S('g',{},svg);
+let mode='sweep', selected=null, hlStreet=null, vb={x:0,y:0,w:W,h:Hh}, asp=Hh/W; // asp: map box height / width
 const OFF=4.2;
 function segD(b, o){ const [x1,y1,x2,y2]=b.seg, [nx,ny]=b.nrm; return `M${x1+nx*o},${y1+ny*o}L${x2+nx*o},${y2+ny*o}`; }
 const sideOff=(b,side)=>(b.sgn||1)*(side==='even'?1:-1)*OFF;
 BL.forEach((b,i)=>{
   S('path',{d:segD(b,0),class:'seg',stroke:'var(--ink-3)','stroke-width':2,'stroke-opacity':.55,'vector-effect':'non-scaling-stroke'},gBase);
   const h=S('path',{d:segD(b,0),class:'hit','vector-effect':'non-scaling-stroke',tabindex:0,'aria-label':name(b)},gHit);
-  h.addEventListener('click',()=>{ if(!dragged) select(i,false); });
-  h.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); select(i,false); } });
+  h.addEventListener('click',()=>{ if(!dragged){ select(i,false); revealPanel(); } });
+  h.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); select(i,false); revealPanel(); } });
   hover(h,()=>`<b>${name(b)}</b><br>${quick(b)}`);
 });
 // a block with no inferred schedule: none at all, or too few to tell
@@ -410,17 +417,20 @@ function drawColor(){
   }
 }
 function drawSel(){
-  gSel.innerHTML=''; if(selected===null) return; const b=BL[selected];
-  if(hlStreet) streets[hlStreet].forEach(j=>S('path',{d:segD(BL[j],0),class:'seg',stroke:'var(--halo)','stroke-width':12,'vector-effect':'non-scaling-stroke'},gSel));
-  S('path',{d:segD(b,0),class:'seg',stroke:'var(--halo)','stroke-width':22,'vector-effect':'non-scaling-stroke'},gSel);
+  gHalo.innerHTML=''; gSel.innerHTML=''; if(selected===null) return; const b=BL[selected];
+  if(hlStreet) streets[hlStreet].forEach(j=>S('path',{d:segD(BL[j],0),class:'seg',stroke:'var(--halo)','stroke-width':12,'vector-effect':'non-scaling-stroke'},gHalo));
+  S('path',{d:segD(b,0),class:'seg',stroke:'var(--halo)','stroke-width':22,'vector-effect':'non-scaling-stroke'},gHalo);
   const [x1,y1,x2,y2]=b.seg;
   [[x1,y1],[x2,y2]].forEach(([x,y])=>S('circle',{cx:x,cy:y,r:3.5*vb.w/W+2,fill:'var(--ink)',stroke:'var(--surface)','stroke-width':1.5,'vector-effect':'non-scaling-stroke'},gSel));
 }
 /* pan & zoom */
-function setVB(){ vb.w=Math.min(W,Math.max(W/10,vb.w)); vb.h=vb.w*Hh/W; vb.x=Math.max(0,Math.min(W-vb.w,vb.x)); vb.y=Math.max(0,Math.min(Hh-vb.h,vb.y));
+// the view keeps the map box's shape; zoomed all the way out it shows the full width, and all the height that fits
+const maxW=()=>Math.min(W, Hh/asp);
+function setVB(){ vb.w=Math.min(maxW(),Math.max(W/10,vb.w)); vb.h=vb.w*asp; vb.x=Math.max(0,Math.min(W-vb.w,vb.x)); vb.y=Math.max(0,Math.min(Hh-vb.h,vb.y));
   svg.setAttribute('viewBox',`${vb.x} ${vb.y} ${vb.w} ${vb.h}`); drawSel(); }
+function fitAll(){ vb.w=maxW(); vb.h=vb.w*asp; vb.x=(W-vb.w)/2; vb.y=(Hh-vb.h)/2; setVB(); }
 function toImg(e){ const r=svg.getBoundingClientRect(); return {x:vb.x+(e.clientX-r.left)/r.width*vb.w, y:vb.y+(e.clientY-r.top)/r.height*vb.h}; }
-function zoomAt(f, cx, cy){ const nw=Math.min(W,Math.max(W/10,vb.w*f)), k=nw/vb.w; vb.x=cx-(cx-vb.x)*k; vb.y=cy-(cy-vb.y)*k; vb.w=nw; setVB(); }
+function zoomAt(f, cx, cy){ const nw=Math.min(maxW(),Math.max(W/10,vb.w*f)), k=nw/vb.w; vb.x=cx-(cx-vb.x)*k; vb.y=cy-(cy-vb.y)*k; vb.w=nw; setVB(); }
 wrap.addEventListener('wheel',e=>{ if(!(e.ctrlKey||e.metaKey)) return; e.preventDefault(); const p=toImg(e); zoomAt(Math.exp(e.deltaY*0.01),p.x,p.y); },{passive:false});
 const ptrs=new Map(); let dragged=false, down=null, pinch=null;
 wrap.addEventListener('pointerdown',e=>{ if(e.target.closest('.zoom')||e.target.closest('a')) return; ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); down={x:e.clientX,y:e.clientY}; dragged=false;
@@ -435,11 +445,21 @@ wrap.addEventListener('pointerup',endPtr); wrap.addEventListener('pointercancel'
 svg.addEventListener('dblclick',e=>{ const p=toImg(e); zoomAt(0.5,p.x,p.y); });
 $('#zin').onclick=()=>zoomAt(0.6,vb.x+vb.w/2,vb.y+vb.h/2);
 $('#zout').onclick=()=>zoomAt(1/0.6,vb.x+vb.w/2,vb.y+vb.h/2);
-$('#zfit').onclick=()=>{ vb={x:0,y:0,w:W,h:Hh}; setVB(); };
+$('#zfit').onclick=fitAll;
 // keep the zoom level; pan only when the block is outside the current view
 function focusBlock(b){ const [x1,y1,x2,y2]=b.seg, m=vb.w*0.06;
   if(Math.min(x1,x2)>=vb.x+m && Math.max(x1,x2)<=vb.x+vb.w-m && Math.min(y1,y2)>=vb.y+m && Math.max(y1,y2)<=vb.y+vb.h-m) return;
   vb.x=(x1+x2)/2-vb.w/2; vb.y=(y1+y2)/2-vb.h/2; setVB(); }
+// stacked layout (under 1000px): cap the map at 72% of the screen height so the panel isn't a full screen away
+const stacked=()=>matchMedia('(max-width:1000px)').matches;
+function sizeMap(){ const st=stacked(), full=vb.w>=maxW()-1e-6;
+  wrap.style.aspectRatio=st?'auto':`${W} / ${Hh}`;
+  wrap.style.height=st?Math.round(Math.min(wrap.clientWidth*Hh/W, innerHeight*0.72))+'px':'';
+  asp=st&&wrap.clientWidth?wrap.clientHeight/wrap.clientWidth:Hh/W;
+  if(full) fitAll(); else setVB(); }
+// after a tap on the map in the stacked layout, bring the panel's title up if it's below the fold
+function revealPanel(){ if(!stacked()) return; const p=$('#panel');
+  if(p.getBoundingClientRect().top>innerHeight-160) p.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); }
 
 $('#modeChips').addEventListener('click',e=>{ const c=e.target.closest('.chip'); if(!c) return; mode=c.dataset.mode;
   $('#modeChips').querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x===c)); drawColor(); });
@@ -487,21 +507,30 @@ function signHTML(s){ const t0=s.h*60;
     <line x1="11" y1="11" x2="43" y2="43" stroke="var(--sign-red)" stroke-width="5"/></svg>
     <div class="s1">No parking</div><div class="s2">${fmtT(t0).toUpperCase()} TO ${fmtT(t0+120).toUpperCase()}</div><div class="s3">${DAYLONG[s.dow]}</div><div class="s4">Street cleaning</div>
     <div class="s5">${phaseTxt(s.on).toUpperCase()} ONLY*</div></div></div>`; }
+// two lanes, first tickets then last tickets, drawn at the host's real width so the text stays full size
 function arrivalStrip(host, s, arr, fin){
-  const Wd=380, Hd=98, l=10, r=10, base=72, t0=s.h*60, x=m=>l+Math.min(m,150)/150*(Wd-l-r);
+  const Wd=Math.max(260,Math.round(host.clientWidth)||380), l=10, r=10, t0=s.h*60, x=m=>l+Math.min(m,150)/150*(Wd-l-r), bw=7;
+  const col=m=>Math.floor((x(m)-l)/bw);
+  // one dot per sweep day, stacked in 7px columns; very tall stacks squeeze instead of wrapping
+  const lanes=[[arr,'var(--accent)','First ticket',''],[fin,'var(--s2)','Last ticket','3 2']].map(([a,c,nm,dash])=>{
+    const n={}; a.forEach(m=>{ const k=col(m); n[k]=(n[k]||0)+1; });
+    const tall=Math.max(3,...Object.values(n)), step=Math.min(7,63/tall);
+    return {a,c,nm,dash,step,h:Math.round(tall*step+6)}; });
+  let y=0; lanes.forEach(L=>{ L.y0=y+20; L.base=L.y0+L.h; y=L.base+8; });
+  const axis=lanes[1].base+4, Hd=axis+20;
   const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,role:'img','aria-label':'First and last sweeping ticket times on each sweep day'},host);
-  const band=S('rect',{x:x(0),y:30,width:x(120)-x(0),height:base-28,rx:4},g); band.style.fill='var(--well)';
-  S('line',{x1:l,x2:Wd-r,y1:base+4,y2:base+4,class:'axis'},g);
-  [0,30,60,90,120].forEach(m=>{ S('line',{x1:x(m),x2:x(m),y1:base+4,y2:base+8,class:'axis'},g); T('text',{x:x(m),y:base+20,'text-anchor':'middle',class:'tick'},g,fmtT(t0+m).replace(' am','a').replace(' pm','p')); });
-  const stack={};
-  [[arr,'var(--accent)'],[fin,'var(--s2)']].forEach(([a,col])=>a.forEach(m=>{ const k=Math.floor(Math.min(m,150)/4); const n=stack[k]=(stack[k]||0)+1;
-    const c=S('circle',{cx:x(m),cy:base-3-((n-1)%6)*7,r:3.3},g); c.style.fill=col; }));
-  [[arr,'first',12,''],[fin,'last',26,'3 2']].forEach(([a,w,ty,dash])=>{ const md=median(a);
-    S('line',{x1:x(md),x2:x(md),y1:ty+4,y2:base+4,stroke:'var(--ink)','stroke-width':1.5,'stroke-dasharray':dash},g);
-    T('text',{x:Math.min(x(md)+5,Wd-120),y:ty,class:'lab strong'},g,`${w} usually ${fmtT(t0+md)}`); });
+  lanes.forEach(L=>{ const md=median(L.a), cnt={};
+    S('rect',{x:x(0),y:L.y0,width:x(120)-x(0),height:L.h,rx:4,class:'win'},g);
+    L.a.forEach(m=>{ const k=col(m), c=cnt[k]=(cnt[k]||0)+1;
+      S('circle',{cx:l+k*bw+bw/2,cy:L.base-3.5-(c-1)*L.step,r:3.2},g).style.fill=L.c; });
+    S('line',{x1:x(md),x2:x(md),y1:L.y0-3,y2:L.base,stroke:'var(--ink)','stroke-width':1.5,'stroke-dasharray':L.dash},g);
+    S('circle',{cx:l+4,cy:L.y0-9,r:4},g).style.fill=L.c;
+    const tt=S('text',{x:l+13,y:L.y0-5,class:'lab'},g); T('tspan',{},tt,`${L.nm}: usually `); T('tspan',{class:'lab strong'},tt,fmtT(t0+md)); });
+  S('line',{x1:l,x2:Wd-r,y1:axis,y2:axis,class:'axis'},g);
+  [0,30,60,90,120].forEach(m=>{ S('line',{x1:x(m),x2:x(m),y1:axis,y2:axis+4,class:'axis'},g); T('text',{x:x(m),y:axis+16,'text-anchor':'middle',class:'tick'},g,fmtT(t0+m).replace(' am','a').replace(' pm','p')); });
   const hit=S('rect',{x:0,y:0,width:Wd,height:Hd,fill:'transparent'},g);
-  hover(hit,()=>`${arr.length} sweep days with tickets · each day has one dot for its first ticket and one for its last<br>Shaded: the posted window`);
-  H('ul',{className:'legend',innerHTML:'<li><span class="sw" style="background:var(--accent);border-radius:50%"></span>first ticket</li><li><span class="sw" style="background:var(--s2);border-radius:50%"></span>last ticket</li><li><span class="sw" style="background:var(--well)"></span>posted window</li>'},host);
+  hover(hit,()=>`${arr.length} sweep days with tickets · one dot per day in each row<br>Lines: the usual time · Shaded: the posted window`);
+  H('ul',{className:'legend',innerHTML:`<li><span class="sw win"></span>posted window, ${fmtRange(t0,t0+120)}</li>`},host);
 }
 function meterCard(host, b){
   const m=b.meter, c=m.c;
@@ -530,7 +559,7 @@ function meterCard(host, b){
     const pk=est.indexOf(Math.max(...est));
     ro.innerHTML=`<div><div class="k">All day, ${DAYS[st.day]}</div><div class="v">${pct(allDay(m,st.day,c))}<small>at least ${pct(allDay(m,st.day,1))}</small></div></div>
       <div><div class="k">Riskiest arrival</div><div class="v">${pct(est[pk])}<small>at ${fmtT(480+pk*30)}</small></div></div>`;
-    ch.innerHTML=''; const Wd=390, Hd=120, l=32, r=8, t=8, bb=20, ymax=Math.max(0.2,Math.ceil(Math.max(...est)*10+0.05)/10);
+    ch.innerHTML=''; const Wd=Math.max(280,Math.round(ch.clientWidth)||390), Hd=120, l=32, r=8, t=8, bb=20, ymax=Math.max(0.2,Math.ceil(Math.max(...est)*10+0.05)/10);
     const x=i=>l+i*(Wd-l-r)/23, y=v=>t+(Hd-t-bb)*(1-v/ymax);
     const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,role:'img','aria-label':'Chance of a meter ticket by arrival time'},ch);
     for(let v=0; v<=ymax+1e-9; v+=0.1){ S('line',{x1:l,x2:Wd-r,y1:y(v),y2:y(v),class:v===0?'axis':'gridl'},g); T('text',{x:l-5,y:y(v)+4,'text-anchor':'end',class:'tick'},g,Math.round(v*100)+'%'); }
@@ -557,7 +586,13 @@ function select(i, focus){
   H('div',{className:'p-sub',textContent:`${b.n} tickets since ${fmtDate(D.start,true).replace(/^\w+, /,'')} · busiest day ${DAYLONG[busiest]}`},p);
   const sib=streets[b.street];
   if(sib.length>1){ const nav=H('div',{className:'p-nav'},p);
-    sib.forEach(j=>{ const c=H('button',{className:'chip sm',textContent:`${BL[j].block}`},nav); c.setAttribute('aria-pressed',j===i); c.title=name(BL[j]); c.onclick=()=>select(j,true); }); }
+    sib.forEach(j=>{ const c=H('button',{className:'chip sm',textContent:`${BL[j].block}`},nav); c.setAttribute('aria-pressed',j===i); c.title=name(BL[j]); c.onclick=()=>select(j,true); });
+    // center the current block's chip, and fade whichever edge has more chips beyond it
+    const on=nav.querySelector('[aria-pressed="true"]');
+    nav.scrollLeft+=on.getBoundingClientRect().left-nav.getBoundingClientRect().left-(nav.clientWidth-on.offsetWidth)/2;
+    const fade=()=>{ const l=nav.scrollLeft>2, r=nav.scrollLeft+nav.clientWidth<nav.scrollWidth-2;
+      nav.style.webkitMaskImage=nav.style.maskImage=`linear-gradient(90deg,${l?'transparent':'#000'} 0,#000 28px,#000 calc(100% - 28px),${r?'transparent':'#000'} 100%)`; };
+    fade(); nav.addEventListener('scroll',fade,{passive:true}); }
   const ul=H('ul',{className:'insights'},p); insights(b).forEach(t=>H('li',{innerHTML:t},ul));
   // sweeping
   const sc=H('div',{className:'card'},p); H('h4',{textContent:'Street sweeping'},sc);
@@ -570,7 +605,7 @@ function select(i, focus){
     const txt=H('div',{},head);
     H('div',{className:'side-name',textContent: g.length===2?'Both sides':sideName(b,s.side)+(b.even?` (${s.side} numbers)`:'')},txt);
     H('div',{className:'side-txt',innerHTML:`Ticketed on <b>${pct(rate)}</b> of ${g[0].days} sweep days, about ${(n/Math.max(1,arr.length/g.length)).toFixed(0)} tickets each time.<br>Next: <b>${nextDays(s,2).join(' · ')}</b>`},txt);
-    H('div',{className:'fig-sub',style:'margin:12px 0 2px',textContent:'When the officer\'s first and last tickets land (two dots per sweep day)'},box);
+    H('div',{className:'fig-sub',style:'margin:14px 0 8px',textContent:'When the first and last tickets land on each sweep day'},box);
     arrivalStrip(box, s, arr, fin);
     if(n<20) H('div',{className:'empty',style:'font-size:12.5px',textContent:`Only ${n} tickets on this side, so treat the schedule as rough.`},box); });
   if(sweepGroups(b).some(g=>g.length===1)) H('div',{className:'empty',style:'font-size:12.5px;margin-top:12px',textContent:'Odd and even mean house numbers: one side of the street has the odd addresses, the other side the even ones, and each side can have its own sweeping day.'},sc);
@@ -585,10 +620,10 @@ function select(i, focus){
   drawSel(); if(focus) focusBlock(b);
   try{ history.replaceState(null,'','#'+b.id); }catch(e){}
 }
-drawColor();
+sizeMap(); drawColor();
 let start=BL.findIndex(b=>'#'+b.id===location.hash);
 if(start<0){ const both=BL.map((b,i)=>[b,i]).filter(([b])=>b.meter&&b.sweep.some(s=>s.n>=20)).sort((a,b)=>b[0].meter.n-a[0].meter.n); start=both.length?both[0][1]:0; }
-select(start,false);
+select(start,true);
 
 /* ============ verdict ============ */
 (function(){
@@ -622,21 +657,26 @@ $('#sweepIntro').innerHTML=`In March 2021, LA cut street sweeping to every other
   const on=cal.filter(c=>(c[1]===1||c[1]===3)&&!c[3]), off=cal.filter(c=>c[1]!==1&&c[1]!==3&&!c[3]);
   $('#calCap').textContent=`Tickets were written on ${on.filter(c=>c[2]>0).length} of ${on.length} non-holiday 1st and 3rd Tuesdays, and on ${off.filter(c=>c[2]>0).length} of ${off.length} other Tuesdays.`;
 })();
-(function(){
-  const h=D.lag_hist, tot=h.reduce((a,b)=>a+b,0), sh=h.map(v=>v/tot), Wd=720, Hd=220, l=40, r=14, t=18, b=34, bw=(Wd-l-r)/h.length;
+// drawn at the column's real width (300-720px) so the labels don't shrink on phones
+function drawLag(){
+  const host=$('#lag'); host.innerHTML='';
+  const h=D.lag_hist, tot=h.reduce((a,b)=>a+b,0), sh=h.map(v=>v/tot), Wd=Math.max(300,Math.min(720,Math.round(host.clientWidth)||720)), narrow=Wd<500;
+  const Hd=narrow?180:220, l=40, r=14, t=18, b=34, bw=(Wd-l-r)/h.length;
   const ymax=Math.ceil(Math.max(...sh)*100/5)*5/100, y=v=>t+(Hd-t-b)*(1-v/ymax);
-  const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,role:'img','aria-label':'Officer arrival after the sweeping window opens'},$('#lag'));
+  const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,role:'img','aria-label':'Officer arrival after the sweeping window opens'},host);
   for(let v=0; v<=ymax+1e-9; v+=0.05){ S('line',{x1:l,x2:Wd-r,y1:y(v),y2:y(v),class:v===0?'axis':'gridl'},g); T('text',{x:l-8,y:y(v)+4,'text-anchor':'end',class:'tick'},g,Math.round(v*100)+'%'); }
   let cum=0; sh.forEach((v,i)=>{ const p=S('path',{d:barPath(l+i*bw+1.5,y(0),bw-3,y(0)-y(v),4)},g); p.style.fill=i<6?'var(--accent)':'color-mix(in oklab, var(--accent) 40%, var(--surface))';
     cum+=v; const c=cum; const hit=S('rect',{x:l+i*bw,y:t,width:bw,height:Hd-t-b,fill:'transparent'},g);
     hover(hit,()=>`<b>${i<12?`+${i*10}–${i*10+10} min`:'120+ min'}</b><br>${pct(v)} of first tickets · ${pct(c)} by then`); });
   [0,3,6,9,12].forEach(i=>T('text',{x:l+i*bw,y:Hd-b+18,'text-anchor':i===0?'start':'middle',class:'tick'},g,'+'+i*10));
-  T('text',{x:Wd-r,y:Hd-b+18,'text-anchor':'end',class:'tick'},g,'min');
+  if(!narrow) T('text',{x:Wd-r,y:Hd-b+18,'text-anchor':'end',class:'tick'},g,'min');
   const c60=sh.slice(0,6).reduce((a,b)=>a+b,0), c30=sh.slice(0,3).reduce((a,b)=>a+b,0), xm=l+6*bw;
   S('line',{x1:xm,x2:xm,y1:t-4,y2:y(0),stroke:'var(--ink)','stroke-width':1.5,'stroke-dasharray':'3 3'},g);
-  T('text',{x:xm+8,y:t+8,class:'lab strong'},g,`${pct(c60)} have arrived by +60 min`);
+  if(narrow){ const tx=T('text',{x:xm+8,y:t+8,class:'lab strong'},g,''); T('tspan',{x:xm+8},tx,`${pct(c60)} have arrived`); T('tspan',{x:xm+8,dy:15},tx,'by +60 min'); }
+  else T('text',{x:xm+8,y:t+8,class:'lab strong'},g,`${pct(c60)} have arrived by +60 min`);
   $('#lagCap').textContent=`${pct(c30)} of first tickets come in the first half hour and ${pct(c60)} in the first hour. If you're parked during a 2-hour window, the first hour is when the risk is.`;
-})();
+}
+drawLag();
 
 /* ============ meter heatmap ============ */
 (function(){
@@ -650,6 +690,11 @@ $('#sweepIntro').innerHTML=`In March 2021, LA cut street sweeping to every other
   $('#heatToggle').addEventListener('click',e=>{ const b=e.target.closest('.chip'); if(!b) return; $('#heatToggle').querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x===b)); draw(b.dataset.k); });
   draw('term');
 })();
+
+// charts are drawn at their real width, so redraw when the width changes (not on height-only changes like a phone's URL bar)
+let lastW=innerWidth, rt=0;
+addEventListener('resize',()=>{ if(innerWidth===lastW) return; lastW=innerWidth; clearTimeout(rt);
+  rt=setTimeout(()=>{ sizeMap(); if(selected!==null) select(selected,false); drawLag(); },150); });
 
 })();
 </script>
