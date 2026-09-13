@@ -51,6 +51,8 @@
   h1{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:clamp(44px,8vw,66px);
      line-height:.92;margin:20px 0 12px;text-wrap:balance}
   .lede{font-size:18.5px;line-height:1.5;color:var(--ink-2);max-width:62ch;margin:0 0 22px}
+  .note{font-size:14px;line-height:1.5;color:var(--ink-2);max-width:65ch;margin:-6px 0 24px;padding:2px 0 2px 14px;border-left:3px solid var(--sign-red)}
+  .note b{color:var(--ink);font-weight:600}
   h2{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:34px;line-height:1.02;margin:8px 0 14px;text-wrap:balance}
   p{max-width:65ch;margin:0 0 14px}
   .code{display:inline-flex;gap:10px;align-items:center;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -190,6 +192,7 @@
   <div class="mast"><span>Curb Log · Citations</span><span id="mastRange">LADOT tickets</span></div>
   <h1>USC Ticket Clock</h1>
   <p class="lede" id="lede">Click a street on the map to see when parking enforcement comes by: the street-sweeping schedule and when the officer really shows up, how often meter officers walk past, and what else gets ticketed there.</p>
+  <p class="note"><b>Not a guide to parking illegally.</b> This page doesn't suggest parking anywhere, or at any time, the signs don't allow. It shows when and where LADOT has written tickets, so the rules on each block and how they're enforced are easier to understand. Past tickets don't predict the next one: an officer can come by at any time, and a quiet hour in the data can still end in a ticket. Always follow the posted signs.</p>
 
   <div class="explorer" id="explorer">
     <div class="mapcol">
@@ -227,14 +230,14 @@
       </div>
       <div class="vrow">
         <div class="vq">So is there a patrol schedule?</div>
-        <div class="va">Yes. Sweeping enforcement shows up at the same time on the same weeks. Meter patrols come in waves late morning, early afternoon and around 4 pm, with a clear gap at 3 pm.</div>
-        <div class="vn">3 pm<small>the quiet hour</small></div>
+        <div class="va">Yes. Sweeping enforcement shows up at the same time on the same weeks. Meter patrols come in waves late morning, early afternoon and around 4 pm.</div>
+        <div class="vn">3<small>meter waves a day</small></div>
       </div>
     </div>
   </section>
 
   <section id="sweep">
-    <div class="code"><b>80.69BS</b> No park / street clean</div>
+    <div class="code" title="The violation code printed on the ticket"><b>80.69BS</b> Ticket code · No park / street clean</div>
     <h2>Street sweeping runs every other week, almost to the minute</h2>
     <p id="sweepIntro"></p>
     <figure>
@@ -257,9 +260,9 @@
   </section>
 
   <section id="meters">
-    <div class="code"><b>88.13B+</b> Meter expired</div>
+    <div class="code" title="The violation code printed on the ticket"><b>88.13B+</b> Ticket code · Meter expired</div>
     <h2>Meters get three waves a day, plus Saturday mornings</h2>
-    <p>Meters near campus are enforced Monday to Saturday, 8 am to 8 pm. No meter tickets were written here on a Sunday. Across all the metered blocks, tickets come in waves: late morning, early afternoon and around 4 pm. The 3 pm hour is quiet every day. On weekdays, 8–10 am is nearly empty, but on Saturday it is one of the busiest times of the week.</p>
+    <p>Meters near campus are enforced Monday to Saturday, 8 am to 8 pm. No meter tickets were written here on a Sunday. Across all the metered blocks, tickets come in waves: late morning, early afternoon and around 4 pm. The 3 pm hour has fewer, but tickets are still written then. On weekdays, 8–10 am is nearly empty, but on Saturday it is one of the busiest times of the week.</p>
     <figure>
       <div class="chips" id="heatToggle" style="margin-bottom:12px">
         <button class="chip" aria-pressed="true" data-k="term">Class weeks</button>
@@ -283,7 +286,7 @@
       <dt>Blocks and sides</dt>
       <dd>I grouped addresses by hundred block and split each block by odd and even street numbers. Each block's line on the map is fitted through its ticket locations. Where odd and even addresses geocode clearly to opposite sides of that line, the panel names the compass side. Otherwise it only says "even" or "odd".</dd>
       <dt>Sweeping schedule</dt>
-      <dd>For each side, the posted day is the weekday with the most sweeping tickets. The window starts at the hour of the earliest 5% of tickets and is assumed to run 2 hours. The weeks are whichever of 1st &amp; 3rd or 2nd &amp; 4th have more tickets. "Ticketed on X% of sweep days" counts posted days with at least one ticket. It excludes holidays and any day with no sweeping tickets anywhere nearby. Each dot in the arrival strip is one sweep day's first ticket.</dd>
+      <dd>For each side, the posted day is the weekday with the most sweeping tickets. The window starts at the hour of the earliest 5% of tickets and is assumed to run 2 hours. The weeks are whichever of 1st &amp; 3rd or 2nd &amp; 4th have more tickets. "Ticketed on X% of sweep days" counts posted days with at least one ticket. It excludes holidays and any day with no sweeping tickets anywhere nearby. The arrival strip shows each sweep day's first and last ticket.</dd>
       <dt>Meter patrols</dt>
       <dd>Uses USC class weeks only (fall and spring, spring break excluded), Monday to Saturday. A visit is a group of meter tickets on one block with no gap over 10 minutes. An officer who finds every meter paid leaves no ticket, so I adjust for those empty visits. The adjustment assumes the number of expired cars an officer finds on a visit is random (Poisson), so the average number of tickets per visit we can see tells us what share of visits wrote nothing. The dashed line and the "at least" figures skip that adjustment.</dd>
       <dt>Limits</dt>
@@ -295,7 +298,7 @@
         <li><a href="https://data.lacity.org/Transportation/Parking-Citations/4f5p-udkv/about_data">LADOT Parking Citations</a>, data.lacity.org</li>
         <li>Basemap © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</li>
         <li><a href="https://abc7.com/post/street-sweeping-la-streetsla-schedule/10375577/">ABC7</a> and <a href="https://ktla.com/news/local-news/city-of-l-a-to-switch-street-sweeping-to-every-other-week-starting-monday/">KTLA</a> on the switch to sweeping every other week; the city's own lookup is at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a></li>
-        <li><a href="https://citina.github.io/curb-log/">Curb Log</a>, sensor occupancy on Vermont 36xx and W 36th St</li>
+        <li><a href="https://citina.github.io/curb-log/">Curb Log</a>, sensor occupancy on Vermont Ave from W 36th St down to about W 37th St (both sides), and on W 36th St just west of Vermont</li>
       </ul>
     </footer>
   </section>
@@ -352,7 +355,7 @@ const svg=S('svg',{viewBox:`0 0 ${W} ${Hh}`,preserveAspectRatio:'xMidYMid meet',
 wrap.insertBefore(svg, wrap.firstChild);
 S('image',{href:BASEMAP,x:0,y:0,width:W,height:Hh,class:'basemap'},svg);
 const gBase=S('g',{},svg), gCol=S('g',{},svg), gSel=S('g',{},svg), gHit=S('g',{},svg);
-let mode='sweep', selected=null, vb={x:0,y:0,w:W,h:Hh};
+let mode='sweep', selected=null, hlStreet=null, vb={x:0,y:0,w:W,h:Hh};
 const OFF=4.2;
 function segD(b, o){ const [x1,y1,x2,y2]=b.seg, [nx,ny]=b.nrm; return `M${x1+nx*o},${y1+ny*o}L${x2+nx*o},${y2+ny*o}`; }
 const sideOff=(b,side)=>(b.sgn||1)*(side==='even'?1:-1)*OFF;
@@ -394,6 +397,7 @@ function drawColor(){
 }
 function drawSel(){
   gSel.innerHTML=''; if(selected===null) return; const b=BL[selected];
+  if(hlStreet) streets[hlStreet].forEach(j=>S('path',{d:segD(BL[j],0),class:'seg',stroke:'var(--halo)','stroke-width':12,'vector-effect':'non-scaling-stroke'},gSel));
   S('path',{d:segD(b,0),class:'seg',stroke:'var(--halo)','stroke-width':22,'vector-effect':'non-scaling-stroke'},gSel);
   const [x1,y1,x2,y2]=b.seg;
   [[x1,y1],[x2,y2]].forEach(([x,y])=>S('circle',{cx:x,cy:y,r:3.5*vb.w/W+2,fill:'var(--ink)',stroke:'var(--surface)','stroke-width':1.5,'vector-effect':'non-scaling-stroke'},gSel));
@@ -418,7 +422,10 @@ svg.addEventListener('dblclick',e=>{ const p=toImg(e); zoomAt(0.5,p.x,p.y); });
 $('#zin').onclick=()=>zoomAt(0.6,vb.x+vb.w/2,vb.y+vb.h/2);
 $('#zout').onclick=()=>zoomAt(1/0.6,vb.x+vb.w/2,vb.y+vb.h/2);
 $('#zfit').onclick=()=>{ vb={x:0,y:0,w:W,h:Hh}; setVB(); };
-function focusBlock(b){ const [x1,y1,x2,y2]=b.seg; vb.w=W/3.2; vb.h=vb.w*Hh/W; vb.x=(x1+x2)/2-vb.w/2; vb.y=(y1+y2)/2-vb.h/2; setVB(); }
+// keep the zoom level; pan only when the block is outside the current view
+function focusBlock(b){ const [x1,y1,x2,y2]=b.seg, m=vb.w*0.06;
+  if(Math.min(x1,x2)>=vb.x+m && Math.max(x1,x2)<=vb.x+vb.w-m && Math.min(y1,y2)>=vb.y+m && Math.max(y1,y2)<=vb.y+vb.h-m) return;
+  vb.x=(x1+x2)/2-vb.w/2; vb.y=(y1+y2)/2-vb.h/2; setVB(); }
 
 $('#modeChips').addEventListener('click',e=>{ const c=e.target.closest('.chip'); if(!c) return; mode=c.dataset.mode;
   $('#modeChips').querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x===c)); drawColor(); });
@@ -429,10 +436,10 @@ BL.forEach((b,i)=>{ byLabel[name(b).toLowerCase()]=i; (streets[b.street]=streets
 Object.keys(streets).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).forEach(s=>{
   H('option',{value:s},ql); streets[s].sort((a,b)=>BL[a].block-BL[b].block).forEach(i=>H('option',{value:name(BL[i])},ql)); });
 $('#q').addEventListener('change',e=>{ const v=e.target.value.trim().toLowerCase(); if(!v) return;
-  let i=byLabel[v];
-  if(i===undefined){ const st=Object.keys(streets).find(s=>s.toLowerCase()===v) || Object.keys(streets).find(s=>s.toLowerCase().includes(v));
+  let i=byLabel[v], st=null;
+  if(i===undefined){ st=Object.keys(streets).find(s=>s.toLowerCase()===v) || Object.keys(streets).find(s=>s.toLowerCase().includes(v)) || null;
     if(st) i=streets[st].reduce((a,j)=>BL[j].n>BL[a].n?j:a, streets[st][0]); }
-  if(i!==undefined) select(i,true); });
+  if(i!==undefined){ hlStreet=st; select(i,true); } });
 
 /* ============ the panel ============ */
 function sweepGroups(b){ const g={}; b.sweep.forEach(s=>{ const k=`${s.dow}|${s.h}|${s.on}`; (g[k]=g[k]||[]).push(s); }); return Object.values(g); }
@@ -443,9 +450,9 @@ function insights(b){
   const out=[];
   const groups=sweepGroups(b);
   if(groups.length){
-    groups.forEach(g=>{ const s=g[0], arr=g.flatMap(x=>x.arr), t0=s.h*60;
+    groups.forEach(g=>{ const s=g[0], arr=g.flatMap(x=>x.arr), fin=g.flatMap(x=>x.last), t0=s.h*60;
       const who = g.length===2 ? 'both sides' : sideName(b,s.side).toLowerCase();
-      out.push(`<b>Sweeping, ${who}:</b> ${phaseTxt(s.on)} ${DAYLONG[s.dow]} of the month, ${fmtRange(t0,t0+120)}. The officer's first ticket usually lands around <b>${fmtT(t0+median(arr))}</b>${arr.length>=6?` (between ${fmtT(t0+q(arr,.1))} and ${fmtT(t0+q(arr,.9))} on most days)`:''}.`); });
+      out.push(`<b>Sweeping, ${who}:</b> ${phaseTxt(s.on)} ${DAYLONG[s.dow]} of the month, ${fmtRange(t0,t0+120)}. The officer's first ticket usually lands around <b>${fmtT(t0+median(arr))}</b>${arr.length>=6?` (between ${fmtT(t0+q(arr,.1))} and ${fmtT(t0+q(arr,.9))} on most days)`:''} and the last around <b>${fmtT(t0+median(fin))}</b>.`); });
   } else out.push('<b>No sweeping tickets</b> here in two years. Either there\'s no posted sweeping, or nobody parks during it.');
   if(b.meter){ const m=b.meter, avg=Array.from({length:24},(_,j)=>[0,1,2,3,4].reduce((a,d)=>a+m.r[d][j],0)/5);
     const win=i=>avg.slice(i,i+4).reduce((a,v)=>a+v,0); let hi=0, lo=0; for(let i=0;i<=20;i++){ if(win(i)>win(hi)) hi=i; if(win(i)<win(lo)) lo=i; }
@@ -463,19 +470,21 @@ function signHTML(s){ const t0=s.h*60;
     <line x1="11" y1="11" x2="43" y2="43" stroke="var(--sign-red)" stroke-width="5"/></svg>
     <div class="s1">No parking</div><div class="s2">${fmtT(t0).toUpperCase()} TO ${fmtT(t0+120).toUpperCase()}</div><div class="s3">${DAYLONG[s.dow]}</div><div class="s4">Street cleaning</div>
     <div class="s5">${phaseTxt(s.on).toUpperCase()} ONLY*</div></div></div>`; }
-function arrivalStrip(host, s, arr){
-  const Wd=380, Hd=78, l=10, r=10, base=50, t0=s.h*60, x=m=>l+Math.min(m,150)/150*(Wd-l-r);
-  const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,role:'img','aria-label':'First sweeping ticket time on each sweep day'},host);
-  const band=S('rect',{x:x(0),y:6,width:x(120)-x(0),height:base-2,rx:4},g); band.style.fill='var(--well)';
+function arrivalStrip(host, s, arr, fin){
+  const Wd=380, Hd=98, l=10, r=10, base=72, t0=s.h*60, x=m=>l+Math.min(m,150)/150*(Wd-l-r);
+  const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,role:'img','aria-label':'First and last sweeping ticket times on each sweep day'},host);
+  const band=S('rect',{x:x(0),y:30,width:x(120)-x(0),height:base-28,rx:4},g); band.style.fill='var(--well)';
   S('line',{x1:l,x2:Wd-r,y1:base+4,y2:base+4,class:'axis'},g);
   [0,30,60,90,120].forEach(m=>{ S('line',{x1:x(m),x2:x(m),y1:base+4,y2:base+8,class:'axis'},g); T('text',{x:x(m),y:base+20,'text-anchor':'middle',class:'tick'},g,fmtT(t0+m).replace(' am','a').replace(' pm','p')); });
   const stack={};
-  arr.forEach(m=>{ const k=Math.floor(Math.min(m,150)/4); const n=stack[k]=(stack[k]||0)+1;
-    const c=S('circle',{cx:x(m),cy:base-3-((n-1)%6)*7,r:3.3},g); c.style.fill='var(--accent)'; });
-  const md=median(arr); S('line',{x1:x(md),x2:x(md),y1:4,y2:base+4,stroke:'var(--ink)','stroke-width':1.5},g);
-  T('text',{x:Math.min(x(md)+5,Wd-120),y:13,class:'lab strong'},g,`usually ${fmtT(t0+md)}`);
+  [[arr,'var(--accent)'],[fin,'var(--s2)']].forEach(([a,col])=>a.forEach(m=>{ const k=Math.floor(Math.min(m,150)/4); const n=stack[k]=(stack[k]||0)+1;
+    const c=S('circle',{cx:x(m),cy:base-3-((n-1)%6)*7,r:3.3},g); c.style.fill=col; }));
+  [[arr,'first',12,''],[fin,'last',26,'3 2']].forEach(([a,w,ty,dash])=>{ const md=median(a);
+    S('line',{x1:x(md),x2:x(md),y1:ty+4,y2:base+4,stroke:'var(--ink)','stroke-width':1.5,'stroke-dasharray':dash},g);
+    T('text',{x:Math.min(x(md)+5,Wd-120),y:ty,class:'lab strong'},g,`${w} usually ${fmtT(t0+md)}`); });
   const hit=S('rect',{x:0,y:0,width:Wd,height:Hd,fill:'transparent'},g);
-  hover(hit,()=>`${arr.length} sweep days with tickets · each dot is that day's first ticket<br>Shaded: the posted window`);
+  hover(hit,()=>`${arr.length} sweep days with tickets · each day has one dot for its first ticket and one for its last<br>Shaded: the posted window`);
+  H('ul',{className:'legend',innerHTML:'<li><span class="sw" style="background:var(--accent);border-radius:50%"></span>first ticket</li><li><span class="sw" style="background:var(--s2);border-radius:50%"></span>last ticket</li><li><span class="sw" style="background:var(--well)"></span>posted window</li>'},host);
 }
 function meterCard(host, b){
   const m=b.meter, c=m.c;
@@ -524,7 +533,7 @@ function meterCard(host, b){
   H('ul',{className:'legend',innerHTML:'<li><span class="sw line"></span>estimate</li><li><span class="sw dash"></span>at least (visits that wrote a ticket)</li>'},host);
 }
 function select(i, focus){
-  selected=i; const b=BL[i], p=$('#panel'); p.innerHTML='';
+  selected=i; const b=BL[i], p=$('#panel'); p.innerHTML=''; if(hlStreet&&b.street!==hlStreet) hlStreet=null;
   const busiest=b.dow.indexOf(Math.max(...b.dow));
   H('div',{className:'p-eyebrow',textContent:'Selected block'},p);
   H('div',{className:'p-title',textContent:name(b)},p);
@@ -536,16 +545,17 @@ function select(i, focus){
   // sweeping
   const sc=H('div',{className:'card'},p); H('h4',{textContent:'Street sweeping'},sc);
   if(!b.sweep.length) H('div',{className:'empty',textContent:'No sweeping tickets here since '+fmtDate(D.start,true).replace(/^\w+, /,'')+'.'},sc);
-  sweepGroups(b).forEach(g=>{ const s=g[0], arr=g.flatMap(x=>x.arr), rate=g.reduce((a,x)=>a+x.rate*x.days,0)/g.reduce((a,x)=>a+x.days,0), n=g.reduce((a,x)=>a+x.n,0);
+  sweepGroups(b).forEach(g=>{ const s=g[0], arr=g.flatMap(x=>x.arr), fin=g.flatMap(x=>x.last), rate=g.reduce((a,x)=>a+x.rate*x.days,0)/g.reduce((a,x)=>a+x.days,0), n=g.reduce((a,x)=>a+x.n,0);
     const box=H('div',{className:'side'},sc);
     const head=H('div',{className:'side-head'},box);
     H('div',{innerHTML:signHTML(s)},head);
     const txt=H('div',{},head);
     H('div',{className:'side-name',textContent: g.length===2?'Both sides':sideName(b,s.side)+(b.even?` (${s.side} numbers)`:'')},txt);
     H('div',{className:'side-txt',innerHTML:`Ticketed on <b>${pct(rate)}</b> of ${g[0].days} sweep days, about ${(n/Math.max(1,arr.length/g.length)).toFixed(0)} tickets each time.<br>Next: <b>${nextDays(s,2).join(' · ')}</b>`},txt);
-    H('div',{className:'fig-sub',style:'margin:12px 0 2px',textContent:'When the officer\'s first ticket lands (one dot per sweep day)'},box);
-    arrivalStrip(box, s, arr);
+    H('div',{className:'fig-sub',style:'margin:12px 0 2px',textContent:'When the officer\'s first and last tickets land (two dots per sweep day)'},box);
+    arrivalStrip(box, s, arr, fin);
     if(n<20) H('div',{className:'empty',style:'font-size:12.5px',textContent:`Only ${n} tickets on this side, so treat the schedule as rough.`},box); });
+  if(sweepGroups(b).some(g=>g.length===1)) H('div',{className:'empty',style:'font-size:12.5px;margin-top:12px',textContent:'Odd and even mean house numbers: one side of the street has the odd addresses, the other side the even ones, and each side can have its own sweeping day.'},sc);
   if(b.sweep.length) H('div',{className:'empty',style:'font-size:12px;margin-top:10px',innerHTML:'*Worked out from where and when tickets were written. Always check the posted sign or <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.'},sc);
   if(b.meter) meterCard(H('div',{className:'card'},p), b);
   // everything ticketed here
@@ -570,8 +580,8 @@ select(start,false);
   const v=BL.find(b=>b.block===3600&&b.street==='Vermont Ave');
   let txt=`On a typical metered block near campus, an unpaid hour on a Thursday carries about a ${pct(typ)} chance of a ticket.`;
   if(v&&v.meter){ const all=allDay(v.meter,3,v.meter.c); let pk=0, pv=0; for(let i=0;i<23;i++){ const p=stayP(v.meter,3,i,2,v.meter.c); if(p>pv){pv=p;pk=i;} }
-    txt+=` On Vermont 36xx it's ${pct(pv)} if you arrive at ${fmtT(480+pk*30)}, and ${pct(all)} if you leave the car unpaid all day.`;
-    $('#vMeterN').innerHTML=`${pct(all)}<small>all day, Vermont 36xx</small>`; }
+    txt+=` On Vermont Ave from W 36th St down to about W 37th St (both sides), it's ${pct(pv)} if you arrive at ${fmtT(480+pk*30)}, and ${pct(all)} if you leave the car unpaid all day.`;
+    $('#vMeterN').innerHTML=`${pct(all)}<small>all day on Vermont Ave,<br>W 36th to ~37th St</small>`; }
   $('#vMeter').textContent=txt+` The ticket is $${D.fines.meter}.`;
   const sides=BL.flatMap(b=>b.sweep).filter(s=>s.n>=20), busy=sides.filter(s=>s.tpd>=4);
   $('#vSweep').textContent=`Each street is swept on only two posted weeks a month, and ${pct(D.phase)} of sweeping tickets fall on those weeks. On a sweep day, the busiest student blocks are ticketed ${pct(median(busy.map(s=>s.rate)))} of the time, and a typical block ${pct(median(sides.map(s=>s.rate)))}. The officer usually arrives in the first hour of the window. The ticket is $${D.fines.sweep}.`;

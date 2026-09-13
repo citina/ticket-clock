@@ -16,8 +16,17 @@ block and it shows:
 Below the map: campus-wide evidence (every-other-week sweeping, officer arrival
 times, meter waves).
 
-A companion to [Curb Log](https://citina.github.io/curb-log/), which measures
-free spaces on Vermont 36xx with LADOT's sensors.
+A companion to [Curb Log](https://citina.github.io/curb-log/), which uses
+LADOT's sensors to measure free spaces on Vermont Ave from W 36th St down to about
+W 37th St (both sides), and on W 36th St just west of Vermont.
+
+## Disclaimer
+
+This project is not meant to encourage anyone to break parking rules or park
+illegally. It shows when and where LADOT has written tickets, so the rules on each
+block, and how they're enforced, are easier to understand. Past tickets don't
+predict the next one: an officer can come by at any time, and a quiet hour or week
+in the data can still end in a ticket. Always follow the posted signs.
 
 ## Run it
 

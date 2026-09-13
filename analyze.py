@@ -150,9 +150,10 @@ for (st, bl, side), x in sc.groupby(["street", "block", "side"]):
     on_days = cand[np.isin((cand.day - 1) // 7 + 1, [on, on + 2])]
     tdays = set(x.date.unique())
     first = (x.groupby("date").mins.min() - h * 60).clip(0, 150).astype(int)
+    last = (x.groupby("date").mins.max() - h * 60).clip(0, 150).astype(int)
     blocks[index[(st, bl)]]["sweep"].append(dict(
         side=side, dow=dow, h=h, on=on, rate=round(float(pd.Index(on_days).isin(tdays).mean()), 2), days=len(on_days),
-        arr=sorted(first.tolist()), n=len(x), tpd=round(len(x) / max(1, len(tdays)), 1)))
+        arr=sorted(first.tolist()), last=sorted(last.tolist()), n=len(x), tpd=round(len(x) / max(1, len(tdays)), 1)))
 for b in blocks:
     b["sweep"].sort(key=lambda s: s["side"])
 print("sweeping tickets on the posted weeks:", round(phase_hits / phase_all, 3))
