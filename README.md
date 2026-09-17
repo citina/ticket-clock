@@ -31,12 +31,12 @@ data can still end in a ticket.
 **Street sweeping signs.** LA has swept each street every other week since March 2021
 (the 1st & 3rd or the 2nd & 4th time its weekday comes up in a month), but many signs
 were never updated and still show only the day, like "No parking Thursday". LADOT says
-parking is legal on a street's off weeks and that it doesn't ticket then
-([Larchmont Chronicle, March 2025](https://larchmontchronicle.com/to-adhere-to-parking-signs-or-not-to-adhere/)).
-Some tickets are still written on off weeks
-([L.A. Material, July 2026](https://lamaterial.com/p/la-wrongful-street-sweeping-tickets)),
-and LADOT says it dismisses those. The days, weeks and times this project shows come
-from StreetsLA's list of posted routes (about 98% of sweeping tickets near campus fall
+parking is legal on a street's off weeks
+([Larchmont Chronicle, March 2025](https://larchmontchronicle.com/to-adhere-to-parking-signs-or-not-to-adhere/)),
+and when the change began it said officers would enforce street sweeping only on days
+that sweeping happens ([LADOT, March 2021](https://ladot.lacity.gov/dotnews/weekly-update-march-4-2021)).
+The days, weeks and times this project shows come from
+[StreetsLA's list](https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc) of posted routes (about 98% of sweeping tickets near campus fall
 on those weeks); only which side of a street gets which day is worked out from the
 tickets. To check your own street, look it up at
 [streets.lacity.gov](https://streets.lacity.gov/services/street-sweeping).

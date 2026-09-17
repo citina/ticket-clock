@@ -61,6 +61,7 @@
   .note b{color:var(--ink-2);font-weight:500}
   .note p{margin:0 0 6px;max-width:none}
   .note a{color:inherit}
+  .note.end{margin-top:40px}
   h2{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:34px;line-height:1.02;margin:8px 0 14px;text-wrap:balance}
   p{max-width:65ch;margin:0 0 14px}
   .code{display:inline-flex;gap:10px;align-items:center;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -123,7 +124,7 @@
   .p-nav .chip{flex:none}
   .insights{list-style:none;padding:12px 14px;margin:14px 0 2px;display:grid;gap:9px;background:var(--well);border-radius:10px}
   .insights li{padding-left:15px;position:relative;font-size:14.5px;line-height:1.45}
-  .insights li::before{content:"";position:absolute;left:0;top:.52em;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .insights li::before{content:"";position:absolute;left:0;top:.52em;width:6px;height:6px;border-radius:50%;background:var(--ink)}
   .card{border-top:1px solid var(--rule);padding:16px 0 14px;margin-top:14px}
   .card h4{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:11px;font-weight:500;letter-spacing:.1em;
            text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
@@ -212,8 +213,7 @@
   <h1>USC Ticket Clock</h1>
   <p class="lede" id="lede">Click a street on the map to see when parking enforcement comes by: the street-sweeping schedule and when the officer really shows up, how often meter officers walk past, and what else gets ticketed there.</p>
   <div class="note">
-    <p><b>Not a guide to parking illegally.</b> This page doesn't suggest parking anywhere, or at any time, the rules don't allow. It shows when and where LADOT has written tickets, so the rules on each block and how they're enforced are easier to understand. Past tickets don't predict the next one: an officer can come by at any time, and a quiet hour in the data can still end in a ticket.</p>
-    <p><b>Street sweeping signs.</b> Since March 2021, LA sweeps each street every other week (the 1st &amp; 3rd or the 2nd &amp; 4th time its weekday comes up in a month), but many signs were never updated and still show only the day, like "No parking Thursday". LADOT says parking is legal on a street's off weeks and that it doesn't ticket then; a few tickets still get written, and LADOT says it dismisses those. The weeks on this page are from StreetsLA's list of posted routes, and <span id="notePhase">98%</span> of sweeping tickets near campus fell on them. For the official schedule, look up your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.</p>
+    <p><b>Street sweeping signs.</b> Since March 2021, LA sweeps each street every other week (the 1st &amp; 3rd or the 2nd &amp; 4th time its weekday comes up in a month), but many signs were never updated and still show only the day, like "No parking Thursday". LADOT says parking is legal on a street's off weeks, and when the change began it said officers would enforce street sweeping only on days that sweeping happens (<a href="https://ladot.lacity.gov/dotnews/weekly-update-march-4-2021">LADOT, March 2021</a>). The weeks on this page are from <a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">StreetsLA's list</a> of posted routes, and <span id="notePhase">98%</span> of sweeping tickets near campus fell on them. For the official schedule, look up your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.</p>
   </div>
   </div>
 
@@ -322,11 +322,14 @@
         <li>Basemap © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</li>
         <li><a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">Posted Street Sweeping Routes</a>, StreetsLA (as of July 2026): each route's area, days, weeks and posted time</li>
         <li><a href="https://abc7.com/post/street-sweeping-la-streetsla-schedule/10375577/">ABC7</a> and <a href="https://ktla.com/news/local-news/city-of-l-a-to-switch-street-sweeping-to-every-other-week-starting-monday/">KTLA</a> on the switch to sweeping every other week; the city's own lookup is at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a></li>
-        <li><a href="https://larchmontchronicle.com/to-adhere-to-parking-signs-or-not-to-adhere/">Larchmont Chronicle</a> on LADOT's policy for sweeping signs that still show every week, and <a href="https://lamaterial.com/p/la-wrongful-street-sweeping-tickets">L.A. Material</a> on sweeping tickets written on off weeks</li>
+        <li><a href="https://ladot.lacity.gov/dotnews/weekly-update-march-4-2021">LADOT's weekly update of March 4, 2021</a> on enforcing street sweeping only on the days streets are swept, and <a href="https://larchmontchronicle.com/to-adhere-to-parking-signs-or-not-to-adhere/">Larchmont Chronicle</a> on LADOT's policy for sweeping signs that still show every week</li>
         <li><a href="https://citina.github.io/curb-log/">Curb Log</a>, sensor occupancy on Vermont Ave from W 36th St down to about W 37th St (both sides), and on W 36th St just west of Vermont</li>
       </ul>
     </footer>
   </section>
+  <div class="note end">
+    <p><b>Not a guide to parking illegally.</b> This page doesn't suggest parking anywhere, or at any time, the rules don't allow. It shows when and where LADOT has written tickets, so the rules on each block and how they're enforced are easier to understand. Past tickets don't predict the next one: an officer can come by at any time, and a quiet hour in the data can still end in a ticket.</p>
+  </div>
 </main>
 <div id="tip" hidden></div>
 
@@ -545,8 +548,8 @@ function arrivalStrip(host, s, arr, fin){
     L.a.forEach(m=>{ const k=col(m), c=cnt[k]=(cnt[k]||0)+1;
       S('circle',{cx:l+k*bw+bw/2,cy:L.base-3.5-(c-1)*L.step,r:3.2},g).style.fill=L.c; });
     S('line',{x1:x(md),x2:x(md),y1:L.y0-3,y2:L.base,stroke:'var(--ink)','stroke-width':1.5,'stroke-dasharray':L.dash},g);
-    S('circle',{cx:l+4,cy:L.y0-9,r:4},g).style.fill=L.c;
-    const tt=S('text',{x:l+13,y:L.y0-5,class:'lab'},g); T('tspan',{},tt,`${L.nm}: usually `); T('tspan',{class:'lab strong'},tt,fmtT(t0+md)); });
+    S('circle',{cx:x(0)+4,cy:L.y0-9,r:4},g).style.fill=L.c;
+    const tt=S('text',{x:x(0)+13,y:L.y0-5,class:'lab'},g); T('tspan',{},tt,`${L.nm}: usually `); T('tspan',{class:'lab strong'},tt,fmtT(t0+md)); });
   S('line',{x1:l,x2:Wd-r,y1:axis,y2:axis,class:'axis'},g);
   const every=x(30)-x(0)>=46?30:60;  // half-hour labels only when they have room
   for(let m=0;m<=span;m+=30){ S('line',{x1:x(m),x2:x(m),y1:axis,y2:axis+4,class:'axis'},g); if(m%every===0) T('text',{x:x(m),y:axis+16,'text-anchor':'middle',class:'tick'},g,fmtT(t0+m).replace(' am','a').replace(' pm','p')); }
@@ -626,12 +629,12 @@ function select(i, focus){
     H('div',{innerHTML:signHTML(s)},head);
     const txt=H('div',{},head);
     H('div',{className:'side-name',textContent: g.length===2?'Both sides':sideName(b,s.side)+(b.even?` (${s.side} numbers)`:'')},txt);
-    H('div',{className:'side-txt',innerHTML:`Ticketed on <b>${pct(rate)}</b> of ${g[0].days} sweep days, about ${(n/Math.max(1,arr.length/g.length)).toFixed(0)} tickets each time.<br>Next: <b>${nextDays(s,2).join(' · ')}</b>`},txt);
+    H('div',{className:'side-txt',innerHTML:`Ticketed on <b>${pct(rate)}</b> of sweep days in the past two years (${g[0].days} days), about ${(n/Math.max(1,arr.length/g.length)).toFixed(0)} tickets each time.<br>Next: <b>${nextDays(s,2).join(' · ')}</b>`},txt);
     H('div',{className:'fig-sub',style:'margin:14px 0 8px',textContent:'When the first and last tickets land on each sweep day'},box);
     arrivalStrip(box, s, arr, fin);
     if(n<20) H('div',{className:'empty',style:'font-size:12.5px',textContent:`Only ${n} tickets on this side, so treat the schedule as rough.`},box); });
   if(sweepGroups(b).some(g=>g.length===1)) H('div',{className:'empty',style:'font-size:12.5px;margin-top:12px',textContent:'Odd and even mean house numbers: one side of the street has the odd addresses, the other side the even ones, and each side can have its own sweeping day.'},sc);
-  if(b.sweep.length) H('div',{className:'empty',style:'font-size:12px;margin-top:10px',innerHTML:'*Real signs often show only the day. The day, weeks and time here are from StreetsLA\'s list of posted routes; which side of the street gets which day is worked out from the tickets. Look up your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.'},sc);
+  if(b.sweep.length) H('div',{className:'empty',style:'font-size:12px;margin-top:10px',innerHTML:'*Real signs often show only the day. The day, weeks and time here are from <a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">StreetsLA\'s list</a> of posted routes; which side of the street gets which day is worked out from the tickets. Look up your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.'},sc);
   if(b.meter) meterCard(H('div',{className:'card'},p), b);
   // everything ticketed here
   const kc=H('div',{className:'card'},p); H('h4',{textContent:'What gets ticketed here'},kc);
