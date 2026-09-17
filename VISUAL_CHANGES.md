@@ -93,14 +93,19 @@ Commit: `97ae462` · Applies: **yes**
 Commit: `440d01e` · Applies: **yes**
 
 - Citina didn't like text boxes of different widths (the disclaimer at the end was narrower than the
-  Sources list above it, which ran the full page width). All text now shares one width:
-  `--measure:640px` on `:root` (a layout value, so it isn't repeated in the dark-mode blocks).
-- It's used by `.lede`, `p`, `figcaption`, `.note`, `.aside`, `footer ul`, and the whole `.method`
-  grid (label column plus text column; `.method dd` lost its own `max-width`). At 1440px every text
-  block runs from the same left edge to the same right edge. Charts, the map and the summary cards
-  keep the full width.
+  Sources list above it). Blocks of text now share one width, `--measure` on `:root` (a layout value,
+  so it isn't repeated in the dark-mode blocks). It started at 640px (`440d01e`); she found that
+  narrow on a wide screen, tried 790px (the map column's width), and settled on **760px** (commit: not
+  saved yet).
+- `--measure` is used by `.lede`, `p`, `figcaption`, `.note`, `.aside` and the whole `.method` grid
+  (label column plus text column; `.method dd` lost its own `max-width`). Charts, the map and the
+  summary cards keep the full width.
+- At the end of the page, the Sources list (`footer ul`) and the closing "Not a guide to parking
+  illegally" note (`.note.end{max-width:none}`) use the full page width (1240px), so they grow with a
+  wide window and match each other. Same commit as the 760px change.
 - LA Street Rules has the same rules with the old mixed widths (`.lede` 62ch, `.note` 75ch, `p` 65ch,
-  `.method dd` 62ch, `.find-msg` 70ch, no limit on `footer ul`). Give them the same `--measure`.
+  `.method dd` 62ch, `.find-msg` 70ch, no limit on `footer ul`). Give them the same `--measure`, and
+  let its Sources list and closing disclaimer run the full width.
 
 ### 7. "Street sweeping signs" moved from the top of the page to the sweeping section
 

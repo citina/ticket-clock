@@ -10,7 +10,7 @@
     --plane:#f2f2ef; --surface:#fcfcfb; --well:#e8e8e2;
     --ink:#14140f; --ink-2:#56554f; --ink-3:#8a8880;
     --rule:#e1e0d9; --edge:#c9c8c0;
-    --measure:640px;  /* one width for every block of text, so their right edges line up */
+    --measure:760px;  /* one width for blocks of text, so their right edges line up; sources and the closing note use the full width */
     --accent:#2a78d6; --accent-ink:#1c5cab;
     --panel:#1a1a19; --panel-ink:#fcfcfb; --panel-ink-2:#b6b5ab; --panel-rule:rgba(255,255,255,.12);
     --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#4a3aa7;
@@ -59,7 +59,7 @@
   .note b{color:var(--ink-2);font-weight:500}
   .note p{margin:0 0 6px;max-width:none}
   .note a{color:inherit}
-  .note.end{margin-top:40px}
+  .note.end{margin-top:40px;max-width:none}
   h2{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:34px;line-height:1.02;margin:8px 0 14px;text-wrap:balance}
   p{max-width:var(--measure);margin:0 0 14px}
   .code{display:inline-flex;gap:10px;align-items:center;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -199,7 +199,7 @@
   .method dd{margin:0;color:var(--ink-2)}
   @media (max-width:560px){ .method{grid-template-columns:1fr;gap:4px} .method dd{margin-bottom:12px} }
   footer{margin-top:44px;font-size:13px;color:var(--ink-3)}
-  footer ul{padding-left:18px;margin:6px 0 0;max-width:var(--measure)}
+  footer ul{padding-left:18px;margin:6px 0 0}
   #tip{position:fixed;z-index:20;pointer-events:none;background:var(--panel);color:var(--panel-ink);font-size:12.5px;line-height:1.45;
        padding:8px 10px;border-radius:6px;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
   #tip b{font-weight:600}
