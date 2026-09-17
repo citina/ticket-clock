@@ -124,3 +124,21 @@ Commit: `440d01e` · Applies: **maybe** (ask Citina where it goes)
 - LA Street Rules uses the same top-right `.intro .note` layout but has no sweeping section to move the
   note into, so ask Citina where it should go.
 
+### 8. A one-line pitch under the intro: signs often leave out the week
+
+Commit: not saved yet · Applies: **yes, with changed wording**
+
+- Citina wanted the top of the page to say why the page is useful: the sweeping sign on the street
+  often doesn't show the week, and this page does (the intro already mentions the meter-patrol info).
+  Under the lede there is now a smaller paragraph, `.lede-note` (16px, `--ink-2`, bold lead-in in
+  `--ink`, 12px above, same `--measure` width):
+  `<b>Signs often leave out the week.</b> LA sweeps each street every other week, but many sweeping
+  signs still show only the day, like "No parking Thursday". This page shows which weeks each street
+  is swept (1st &amp; 3rd or 2nd &amp; 4th) and the next sweep dates.`
+  The week pairs use `&nbsp;` so "2nd & 4th" never splits across lines.
+- The longer "Street sweeping signs" side note in the sweeping section stays; this is the short
+  version at the top.
+- On LA Street Rules: some routes city-wide are swept every week (its sign shows "EVERY WEEK"), so
+  "LA sweeps each street every other week" isn't true there. Say "most streets" or similar, and check
+  the wording with Citina.
+
