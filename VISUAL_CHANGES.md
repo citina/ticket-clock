@@ -95,8 +95,7 @@ Commit: `440d01e` · Applies: **yes**
 - Citina didn't like text boxes of different widths (the disclaimer at the end was narrower than the
   Sources list above it). Blocks of text now share one width, `--measure` on `:root` (a layout value,
   so it isn't repeated in the dark-mode blocks). It started at 640px (`440d01e`); she found that
-  narrow on a wide screen, tried 790px (the map column's width), and settled on **760px** (commit: not
-  saved yet).
+  narrow on a wide screen, tried 790px (the map column's width), and settled on **760px** (`44fe096`).
 - `--measure` is used by `.lede`, `p`, `figcaption`, `.note`, `.aside` and the whole `.method` grid
   (label column plus text column; `.method dd` lost its own `max-width`). Charts, the map and the
   summary cards keep the full width.
