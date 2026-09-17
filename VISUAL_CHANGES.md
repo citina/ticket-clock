@@ -33,7 +33,7 @@ and 5 below replace that, so update HANDOFF.md to match when you merge.
 
 ### 1. "Street sweeping signs": LADOT's own source, no "tickets still get written"
 
-Commit: not saved yet · Applies: **yes**
+Commit: `97ae462` · Applies: **yes**
 
 - Removed "a few tickets still get written, and LADOT says it dismisses those." Citina doesn't want
   the page to say that.
@@ -53,7 +53,7 @@ Commit: not saved yet · Applies: **yes**
 
 ### 2. Bullet dots under "Selected block" are black
 
-Commit: not saved yet · Applies: **yes**, to any colored bullet dots in its block panel
+Commit: `97ae462` · Applies: **yes**, to any colored bullet dots in its block panel
 
 - `.insights li::before` background went from `var(--accent)` (blue) to `var(--ink)`, so the dots
   are black in light mode and white in dark mode.
@@ -61,7 +61,7 @@ Commit: not saved yet · Applies: **yes**, to any colored bullet dots in its blo
 
 ### 3. Say where the number of sweep days comes from
 
-Commit: not saved yet · Applies: **yes**
+Commit: `97ae462` · Applies: **yes**
 
 - "Ticketed on 66% of 44 sweep days" was unclear about where 44 came from. It now reads "Ticketed on
   66% of sweep days in the past two years (44 days)".
@@ -70,7 +70,7 @@ Commit: not saved yet · Applies: **yes**
 
 ### 4. Arrival strip labels line up with the grey window
 
-Commit: not saved yet · Applies: **USC only for now**
+Commit: `97ae462` · Applies: **USC only for now**
 
 - In `arrivalStrip`, the colored dot and its label start at the left edge of the grey posted-window
   band (`x(0)`) instead of the chart's left edge.
@@ -80,7 +80,7 @@ Commit: not saved yet · Applies: **USC only for now**
 
 ### 5. "Not a guide to parking illegally" moved to the end of the page
 
-Commit: not saved yet · Applies: **yes**
+Commit: `97ae462` · Applies: **yes**
 
 - The paragraph is unchanged but now sits in `<div class="note end">`, the last thing in `<main>`,
   after the method section and its sources (`.note.end{margin-top:40px}`, same small grey style).
