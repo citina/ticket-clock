@@ -151,6 +151,7 @@
   .krow .bar{height:6px;border-radius:3px;background:var(--accent);margin-top:7px}
   .krow .n{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-2);text-align:right}
   .kdet{padding:2px 8px 12px}
+  .knote{font-size:13.5px;line-height:1.5;margin-bottom:3px}
   .kcode{font-size:13px;color:var(--ink-2);line-height:1.5}
   .kcode b{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:12px;font-weight:600;color:var(--ink);
            border:1px solid var(--edge);border-radius:3px;padding:0 5px;white-space:nowrap}
@@ -221,7 +222,7 @@
       <dt>Meter patrols</dt>
       <dd>Monday to Saturday, 8 am to 8 pm, holidays left out. A visit is a group of meter tickets on one block with no gap over 10 minutes. An officer who finds every meter paid leaves no ticket, so the visit rate is adjusted for those empty visits, assuming the number of expired cars an officer finds on a visit is random (Poisson). A block needs at least 20 meter tickets. Which blocks have meters comes from LADOT's meter inventory (dataset s49e-q6j2).</dd>
       <dt>Ticket kinds</dt>
-      <dd>LADOT's handheld devices write the same rule in different ways, like "STANDNG IN ALLEY" or "8069B NO PARK ST CLN", so tickets are grouped by violation code under one plain name. The no-stopping codes, including the rush-hour ones, all become "No stopping", and the usual hours show when they're written. Fines are the median of the tickets that list one. Tapping a kind shows the code LADOT prints on the ticket, its own wording, and how many codes share the name. The dot charts count tickets by the half hour written on them: the block's most ticketed kind, and any kind with at least 50 tickets there.</dd>
+      <dd>LADOT's handheld devices write the same rule in different ways, like "STANDNG IN ALLEY" or "8069B NO PARK ST CLN", so tickets are grouped by violation code under one plain name. The no-stopping codes, including the rush-hour ones, all become "No stopping", and the usual hours show when they're written. Fines are the median of the tickets that list one. Tapping a kind shows what the rule is, and every code LADOT writes it under with LADOT's own wording. The dot charts count tickets by the half hour written on them: the block's most ticketed kind, and any kind with at least 50 tickets there.</dd>
       <dt>Limits</dt>
       <dd>A ticket only appears when someone broke the rule, so quiet blocks look less enforced than they are, and a rule nobody was ticketed for doesn't show up at all. Addresses that couldn't be matched are left out. Routes and staffing change, and none of this is a promise about next week. Always read the posted signs, and for sweeping, the city's schedule.</dd>
     </dl>
@@ -493,16 +494,21 @@ function renderCard(b){
     const r=H('div',{},row); H('div',{className:'n',textContent:t[1].toLocaleString()},r);
     const bar=H('div',{className:'bar'},r); bar.style.width=Math.max(4,100*t[1]/kmax)+'%';
     const det=H('div',{className:'kdet'},kg); det.hidden=true;
-    const codeLine=!src?'':src[0]==='?'?'No ticket code or wording was recorded for these.'
-      :`LADOT's ticket code <b>${esc(src[0])}</b>, written as “${esc(src[1])}”${src[2]>1?`, one of ${src[2]} codes under this name`:''}.`;
+    const note=(META.kind_note||[])[t[0]]||'';
+    const codeLine=!src?'':src[0][0]==='?'?(note?'':'LADOT recorded no code or wording for these.')
+      :`LADOT's ticket ${src[2]>1?'codes':'code'} ${src[0].map(c=>`<b>${esc(c)}</b>`).join(', ')}`
+       +`${src[2]>src[0].length?` and ${src[2]-src[0].length} more`:''}, written as `
+       +`${src[1].map(x=>`“${esc(x)}”`).join(', ')}${src[3]>src[1].length?` and ${src[3]-src[1].length} more`:''}.`;
     row.setAttribute('aria-expanded','false');
     row.onclick=()=>{ const open=row.getAttribute('aria-expanded')==='true';
       row.setAttribute('aria-expanded',String(!open)); det.hidden=open;
-      if(!open&&!det.childElementCount){ if(codeLine) H('div',{className:'kcode',innerHTML:codeLine},det);
+      if(!open&&!det.childElementCount){ if(note) H('div',{className:'knote',textContent:note},det);
+        if(codeLine) H('div',{className:'kcode',innerHTML:codeLine},det);
         if(t[0]===lead&&cur.has(lead)) H('div',{className:'evid',style:'margin-top:6px',textContent:'Its times of day are in the chart above.'},det);
         else if(cur.has(t[0])) timeDots(det,b,t[0],cur.get(t[0]),false);
         else H('div',{className:'evid',style:'margin-top:6px',textContent:`Too few tickets here for its own chart (under ${META.chart_min||50}).`},det); } };
-    if(src) row.addEventListener('pointermove',e=>{ if(e.pointerType==='mouse') showTip(e,`<b>${esc(kind)}</b><br>Ticket code ${esc(src[0])} · ${esc(src[1])}`); });
+    if(src) row.addEventListener('pointermove',e=>{ if(e.pointerType==='mouse')
+      showTip(e,`<b>${esc(kind)}</b>${note?'<br>'+esc(note):''}<br>Ticket code ${esc(src[0][0])}${src[2]>1?` and ${src[2]-1} more`:''}`); });
     row.addEventListener('pointerleave',hideTip);
     if(i>=FEW) extra.push(row,det); });
   if(extra.length){ const more=H('button',{className:'chip sm',style:'margin-top:12px'},kc); let open=false;

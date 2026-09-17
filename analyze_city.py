@@ -287,12 +287,17 @@ for b, kind, n, fine, wk, dow in top[["b", "kind", "n", "fine", "wk", "dow"]].it
     tops[b].append([kind_ix[kind], int(n), int(fine) if fine == fine else 0, int(dow),
                     usual_hours(np.repeat(hc.index.values * 60, hc.values)), round(float(wk), 2)])
 
-# LADOT's own code and wording for each kind, for the card: the commonest pair, and how many codes it covers
+# For the card: every code LADOT writes a kind under, its own wordings, and a plain line about the rule
 src = (d.groupby(["kind", d.violation_code.fillna("?"), viol]).size().reset_index(name="c")
        .sort_values("c", ascending=False))
-codes = src.groupby("kind").violation_code.nunique()
-src = src.drop_duplicates("kind").set_index("kind")
-kind_src = [[src.violation_code[k], src.violation_description[k], int(codes[k])] for k in kinds]
+CODE_CAP, DESC_CAP = 6, 3   # the commonest few; the rest are counted, not listed
+kind_src = []
+for k in kinds:
+    x = src[src.kind == k]
+    cs = list(dict.fromkeys(x.violation_code))
+    ds = list(dict.fromkeys(x.violation_description))
+    kind_src.append([cs[:CODE_CAP], ds[:DESC_CAP], len(cs), len(ds)])
+kind_note = [KIND_NOTES.get(k, "") for k in kinds]
 
 # each kind's tickets by the half hour they were written (midnight = 0), for the dot charts: the block's
 # most ticketed kind, plus any kind with KIND_MIN tickets there
@@ -493,7 +498,7 @@ for s_ix, h, key, suffix in index:
     streets[s_ix].append([h, cell_ix[key], suffix] if suffix else [h, cell_ix[key]])
 meta = dict(start=str(START.date()), end=str(END.date()), total=total, matched=len(d), phase=round(phase_hits / phase_all, 3),
             cell=CELL, sweep_min=SWEEP_MIN, routes_around=True, chart_min=KIND_MIN,
-            names=names, kinds=kinds, kind_src=kind_src, cells=cell_keys)
+            names=names, kinds=kinds, kind_src=kind_src, kind_note=kind_note, cells=cell_keys)
 (OUT / "index.json").write_text(json.dumps(meta, separators=(",", ":")))
 (OUT / "streets.json").write_text(json.dumps(streets, separators=(",", ":")))
 sizes = np.array(sizes)
