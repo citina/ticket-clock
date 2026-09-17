@@ -90,7 +90,7 @@ Commit: `97ae462` · Applies: **yes**
 
 ### 6. One width for every block of text
 
-Commit: not saved yet · Applies: **yes**
+Commit: `440d01e` · Applies: **yes**
 
 - Citina didn't like text boxes of different widths (the disclaimer at the end was narrower than the
   Sources list above it, which ran the full page width). All text now shares one width:
@@ -104,7 +104,7 @@ Commit: not saved yet · Applies: **yes**
 
 ### 7. "Street sweeping signs" moved from the top of the page to the sweeping section
 
-Commit: not saved yet · Applies: **maybe** (ask Citina where it goes)
+Commit: `440d01e` · Applies: **maybe** (ask Citina where it goes)
 
 - Citina found the note's spot in the top-right corner, above the block panel, odd. It is now a side
   note (`.aside`, thin accent bar on the left) right after the opening paragraph of "Street sweeping
