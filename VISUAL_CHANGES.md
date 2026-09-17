@@ -126,7 +126,7 @@ Commit: `440d01e` · Applies: **maybe** (ask Citina where it goes)
 
 ### 8. A one-line pitch under the intro: signs often leave out the week
 
-Commit: not saved yet · Applies: **yes, with changed wording**
+Commit: `bada725` · Applies: **yes, with changed wording**
 
 - Citina wanted the top of the page to say why the page is useful: the sweeping sign on the street
   often doesn't show the week, and this page does (the intro already mentions the meter-patrol info).
