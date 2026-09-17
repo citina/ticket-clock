@@ -14,7 +14,7 @@ from scipy.optimize import brentq
 from citations import *
 
 MIN_TIX = 20          # a block needs this many tickets in the window to get a panel
-SWEEP_MIN = 8         # sweeping tickets on one side before we infer its schedule
+SWEEP_MIN = 8         # sweeping tickets on one side before we match it to a posted route
 METER_MIN = 20        # meter tickets before we model a block's patrols
 VISIT_GAP = 10        # minutes: meter tickets closer than this on one block = one officer visit
 SEP_MIN, CONS_MIN = 4.0, 0.75  # metres / share: when odd and even addresses sit on clear sides
@@ -150,31 +150,42 @@ for key, n in inv.groupby(["street", "block"]).size().items():
 print(sum(b["mspaces"] > 0 for b in blocks), "blocks with metered spaces")
 
 # ---------- street sweeping, per side ----------
-sc = w[w.sweep].dropna(subset=["street", "block"])
+# The posted day, weeks and time come from StreetsLA's route list. The tickets add which route day
+# covers each side (the one most of that side's tickets sit inside, on their weekday) and when they come.
+routes = load_routes()
+sc = w[w.sweep].dropna(subset=["street", "block"]).reset_index(drop=True)
 program_days = set(sc.date.unique())  # a weekday with no sweeping ticket anywhere nearby = program off
-phase_hits = phase_all = 0
+covers = np.array([inside(sc.lon, sc.lat, r["rings"]) for r in routes])  # route day x ticket
+phase_hits = phase_all = off_time = 0
 for (st, bl, side), x in sc.groupby(["street", "block", "side"]):
     if len(x) < SWEEP_MIN or (st, bl) not in index:
         continue
     dow = int(x.dow.mode()[0])
     x = x[x.dow == dow]
-    h = int(x.mins.quantile(.05) // 60)
+    votes = [covers[i, x.index].sum() if r["dow"] == dow else 0 for i, r in enumerate(routes)]
+    if max(votes) == 0:
+        print(f"warning: no posted route covers {bl} {st} ({side} side) on its sweeping weekday; no schedule shown")
+        continue
+    r = routes[int(np.argmax(votes))]
     nth = (x.date.dt.day - 1) // 7 + 1
-    on = 1 if nth.isin([1, 3]).mean() >= .5 else 2
-    phase_hits += int(nth.isin([on, on + 2]).sum())
+    phase_hits += int(nth.isin([r["on"], r["on"] + 2]).sum())
     phase_all += len(x)
+    posted = x.mins.between(r["s0"], r["s1"])
+    off_time += int((~posted).sum())
+    x = x[posted]
     cand = pd.date_range(START, END)
     cand = cand[(cand.dayofweek == dow) & ~cand.isin(list(hol)) & cand.isin(list(program_days))]
-    on_days = cand[np.isin((cand.day - 1) // 7 + 1, [on, on + 2])]
+    on_days = cand[np.isin((cand.day - 1) // 7 + 1, [r["on"], r["on"] + 2])]
     tdays = set(x.date.unique())
-    first = (x.groupby("date").mins.min() - h * 60).clip(0, 150).astype(int)
-    last = (x.groupby("date").mins.max() - h * 60).clip(0, 150).astype(int)
+    day = x.groupby("date").mins
     blocks[index[(st, bl)]]["sweep"].append(dict(
-        side=side, dow=dow, h=h, on=on, rate=round(float(pd.Index(on_days).isin(tdays).mean()), 2), days=len(on_days),
-        arr=sorted(first.tolist()), last=sorted(last.tolist()), n=len(x), tpd=round(len(x) / max(1, len(tdays)), 1)))
+        side=side, route=r["route"], dow=dow, on=r["on"], s0=r["s0"], s1=r["s1"],
+        rate=round(float(pd.Index(on_days).isin(tdays).mean()), 2), days=len(on_days),
+        arr=sorted((day.min() - r["s0"]).tolist()), last=sorted((day.max() - r["s0"]).tolist()), n=len(x), tpd=round(len(x) / max(1, len(tdays)), 1)))
 for b in blocks:
     b["sweep"].sort(key=lambda s: s["side"])
 print("sweeping tickets on the posted weeks:", round(phase_hits / phase_all, 3))
+print(f"sweeping tickets outside the posted time (left off the arrival strips): {off_time} of {phase_all}")
 
 # ---------- meters, per block (class weeks) ----------
 m = w[w.meter].dropna(subset=["street", "block"])

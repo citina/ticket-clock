@@ -1,4 +1,5 @@
 """Shared loading, geometry and calendar helpers for the USC ticket analysis."""
+import json
 import math
 import re
 from pathlib import Path
@@ -12,6 +13,7 @@ DATA = ROOT / "data"
 DOCS = ROOT / "docs"
 CSV = DATA / "citations_usc.csv"
 METERS = DATA / "meters_usc.csv"
+ROUTES = DATA / "sweep_routes.geojson"
 
 # The study area: a 2.5 x 2.5 km box around USC's University Park campus
 BOX = dict(s=34.012, n=34.035, w=-118.300, e=-118.272)
@@ -36,14 +38,20 @@ METER = "8813B"  # code 88.13B; some handhelds write it without dots (8813B+)
 
 
 def parse_loc(s):
-    """'3601 VERMONT AV S' -> (3601, 'VERMONT AVE'); intersections and blanks -> (None, None)."""
+    """'3601 VERMONT AV S' -> (3601, 'VERMONT AVE'); intersections and blanks -> (None, None).
+
+    East addresses keep an 'E ' prefix: 101 E 35th St is across Main St from 101 W 35th St,
+    on a different sweeping route.
+    """
     if not isinstance(s, str):
         return None, None
     m = ADDR.search(s.upper())
     if not m:
         return None, None
-    toks = [SUFFIX.get(t, t) for t in re.split(r"[\s.]+", m.group(2)) if t and t not in DIRS]
-    return (int(m.group(1)), " ".join(toks)) if toks else (None, None)
+    raw = re.split(r"[\s.]+", m.group(2))
+    toks = [SUFFIX.get(t, t) for t in raw if t and t not in DIRS]
+    east = "E " if {"E", "EAST"} & set(raw) else ""
+    return (int(m.group(1)), east + " ".join(toks)) if toks else (None, None)
 
 
 def canonical_streets(streets):
@@ -115,6 +123,46 @@ def in_term(dates):
     for a, b in TERMS:
         s |= (dates >= a) & (dates <= b)
     return s.values
+
+
+# ---- StreetsLA's posted sweeping routes ----
+DAYNUM = {"Monday": 0, "Tuesday": 1, "Wednesday": 2, "Thursday": 3, "Friday": 4, "Saturday": 5, "Sunday": 6}
+
+
+def clock(s):
+    """'6:30 am' -> 390 minutes after midnight."""
+    m = re.fullmatch(r"(\d{1,2})(?::(\d\d))?\s*([ap])m", s.strip().lower())
+    return (int(m[1]) % 12 + 12 * (m[3] == "p")) * 60 + int(m[2] or 0)
+
+
+def load_routes(path=ROUTES):
+    """One dict per route day: route, dow, on (1 = 1st & 3rd weeks, 2 = 2nd & 4th), posted
+    window s0-s1 in minutes, and the polygon rings (lon, lat) of the area it covers."""
+    out = []
+    for f in json.loads(path.read_text())["features"]:
+        p, geom = f["properties"], f["geometry"]
+        parts = [geom["coordinates"]] if geom["type"] == "Polygon" else geom["coordinates"]
+        start, end = p["Posted_Time"].split("-")
+        out.append(dict(route=p["Route"].split()[0], dow=DAYNUM[p["Posted_Day"]], on={"1 & 3": 1, "2 & 4": 2}[p["Weeks"]],
+                        s0=clock(start), s1=clock(end), rings=[np.asarray(r, float) for q in parts for r in q]))
+    return out
+
+
+def inside(lon, lat, rings):
+    """Which points fall inside a polygon. Even-odd rule over every ring, so holes and
+    multi-part areas need no special case; points outside a ring's bounding box can't flip it."""
+    lon, lat = np.asarray(lon, float), np.asarray(lat, float)
+    hit = np.zeros(len(lon), bool)
+    for r in rings:
+        lo, hi = r.min(0), r.max(0)
+        k = np.flatnonzero((lon >= lo[0]) & (lon <= hi[0]) & (lat >= lo[1]) & (lat <= hi[1]))
+        if not len(k):
+            continue
+        x, y = lon[k], lat[k]
+        for (x1, y1), (x2, y2) in zip(r, np.roll(r, -1, axis=0)):
+            if y1 != y2:
+                hit[k] ^= ((y1 > y) != (y2 > y)) & (x < x1 + (x2 - x1) * (y - y1) / (y2 - y1))
+    return hit
 
 
 # ---- Web Mercator pixels on the basemap (same projection as the OSM tiles) ----

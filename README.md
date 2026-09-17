@@ -35,15 +35,17 @@ parking is legal on a street's off weeks and that it doesn't ticket then
 ([Larchmont Chronicle, March 2025](https://larchmontchronicle.com/to-adhere-to-parking-signs-or-not-to-adhere/)).
 Some tickets are still written on off weeks
 ([L.A. Material, July 2026](https://lamaterial.com/p/la-wrongful-street-sweeping-tickets)),
-and LADOT says it dismisses those. The weeks this project shows are worked out from
-the tickets themselves (about 98% of sweeping tickets near campus fall on them), so
-they're evidence, not the official schedule. For that, look up your street at
+and LADOT says it dismisses those. The days, weeks and times this project shows come
+from StreetsLA's list of posted routes (about 98% of sweeping tickets near campus fall
+on those weeks); only which side of a street gets which day is worked out from the
+tickets. To check your own street, look it up at
 [streets.lacity.gov](https://streets.lacity.gov/services/street-sweeping).
 
 ## Run it
 
 ```
-./fetch_citations.py   # data/citations_usc.csv (~45 MB, data.lacity.org 4f5p-udkv) and data/meters_usc.csv (meter inventory, s49e-q6j2)
+./fetch_citations.py   # data/citations_usc.csv (~45 MB, data.lacity.org 4f5p-udkv), data/meters_usc.csv (meter inventory, s49e-q6j2),
+                       # data/sweep_routes.geojson (StreetsLA posted sweeping routes, ArcGIS Online)
 ./basemap.py           # docs/basemap.jpg (36 OpenStreetMap tiles at zoom 16, cached in .tilecache/)
 ./analyze.py           # data/bundle.json (every number the page shows)
 ./build.py             # docs/index.html (one self-contained file)
@@ -63,7 +65,7 @@ newest ticket is past them.
 
 | File | What it is |
 |---|---|
-| `citations.py` | shared loading: address parsing, street-name cleanup, holidays, USC term dates, map projection |
+| `citations.py` | shared loading: address parsing, street-name cleanup, holidays, USC term dates, posted sweeping routes, map projection |
 | `analyze.py` | per-block geometry, sweeping schedule per side, meter visit rates, campus charts |
 | `template.html` | the page; `build.py` fills in the data and the basemap |
 
@@ -72,15 +74,20 @@ newest ticket is past them.
 - **Window.** Patterns use the two years up to the newest ticket (a rolling window),
   so they describe how enforcement works now.
 - **Blocks.** Hundred block of each address; odd and even numbers are the two sides.
+  East addresses (across Main St) are their own blocks, like "E 35th St".
   A block's map line is fitted through its ticket locations. Where the two sides
   geocode to clearly opposite sides of it (13 blocks), the page names the compass side.
 - **Sweeping.** Street-cleaning tickets are code 80.69BS (a few handhelds write it
   8069BS; both count). A block side needs 8 of them in the window to get a schedule;
-  the map calls the rest "no sweeping schedule found". LA sweeps every other week since March 2021 (1st & 3rd or 2nd & 4th
-  weekday of the month). Per side: posted day = most common ticket weekday; window
-  = the hour of the earliest 5% of tickets, 2 hours long; phase = whichever week pair
-  holds more tickets (98% of sweeping tickets match). "Ticketed on X% of sweep days"
-  excludes holidays and days with no sweeping tickets anywhere nearby.
+  the map calls the rest "no sweeping schedule found". The posted day, weeks (1st & 3rd
+  or 2nd & 4th) and time come from StreetsLA's posted routes. Each route covers an area
+  and runs on two days, one per side of the street; a side gets the route day on its
+  most common ticket weekday, among the routes its tickets sit inside. 98% of sweeping
+  tickets fall on the posted weeks. The handful written outside the posted time (15 of
+  about 19,700 in September 2026) are left off the arrival strips; `analyze.py` prints
+  the current count.
+  "Ticketed on X% of sweep days" excludes holidays and days with no sweeping tickets
+  anywhere nearby.
 - **Metered blocks.** From LADOT's meter inventory, so blocks whose meters never drew
   a ticket still count (tickets alone miss 3800 Figueroa and 2600 Vermont). On the
   map they're dotted where the current view has nothing else to show for them.
@@ -93,4 +100,5 @@ newest ticket is past them.
 A ticket needs a violator, so quiet blocks look less patrolled than they are. None
 of this replaces the posted sign.
 
-Data: LADOT Parking Citations, data.lacity.org. Basemap © OpenStreetMap contributors.
+Data: LADOT Parking Citations, data.lacity.org. Posted Street Sweeping Routes, StreetsLA.
+Basemap © OpenStreetMap contributors.

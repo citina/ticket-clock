@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """Download every LADOT parking citation inside the study box to data/citations_usc.csv,
-and LADOT's meter inventory for the same box to data/meters_usc.csv.
+LADOT's meter inventory for the same box to data/meters_usc.csv, and StreetsLA's posted
+sweeping routes that reach into the box to data/sweep_routes.geojson.
 
 Sources: data.lacity.org datasets 4f5p-udkv (Parking Citations, refreshed daily;
-about 320k rows / 45 MB) and s49e-q6j2 (Metered Parking Inventory; about 700 spaces).
-One request each, no key needed.
+about 320k rows / 45 MB) and s49e-q6j2 (Metered Parking Inventory; about 700 spaces),
+and StreetsLA's "Posted Street Sweeping Routes" layer on ArcGIS Online (about 26 route
+days here). One request each, no key needed.
 """
+import json
 import urllib.parse
 import urllib.request
 
-from citations import BOX, CSV, DATA, METERS
+from citations import BOX, CSV, DATA, METERS, ROUTES
 
 URL = "https://data.lacity.org/resource/4f5p-udkv.csv"
 COLS = ("ticket_number,issue_date,issue_time,meter_id,marked_time,location,route,agency,"
@@ -33,3 +36,15 @@ q = {"$select": "spaceid,blockface,metertype,timelimit",
 with urllib.request.urlopen("https://data.lacity.org/resource/s49e-q6j2.csv?" + urllib.parse.urlencode(q), timeout=120) as r:
     METERS.write_bytes(r.read())
 print(METERS, sum(1 for _ in open(METERS)) - 1, "metered spaces")
+
+# Posted sweeping routes: day, week pair, posted time and the area each one covers
+URL = ("https://services1.arcgis.com/PTh9WC0Sf2WS7AAq/arcgis/rest/services/"
+       "Posted_Street_Sweeping_Routes_Update/FeatureServer/0/query")
+q = {"where": "1=1", "geometry": f"{BOX['w']},{BOX['s']},{BOX['e']},{BOX['n']}", "geometryType": "esriGeometryEnvelope",
+     "inSR": "4326", "spatialRel": "esriSpatialRelIntersects", "outFields": "Route,Posted_Time,Posted_Day,Weeks",
+     "returnGeometry": "true", "outSR": "4326", "f": "geojson"}
+with urllib.request.urlopen(URL + "?" + urllib.parse.urlencode(q), timeout=120) as r:
+    body = r.read()
+n = len(json.loads(body)["features"])  # an ArcGIS error comes back as 200 with no "features"
+ROUTES.write_bytes(body)
+print(ROUTES, n, "posted sweeping route days")
