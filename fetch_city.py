@@ -44,6 +44,20 @@ def get(url, params, timeout=600, tries=4):
             time.sleep(20 * (k + 1))
 
 
+def get_json(url, params, **kw):
+    """A request whose answer has to parse as JSON: the map server also answers 200 with an HTML
+    error page, which is just as broken as a 502."""
+    for k in range(4):
+        body = get(url, params, **kw)
+        try:
+            return json.loads(body)
+        except json.JSONDecodeError:
+            if k == 3:
+                raise
+            print(f"warning: {url.split('/')[2]} answered with something that isn't JSON; retrying in {20 * (k + 1)}s")
+            time.sleep(20 * (k + 1))
+
+
 def months(start, end):
     m = start.replace(day=1)
     while m <= end:
@@ -75,8 +89,8 @@ for m, nxt in months(start, today):
 # ---- street centerlines, 1,000 per request ----
 feats, off = [], 0
 while True:
-    page = json.loads(get(STREETS, {"where": "1=1", "outFields": FIELDS, "outSR": "4326", "orderByFields": "OBJECTID",
-                                    "resultOffset": off, "resultRecordCount": 1000, "f": "geojson"}, timeout=120))
+    page = get_json(STREETS, {"where": "1=1", "outFields": FIELDS, "outSR": "4326", "orderByFields": "OBJECTID",
+                              "resultOffset": off, "resultRecordCount": 1000, "f": "geojson"}, timeout=120)
     feats += page["features"]
     off += len(page["features"])
     if not page["features"] or not (page.get("exceededTransferLimit") or page.get("properties", {}).get("exceededTransferLimit")):
@@ -91,8 +105,7 @@ body = get("https://data.lacity.org/resource/s49e-q6j2.csv",
 print("meters.csv", body.count(b"\n") - 1, "spaces")
 
 # ---- posted sweeping routes: day, week pair, posted time and area ----
-body = get("https://services1.arcgis.com/PTh9WC0Sf2WS7AAq/arcgis/rest/services/Posted_Street_Sweeping_Routes_Update/FeatureServer/0/query",
-           {"where": "1=1", "outFields": "Route,Posted_Time,Posted_Day,Weeks", "returnGeometry": "true", "outSR": "4326", "f": "geojson"}, timeout=120)
-n = len(json.loads(body)["features"])  # an ArcGIS error comes back as 200 with no "features"
-(CITY / "sweep_routes.geojson").write_bytes(body)
-print("sweep_routes.geojson", n, "posted sweeping route days")
+routes = get_json("https://services1.arcgis.com/PTh9WC0Sf2WS7AAq/arcgis/rest/services/Posted_Street_Sweeping_Routes_Update/FeatureServer/0/query",
+                  {"where": "1=1", "outFields": "Route,Posted_Time,Posted_Day,Weeks", "returnGeometry": "true", "outSR": "4326", "f": "geojson"}, timeout=120)
+(CITY / "sweep_routes.geojson").write_text(json.dumps(routes, separators=(",", ":")))   # an ArcGIS error is a 200 with no features
+print("sweep_routes.geojson", len(routes["features"]), "posted sweeping route days")
