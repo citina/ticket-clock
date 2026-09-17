@@ -101,8 +101,9 @@
   .mapwrap{position:relative;margin:12px 0 0;background:var(--surface);border:1px solid var(--rule);border-radius:12px;overflow:hidden;
            touch-action:none;user-select:none;-webkit-user-select:none;height:clamp(360px,70vh,680px)}
   @media (max-width:1000px){ .mapwrap{height:clamp(280px,60vh,520px)} }
-  .mapwrap svg{width:100%;height:100%;display:block;max-width:none}
-  .tiles{opacity:.72;filter:var(--map-filter)}
+  .mapwrap svg{position:relative;width:100%;height:100%;display:block;max-width:none}
+  /* the tiles get their own HTML box under the lines: Safari ignores CSS filters on elements inside an SVG */
+  .tiles{position:absolute;inset:0;pointer-events:none;opacity:.72;filter:var(--map-filter)}
   .blk{fill:none;stroke:var(--ink);stroke-opacity:.72;stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke}
   .hit{fill:none;stroke:transparent;stroke-width:16;stroke-linecap:round;cursor:pointer;vector-effect:non-scaling-stroke}
   .zoom{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:4px}
@@ -255,9 +256,10 @@ const cells=new Map();   // cell key -> 'loading' | [block records]
 
 /* ============ the map ============ */
 const wrap=$('#mapwrap');
+const tileBox=H('div',{className:'tiles'}), tileSvg=S('svg',{'aria-hidden':'true'},tileBox);
 const svg=S('svg',{role:'img','aria-label':'Map of Los Angeles streets; lines are blocks with tickets'});
-wrap.insertBefore(svg, wrap.firstChild);
-const gTiles=S('g',{class:'tiles'},svg), gHalo=S('g',{},svg), gBlk=S('g',{},svg), gYou=S('g',{},svg), gHit=S('g',{},svg);
+wrap.insertBefore(svg, wrap.firstChild); wrap.insertBefore(tileBox, svg);
+const gTiles=S('g',{},tileSvg), gHalo=S('g',{},svg), gBlk=S('g',{},svg), gYou=S('g',{},svg), gHit=S('g',{},svg);
 let vb={x:(LX0+LX1)/2, y:(LY0+LY1)/2, w:LX1-LX0, h:0};
 const minW=()=>150/PX_M, maxW=()=>Math.max(LX1-LX0, (LY1-LY0)*wrap.clientWidth/Math.max(1,wrap.clientHeight));
 function setVB(){
@@ -265,7 +267,7 @@ function setVB(){
   vb.w=Math.min(maxW(),Math.max(minW(),vb.w)); vb.h=vb.w*asp;
   const cx=Math.min(LX1,Math.max(LX0,vb.x+vb.w/2)), cy=Math.min(LY1,Math.max(LY0,vb.y+vb.h/2));
   vb.x=cx-vb.w/2; vb.y=cy-vb.h/2;
-  svg.setAttribute('viewBox',`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  svg.setAttribute('viewBox',`${vb.x} ${vb.y} ${vb.w} ${vb.h}`); tileSvg.setAttribute('viewBox',svg.getAttribute('viewBox'));
   drawTiles(); drawYou(); showBlocks();
 }
 function centerOn(x, y, w){ vb.w=w; const asp=wrap.clientHeight/Math.max(1,wrap.clientWidth); vb.x=x-w/2; vb.y=y-w*asp/2; setVB(); }
