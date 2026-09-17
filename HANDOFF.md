@@ -166,7 +166,9 @@ Decisions Citina made on 2026-09-16 (keep them unless she asks):
   six-day unpaid odds (the meter ticket count lives in the kinds list). "What gets ticketed here"
   lists every kind like the USC card (8 shown, "Show all N kinds" / "Show fewer"), under a dot chart
   of the block's most ticketed kind by half hour (grey band = posted sweeping time when that kind is
-  street cleaning).
+  street cleaning). Each kind is a button: it opens LADOT's own code and wording for that name
+  (`kind_src` in index.json) and, for kinds with `chart_min` (50) tickets on the block, its own dot
+  chart (`hh` holds one entry per charted kind). A mouse also gets the code as a tooltip.
 
 How it works:
 

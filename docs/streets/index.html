@@ -140,11 +140,20 @@
   .odds6 div{background:var(--well);border-radius:6px;padding:5px 0 6px;text-align:center}
   .odds6 .k{display:block;font:10.5px "IBM Plex Mono",monospace;letter-spacing:.06em;color:var(--ink-3)}
   .odds6 .v{display:block;font:600 15px "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
-  .kinds{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px 12px;font-size:14px}
-  .kinds .nm{font-weight:500}
-  .kinds .meta{font-size:12.5px;color:var(--ink-2)}
-  .kinds .bar{height:6px;border-radius:3px;background:var(--accent);margin-top:7px}
-  .kinds .n{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-2);text-align:right}
+  .kinds{display:grid;gap:2px;font-size:14px}
+  .krow{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px 12px;width:100%;text-align:left;
+        appearance:none;border:0;background:none;color:inherit;font:inherit;cursor:pointer;border-radius:8px;padding:6px 8px}
+  .krow:hover,.krow[aria-expanded="true"]{background:var(--well)}
+  .krow .nm{font-weight:500}
+  .krow .nm::after{content:"›";color:var(--ink-3);font-weight:400;margin-left:6px}
+  .krow[aria-expanded="true"] .nm::after{content:"⌄"}
+  .krow .meta{font-size:12.5px;color:var(--ink-2)}
+  .krow .bar{height:6px;border-radius:3px;background:var(--accent);margin-top:7px}
+  .krow .n{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-2);text-align:right}
+  .kdet{padding:2px 8px 12px}
+  .kcode{font-size:13px;color:var(--ink-2);line-height:1.5}
+  .kcode b{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:12px;font-weight:600;color:var(--ink);
+           border:1px solid var(--edge);border-radius:3px;padding:0 5px;white-space:nowrap}
   .fig-title{font-weight:600;font-size:14.5px;margin:0 0 6px}
   .fig-title .tag{background:var(--ink);color:var(--plane);border-radius:4px;padding:1px 7px;white-space:nowrap}
   .tick{font:11px "IBM Plex Mono",ui-monospace,Menlo,monospace;fill:var(--ink-3)}
@@ -212,7 +221,7 @@
       <dt>Meter patrols</dt>
       <dd>Monday to Saturday, 8 am to 8 pm, holidays left out. A visit is a group of meter tickets on one block with no gap over 10 minutes. An officer who finds every meter paid leaves no ticket, so the visit rate is adjusted for those empty visits, assuming the number of expired cars an officer finds on a visit is random (Poisson). A block needs at least 20 meter tickets. Which blocks have meters comes from LADOT's meter inventory (dataset s49e-q6j2).</dd>
       <dt>Ticket kinds</dt>
-      <dd>LADOT's handheld devices write the same rule in different ways, like "STANDNG IN ALLEY" or "8069B NO PARK ST CLN", so tickets are grouped by violation code under one plain name. The no-stopping codes, including the rush-hour ones, all become "No stopping", and the usual hours show when they're written. Fines are the median of the tickets that list one. The dot chart shows the block's most ticketed kind at the half hour on each ticket.</dd>
+      <dd>LADOT's handheld devices write the same rule in different ways, like "STANDNG IN ALLEY" or "8069B NO PARK ST CLN", so tickets are grouped by violation code under one plain name. The no-stopping codes, including the rush-hour ones, all become "No stopping", and the usual hours show when they're written. Fines are the median of the tickets that list one. Tapping a kind shows the code LADOT prints on the ticket, its own wording, and how many codes share the name. The dot charts count tickets by the half hour written on them: the block's most ticketed kind, and any kind with at least 50 tickets there.</dd>
       <dt>Limits</dt>
       <dd>A ticket only appears when someone broke the rule, so quiet blocks look less enforced than they are, and a rule nobody was ticketed for doesn't show up at all. Addresses that couldn't be matched are left out. Routes and staffing change, and none of this is a promise about next week. Always read the posted signs, and for sweeping, the city's schedule.</dd>
     </dl>
@@ -392,16 +401,16 @@ function signHTML(dows, s0, s1, on){
     <div class="s1">No parking</div><div class="s2">${fmtT(s0).toUpperCase()} TO ${fmtT(s1).toUpperCase()}</div><div class="s3">${dows.length===1?DAYLONG[dows[0]]:DAYS[dows[0]]+'–'+DAYS[dows[dows.length-1]]}</div><div class="s4">Street cleaning</div>
     <div class="s5">${on?phaseTxt(on).toUpperCase()+' ONLY*':'EVERY WEEK'}</div></div></div>`; }
 // a ticket kind: [kind, tickets, median fine, busiest weekday, usual hours, share on weekdays]; b.k[0] is the most ticketed
-// the most ticketed kind by the half hour it was written (b.hh: first half hour, then counts), a dot for every `per` tickets
-function timeDots(host, b){
-  if(!b.hh) return;   // data from before the chart existed
-  const kind=META.kinds[b.k[0][0]], c=new Array(48).fill(0); b.hh.slice(1).forEach((n,i)=>c[b.hh[0]+i]=n);
+// one kind by the half hour its tickets were written (hh: first half hour, then the counts), a dot for every `per` tickets
+const charts=b=>new Map((b.hh||[]).map(a=>typeof a==='number'?null:[a[0],a.slice(1)]).filter(Boolean));
+function timeDots(host, b, ki, hh, lead){
+  const kind=META.kinds[ki], c=new Array(48).fill(0); hh.slice(1).forEach((n,i)=>c[hh[0]+i]=n);
   const mx=Math.max(...c), per=[1,2,5,10,20,50,100,200,500,1000,2000,5000,10000].find(v=>mx/v<=10.5)||20000;
-  H('div',{className:'fig-title',innerHTML:`<span class="tag">${esc(kind)}</span> tickets by time of day`},host);
+  if(lead) H('div',{className:'fig-title',innerHTML:`<span class="tag">${esc(kind)}</span> tickets by time of day`},host);
   const Wd=Math.max(260,Math.round(host.clientWidth)||380), l=8, r=8, cw=(Wd-l-r)/48, rad=Math.min(3.2,cw*.42), step=Math.min(7,rad*2+.8);
   const top=4, base=top+10*step+4, Hd=base+22, x=j=>l+j*cw;
   const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,role:'img','aria-label':`${kind} tickets on this block by the half hour they were written`},host);
-  const wins=kind==='Street cleaning'?[...new Set((b.w||[]).map(s=>s[2]+'-'+s[3]))].map(k=>k.split('-').map(Number)):[];
+  const wins=kind==='Street cleaning'&&b.w?[...new Set((b.w||[]).map(s=>s[2]+'-'+s[3]))].map(k=>k.split('-').map(Number)):[];
   wins.forEach(([s0,s1])=>S('rect',{x:x(s0/30),y:top,width:x(s1/30)-x(s0/30),height:base-top,rx:3,class:'win'},g));
   c.forEach((n,j)=>{ const dots=n?Math.max(1,Math.round(n/per)):0;
     for(let i=0;i<dots;i++) S('circle',{cx:x(j)+cw/2,cy:base-rad-1-i*step,r:rad},g).style.fill='var(--accent)'; });
@@ -412,7 +421,7 @@ function timeDots(host, b){
   hit.addEventListener('pointermove',e=>{ if(e.pointerType!=='mouse') return; const bb=g.getBoundingClientRect(), j=Math.max(0,Math.min(47,Math.floor(((e.clientX-bb.left)*Wd/bb.width-l)/cw)));
     showTip(e,`<b>${fmtRange(j*30,j*30+30)}</b><br>${c[j].toLocaleString()} ${esc(kind.toLowerCase())} ticket${c[j]===1?'':'s'}`); });
   hit.addEventListener('pointerleave',hideTip);
-  H('div',{className:'evid',style:'margin-top:6px',innerHTML:`The most ticketed kind here. ${per===1?'Each dot is one ticket':`Each dot is about ${per} tickets`}, placed at the half hour it was written.${wins.length?' <span style="white-space:nowrap"><span class="sw win" style="height:10px;vertical-align:-1px"></span> posted sweeping time</span>.':''}`},host);
+  H('div',{className:'evid',style:'margin-top:6px',innerHTML:`${lead?'The most ticketed kind here. ':''}${per===1?'Each dot is one ticket':`Each dot is about ${per} tickets`}, placed at the half hour it was written.${wins.length?' <span style="white-space:nowrap"><span class="sw win" style="height:10px;vertical-align:-1px"></span> posted sweeping time</span>.':''}`},host);
 }
 const when=t=>`${t[5]>=.85?'mostly weekdays':'most often '+DAYLONG[t[3]]+'s'}, usually ${usual(t[4])}`;
 // no side matched to a route: the posted route days around the block (b.wr), without which side gets which, or none
@@ -472,15 +481,32 @@ function renderCard(b){
     H('div',{className:'evid',textContent:'LADOT\'s data doesn\'t include the hours posted on the meters, so check the meter itself.'},mc); }
 
   const kc=H('div',{className:'card'},p); H('h4',{textContent:'What gets ticketed here'},kc);
-  timeDots(kc,b);
-  const kg=H('div',{className:'kinds',style:'margin-top:18px'},kc), kmax=b.k[0][1], FEW=8;
+  const cur=charts(b), lead=b.k[0][0];
+  if(cur.has(lead)) timeDots(kc,b,lead,cur.get(lead),true);
+  H('div',{className:'evid',style:'margin:14px 0 0',textContent:'Tap a kind below for the code LADOT writes on the ticket, and for its own times of day.'},kc);
+  const kg=H('div',{className:'kinds',style:'margin-top:6px'},kc), kmax=b.k[0][1], FEW=8;
   const extra=[];
-  b.k.forEach((t,i)=>{ const a=H('div',{},kg); H('div',{className:'nm',textContent:META.kinds[t[0]]},a);
+  b.k.forEach((t,i)=>{ const kind=META.kinds[t[0]], src=(META.kind_src||[])[t[0]];
+    const row=H('button',{className:'krow',type:'button'},kg), a=H('div',{},row);
+    H('div',{className:'nm',textContent:kind},a);
     H('div',{className:'meta',textContent:`${t[2]?`$${t[2]} · `:''}${when(t)}`},a);
-    const r=H('div',{},kg); H('div',{className:'n',textContent:t[1].toLocaleString()},r); const bar=H('div',{className:'bar'},r); bar.style.width=Math.max(4,100*t[1]/kmax)+'%';
-    if(i>=FEW) extra.push(a,r); });
+    const r=H('div',{},row); H('div',{className:'n',textContent:t[1].toLocaleString()},r);
+    const bar=H('div',{className:'bar'},r); bar.style.width=Math.max(4,100*t[1]/kmax)+'%';
+    const det=H('div',{className:'kdet'},kg); det.hidden=true;
+    const codeLine=!src?'':src[0]==='?'?'No ticket code or wording was recorded for these.'
+      :`LADOT's ticket code <b>${esc(src[0])}</b>, written as “${esc(src[1])}”${src[2]>1?`, one of ${src[2]} codes under this name`:''}.`;
+    row.setAttribute('aria-expanded','false');
+    row.onclick=()=>{ const open=row.getAttribute('aria-expanded')==='true';
+      row.setAttribute('aria-expanded',String(!open)); det.hidden=open;
+      if(!open&&!det.childElementCount){ if(codeLine) H('div',{className:'kcode',innerHTML:codeLine},det);
+        if(t[0]===lead&&cur.has(lead)) H('div',{className:'evid',style:'margin-top:6px',textContent:'Its times of day are in the chart above.'},det);
+        else if(cur.has(t[0])) timeDots(det,b,t[0],cur.get(t[0]),false);
+        else H('div',{className:'evid',style:'margin-top:6px',textContent:`Too few tickets here for its own chart (under ${META.chart_min||50}).`},det); } };
+    if(src) row.addEventListener('pointermove',e=>{ if(e.pointerType==='mouse') showTip(e,`<b>${esc(kind)}</b><br>Ticket code ${esc(src[0])} · ${esc(src[1])}`); });
+    row.addEventListener('pointerleave',hideTip);
+    if(i>=FEW) extra.push(row,det); });
   if(extra.length){ const more=H('button',{className:'chip sm',style:'margin-top:12px'},kc); let open=false;
-    const set=()=>{ extra.forEach(e=>{ e.hidden=!open; }); more.textContent=open?'Show fewer':`Show all ${b.k.length} kinds`; more.setAttribute('aria-expanded',open); };
+    const set=()=>{ extra.forEach(e=>{ e.hidden=!open||(e.classList.contains('kdet')&&e.previousElementSibling.getAttribute('aria-expanded')!=='true'); }); more.textContent=open?'Show fewer':`Show all ${b.k.length} kinds`; more.setAttribute('aria-expanded',open); };
     more.onclick=()=>{ open=!open; set(); if(!open&&more.getBoundingClientRect().top<0) more.scrollIntoView({block:'center'}); }; set(); }
   H('div',{className:'evid',style:'margin:4px 0 14px;padding-top:12px;border-top:1px solid var(--rule)',textContent:'This card is worked out from LADOT tickets, not read from the signs, so a rule nobody was ticketed for doesn\'t show up. Check the posted signs where you park.'},p);
 }

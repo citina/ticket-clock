@@ -28,6 +28,7 @@ OUT = DOCS / "streets" / "data"
 CELL = 1024           # map cell edge in zoom-17 Web Mercator pixels (1 px is about 1 m in LA)
 SWEEP_MIN = 8         # sweeping tickets on one side before we match it to a posted route
 METER_MIN = 20        # meter tickets before we model a block's patrols
+KIND_MIN = 50         # tickets before a kind gets its own dot chart on a block (its top kind always has one)
 VISIT_GAP = 10        # minutes: meter tickets closer than this on one block = one officer visit
 SLOT0, NSLOT = 8 * 60, 24   # half hours from 8:00 am to 8:00 pm (meter hours)
 FAR = 600             # metres: a match this far from the ticket's own coordinates is treated as wrong
@@ -286,11 +287,22 @@ for b, kind, n, fine, wk, dow in top[["b", "kind", "n", "fine", "wk", "dow"]].it
     tops[b].append([kind_ix[kind], int(n), int(fine) if fine == fine else 0, int(dow),
                     usual_hours(np.repeat(hc.index.values * 60, hc.values)), round(float(wk), 2)])
 
-# the block's most ticketed kind, counted by the half hour it was written (midnight = 0), for the dot plot
-first = top.drop_duplicates("b").set_index("b").kind
-tk = d[d.kind.values == first.reindex(d.b).values]
-halfhours = np.zeros((len(blocks), 48), int)
-np.add.at(halfhours, (tk.b.values, (tk.mins // 30).values), 1)
+# LADOT's own code and wording for each kind, for the card: the commonest pair, and how many codes it covers
+src = (d.groupby(["kind", d.violation_code.fillna("?"), viol]).size().reset_index(name="c")
+       .sort_values("c", ascending=False))
+codes = src.groupby("kind").violation_code.nunique()
+src = src.drop_duplicates("kind").set_index("kind")
+kind_src = [[src.violation_code[k], src.violation_description[k], int(codes[k])] for k in kinds]
+
+# each kind's tickets by the half hour they were written (midnight = 0), for the dot charts: the block's
+# most ticketed kind, plus any kind with KIND_MIN tickets there
+want = pd.concat([top.drop_duplicates("b")[["b", "kind"]], top[top.n >= KIND_MIN][["b", "kind"]]]).drop_duplicates()
+hh = (d[["b", "kind", "mins"]].merge(want, on=["b", "kind"])
+      .assign(hf=lambda x: x.mins // 30).groupby(["b", "kind", "hf"]).size())
+charts = collections.defaultdict(lambda: collections.defaultdict(dict))
+for (b, kind, hf), c in hh.items():
+    charts[b][kind][hf] = int(c)
+print(f"{len(want):,} dot charts on {want.b.nunique():,} blocks")
 
 # ---------- street sweeping, per side: the same rule as the USC page ----------
 # The posted day, weeks and time come from StreetsLA's routes. Each route covers an area and is swept on two
@@ -459,8 +471,9 @@ for k, (st, h, part) in enumerate(blocks):
         rec["wr"] = sorted([list(dows), s0, s1, on] for dows, s0, s1, on in around[k])   # route days around it
     if meters.get(k):
         rec["m"] = meters[k]
-    nz = np.flatnonzero(halfhours[k])
-    rec["hh"] = [int(nz[0])] + halfhours[k][nz[0]:nz[-1] + 1].tolist()   # first half hour, then the counts
+    # per kind: [kind, first half hour, counts...] in the same order as the kinds above
+    rec["hh"] = [[t[0], min(bins)] + [bins.get(j, 0) for j in range(min(bins), max(bins) + 1)]
+                 for t in tops[k] if (bins := charts[k].get(kinds[t[0]]))]
     if spaces.get(k):
         rec["sp"] = spaces[k]
     cells[(cx, cy)].append(rec)
@@ -479,7 +492,8 @@ streets = [[] for _ in names]
 for s_ix, h, key, suffix in index:
     streets[s_ix].append([h, cell_ix[key], suffix] if suffix else [h, cell_ix[key]])
 meta = dict(start=str(START.date()), end=str(END.date()), total=total, matched=len(d), phase=round(phase_hits / phase_all, 3),
-            cell=CELL, sweep_min=SWEEP_MIN, routes_around=True, names=names, kinds=kinds, cells=cell_keys)
+            cell=CELL, sweep_min=SWEEP_MIN, routes_around=True, chart_min=KIND_MIN,
+            names=names, kinds=kinds, kind_src=kind_src, cells=cell_keys)
 (OUT / "index.json").write_text(json.dumps(meta, separators=(",", ":")))
 (OUT / "streets.json").write_text(json.dumps(streets, separators=(",", ":")))
 sizes = np.array(sizes)
