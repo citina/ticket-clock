@@ -50,6 +50,7 @@ Commit: `97ae462` · Applies: **yes**
 - On LA Street Rules: the same "Street sweeping signs." paragraph and the L.A. Material source are in
   `docs/streets/index.html`. Make the same LADOT edits there. Its schedule comes from tickets, not
   StreetsLA's list, so only add the StreetsLA link if that page starts using the routes layer.
+- **Ported to LA Street Rules** in `f9e602c`, with the StreetsLA link in the note and in the sweeping card's footnote (that page uses the routes layer now).
 
 ### 2. Bullet dots under "Selected block" are black
 
@@ -58,6 +59,7 @@ Commit: `97ae462` · Applies: **yes**, to any colored bullet dots in its block p
 - `.insights li::before` background went from `var(--accent)` (blue) to `var(--ink)`, so the dots
   are black in light mode and white in dark mode.
 - LA Street Rules has no `.insights` list, so this only matters if its panel has blue bullet dots.
+- **LA Street Rules:** nothing to port, its block card has no bullet dots.
 
 ### 3. Say where the number of sweep days comes from
 
@@ -67,6 +69,7 @@ Commit: `97ae462` · Applies: **yes**
   66% of sweep days in the past two years (44 days)".
 - On LA Street Rules: "Tickets were written on X% of N sweep days here" should become the same kind
   of wording, e.g. "Tickets were written on X% of sweep days here in the past two years (N days)".
+- **Ported to LA Street Rules** in `f9e602c`: "Tickets were written on X% of sweep days here in the past two years (N days), about M each time."
 
 ### 4. Arrival strip labels line up with the grey window
 
@@ -77,6 +80,7 @@ Commit: `97ae462` · Applies: **USC only for now**
 - The label still reads "First ticket: usually 12:51 pm" (Citina tried dropping "usually" and asked
   for it back).
 - LA Street Rules has no arrival strip. Use this if it gets one.
+- **LA Street Rules:** not ported (no arrival strip). Its new dot chart has no legend dot to line up.
 
 ### 5. "Not a guide to parking illegally" moved to the end of the page
 
@@ -87,6 +91,7 @@ Commit: `97ae462` · Applies: **yes**
   The note at the top now holds only "Street sweeping signs".
 - On LA Street Rules: move its "Not a guide to parking illegally." paragraph to the end of the page
   the same way. Ask Citina before moving its other disclaimer parts, such as "What the page loads".
+- **Ported to LA Street Rules** in `f9e602c`, with "What the page loads" moved to the end too (Citina's choice), and the USC page's closing words ("and a quiet hour in the data can still end in a ticket").
 
 ### 6. One width for every block of text
 
@@ -105,6 +110,7 @@ Commit: `440d01e` · Applies: **yes**
 - LA Street Rules has the same rules with the old mixed widths (`.lede` 62ch, `.note` 75ch, `p` 65ch,
   `.method dd` 62ch, `.find-msg` 70ch, no limit on `footer ul`). Give them the same `--measure`, and
   let its Sources list and closing disclaimer run the full width.
+- **Ported to LA Street Rules** in `f9e602c`: `--measure` on `.lede`, `p`, `.note`, `.aside`, `.find-msg` and `.method`; `.note.end` and the Sources list use the full width.
 
 ### 7. "Street sweeping signs" moved from the top of the page to the sweeping section
 
@@ -123,6 +129,7 @@ Commit: `440d01e` · Applies: **maybe** (ask Citina where it goes)
   are unchanged.
 - LA Street Rules uses the same top-right `.intro .note` layout but has no sweeping section to move the
   note into, so ask Citina where it should go.
+- **Ported to LA Street Rules** in `f9e602c`: Citina chose an `.aside` right after the map and block card, before the method section, with the USC page's wording.
 
 ### 8. A one-line pitch under the intro: signs often leave out the week
 
@@ -141,4 +148,4 @@ Commit: `bada725` · Applies: **yes, with changed wording**
 - On LA Street Rules: some routes city-wide are swept every week (its sign shows "EVERY WEEK"), so
   "LA sweeps each street every other week" isn't true there. Say "most streets" or similar, and check
   the wording with Citina.
-
+- **Ported to LA Street Rules** in `f9e602c` with this wording (Citina approved): `<b>Signs often leave out the week.</b> Most LA streets are swept every other week, but many sweeping signs still show only the day, like "No parking Thursday". This page shows which weeks each block is swept and the next sweep dates.`
