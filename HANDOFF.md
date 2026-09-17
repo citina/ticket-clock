@@ -206,8 +206,10 @@ Known gaps: tickets written at intersections (7.6%) aren't shown; about 5% of bl
 street; the meter card has no posted meter hours (LADOT's data doesn't include them) and uses all
 weeks, not USC class weeks, so 3600 S Vermont's odds differ a little between the two pages. A side with
 fewer than 8 sweeping tickets shows no schedule even inside a posted route, as on the USC page, and
-the "No sweeping schedule found" text is worked out from tickets only: it doesn't check whether a
-posted route covers the block.
+then the card lists the posted route days around the block (`wr` in the cell data: points 6 m off each
+side of the middle of each piece of its line, tested against every route area) without saying which
+side gets which, or says no posted route covers it. `index.json`'s `routes_around` tells the page the
+data has `wr`; older data falls back to the ticket-only "No sweeping schedule found" text.
 
 ## Committing
 

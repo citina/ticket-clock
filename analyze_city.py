@@ -51,6 +51,12 @@ def z17(lon, lat):
         return (np.asarray(lon, dtype=float) + 180) / 360 * n, (1 - np.log(np.tan(r) + 1 / np.cos(r)) / math.pi) / 2 * n
 
 
+def lonlat(x, y):
+    """Zoom-17 Web Mercator pixels back to longitude and latitude."""
+    n = 2 ** 17 * 256
+    return np.asarray(x) / n * 360 - 180, np.degrees(np.arctan(np.sinh(math.pi * (1 - 2 * np.asarray(y) / n))))
+
+
 PX_M = 156543.03392 * math.cos(math.radians(34.05)) / 2 ** 17   # metres per zoom-17 pixel in LA
 
 # ---------- street centerlines ----------
@@ -347,6 +353,38 @@ print(f"{sum(len(v) for v in sweeps.values()):,} block sides matched to a posted
 print(f"{phase_hits / phase_all:.1%} of their sweeping tickets on the posted weeks;",
       f"{off_time:,} of {in_route:,} outside the posted time (not counted)")
 
+# A block with no side matched to a route still gets the posted route days around it, so the card can say
+# which days the routes give it (without which side is which) or that no route covers it. The test points
+# sit 6 m off each side of the middle of each piece of the block's line: streets often form a route's edge,
+# with another route across, and a block can run past a route's end.
+OFF = 6 / PX_M
+px, py, owner = [], [], []
+for k in range(len(blocks)):
+    if sweeps.get(k):
+        continue
+    for ln in geo[k]["lines"]:
+        seg = np.hypot(*np.diff(ln, axis=0).T)
+        if not seg.sum():
+            continue
+        cum = np.r_[0, np.cumsum(seg)]
+        j = min(int(np.searchsorted(cum, cum[-1] / 2, side="right")) - 1, len(seg) - 1)
+        mid = ln[j] + (cum[-1] / 2 - cum[j]) / seg[j] * (ln[j + 1] - ln[j])
+        ux, uy = (ln[j + 1] - ln[j]) / seg[j]
+        for sgn in (1, -1):
+            px.append(mid[0] - sgn * uy * OFF)
+            py.append(mid[1] + sgn * ux * OFF)
+            owner.append(k)
+plon, plat = lonlat(px, py)
+owner = np.array(owner, int)
+areas = collections.defaultdict(list)   # a Monday-to-Friday route is five route days over one area: test it once
+for r in routes:
+    areas[b"".join(q.tobytes() for q in r["rings"])].append(r)
+around = collections.defaultdict(set)   # block -> {(weekdays, start, end, weeks)}
+for rs in areas.values():
+    for k in set(owner[inside(plon, plat, rs[0]["rings"])].tolist()):
+        around[k].update((tuple(r["dows"]), r["s0"], r["s1"], r["on"]) for r in rs)
+print(f"{len(around):,} of {len(set(owner.tolist())):,} blocks without a matched side sit in a posted route")
+
 # ---------- meters: officer visits per half hour, Monday to Saturday ----------
 m = d[d.meter].sort_values(["b", "date", "mins"])
 cnt = m.groupby("b").size()
@@ -417,6 +455,8 @@ for k, (st, h, part) in enumerate(blocks):
         rec["w"] = sweeps[k]
     if unrouted.get(k):
         rec["wu"] = unrouted[k]
+    if around.get(k):
+        rec["wr"] = sorted([list(dows), s0, s1, on] for dows, s0, s1, on in around[k])   # route days around it
     if meters.get(k):
         rec["m"] = meters[k]
     nz = np.flatnonzero(halfhours[k])
@@ -439,7 +479,7 @@ streets = [[] for _ in names]
 for s_ix, h, key, suffix in index:
     streets[s_ix].append([h, cell_ix[key], suffix] if suffix else [h, cell_ix[key]])
 meta = dict(start=str(START.date()), end=str(END.date()), total=total, matched=len(d), phase=round(phase_hits / phase_all, 3),
-            cell=CELL, sweep_min=SWEEP_MIN, names=names, kinds=kinds, cells=cell_keys)
+            cell=CELL, sweep_min=SWEEP_MIN, routes_around=True, names=names, kinds=kinds, cells=cell_keys)
 (OUT / "index.json").write_text(json.dumps(meta, separators=(",", ":")))
 (OUT / "streets.json").write_text(json.dumps(streets, separators=(",", ":")))
 sizes = np.array(sizes)

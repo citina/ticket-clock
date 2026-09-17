@@ -207,7 +207,7 @@
       <dt>Blocks and sides</dt>
       <dd>Each ticket's address is matched to the City of Los Angeles street centerlines (LA GeoHub), which list the house numbers on each side of every stretch of street. A block is one street's hundred block, and its line on the map is the part of the street those numbers cover. Tickets written at an intersection, like "5th St / Wall St", have no house number and are left out, and so are streets outside the City of Los Angeles. The centerlines also say which side of the street has the even numbers, so the card names the compass side.</dd>
       <dt>Sweeping schedule</dt>
-      <dd>The posted day, weeks and time come from StreetsLA's map of posted sweeping routes. Each route covers an area and is swept on two days, one for each side of the street. A side gets the route day that matches the weekday of most of its sweeping tickets, among the routes those tickets sit inside. A side needs at least 8 sweeping tickets for that. A few routes, like Downtown's, are swept every week; one with no fixed time is left out. Tickets written outside the posted time aren't counted. "Tickets were written on X% of sweep days" counts posted days with at least one ticket, leaving out holidays and any day with no sweeping tickets anywhere in the city.</dd>
+      <dd>The posted day, weeks and time come from StreetsLA's map of posted sweeping routes. Each route covers an area and is swept on two days, one for each side of the street. A side gets the route day that matches the weekday of most of its sweeping tickets, among the routes those tickets sit inside. A side needs at least 8 sweeping tickets for that. A few routes, like Downtown's, are swept every week; one with no fixed time is left out. Tickets written outside the posted time aren't counted. When neither side is matched, the card lists the posted route days around the block instead (tested a few metres to each side of the street), without saying which side gets which, or says that no posted route covers it. "Tickets were written on X% of sweep days" counts posted days with at least one ticket, leaving out holidays and any day with no sweeping tickets anywhere in the city.</dd>
       <dt>Meter patrols</dt>
       <dd>Monday to Saturday, 8 am to 8 pm, holidays left out. A visit is a group of meter tickets on one block with no gap over 10 minutes. An officer who finds every meter paid leaves no ticket, so the visit rate is adjusted for those empty visits, assuming the number of expired cars an officer finds on a visit is random (Poisson). A block needs at least 20 meter tickets. Which blocks have meters comes from LADOT's meter inventory (dataset s49e-q6j2).</dd>
       <dt>Ticket kinds</dt>
@@ -414,6 +414,23 @@ function timeDots(host, b){
   H('div',{className:'evid',style:'margin-top:6px',innerHTML:`The most ticketed kind here. ${per===1?'Each dot is one ticket':`Each dot is about ${per} tickets`}, placed at the half hour it was written.${wins.length?' <span style="white-space:nowrap"><span class="sw win" style="height:10px;vertical-align:-1px"></span> posted sweeping time</span>.':''}`},host);
 }
 const when=t=>`${t[5]>=.85?'mostly weekdays':'most often '+DAYLONG[t[3]]+'s'}, usually ${usual(t[4])}`;
+// no side matched to a route: the posted route days around the block (b.wr), without which side gets which, or none
+const dayList=ds=>ds.length===1?DAYLONG[ds[0]]:ds.length===2?`${DAYLONG[ds[0]]} and ${DAYLONG[ds[1]]}`
+  :ds.every((d,i)=>!i||d===ds[i-1]+1)?`${DAYLONG[ds[0]]} to ${DAYLONG[ds[ds.length-1]]}`:ds.slice(0,-1).map(d=>DAYLONG[d]).join(', ')+' and '+DAYLONG[ds[ds.length-1]];
+function noSchedule(host, b, n){
+  const lookup=' Look up your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.';
+  const tix=n?`${n.toLocaleString()} sweeping ticket${n>1?'s were':' was'} written here since ${since()}`:`No sweeping tickets were written here since ${since()}`;
+  if(!b.wr){ H('div',{className:'rule-line',innerHTML:`<b>No sweeping schedule found.</b> None of StreetsLA's posted sweeping routes covers this block. ${tix}.${lookup}`},host); return; }
+  const g=new Map(); b.wr.forEach(([dows,s0,s1,on])=>{ const k=`${on}|${s0}|${s1}`; if(!g.has(k)) g.set(k,new Set()); dows.forEach(d=>g.get(k).add(d)); });
+  const parts=[...g].map(([k,set])=>{ const [on,s0,s1]=k.split('|').map(Number), ds=[...set].sort((a,c)=>a-c);
+    return {on, days:ds.length, txt:on?`${dayList(ds)}, ${phaseTxt(on)} weeks, ${fmtRange(s0,s1)}`:`every ${dayList(ds)}, ${fmtRange(s0,s1)}`}; });
+  const cap=t=>t[0].toUpperCase()+t.slice(1), split=parts.length>1||parts.some(x=>x.on&&x.days>1);
+  H('div',{className:'rule-line',innerHTML:`StreetsLA's posted sweeping routes around this block: ${parts.map(x=>`<b>${esc(cap(x.txt))}</b>`).join(' or ')}.`},host);
+  const which=!n?`${tix}, so the tickets can't show which side gets which.`
+    :b.wu?`${tix}, but not inside these routes on their days, so they can't show which side gets which.`
+    :`Only ${tix[0].toLowerCase()+tix.slice(1)}, too few to show which side gets which.`;
+  H('div',{className:'evid',innerHTML:(split?`Each side of the street gets one of these, and the list doesn't say which. ${which}`:`${tix}.`)+lookup},host);
+}
 function renderCard(b){
   const p=$('#panel'); p.innerHTML='';
   if(!b){ H('div',{className:'p-eyebrow',textContent:'Street rules'},p); H('div',{className:'p-title',textContent:'Pick a block'},p);
@@ -425,10 +442,11 @@ function renderCard(b){
 
   const sc=H('div',{className:'card'},p); H('h4',{textContent:'Street sweeping'},sc);
   const groups=sweepGroups(b), sw=b.k.find(t=>META.kinds[t[0]]==='Street cleaning');
-  if(!groups.length) H('div',{className:'rule-line',innerHTML:'<b>No sweeping schedule found.</b> '+(!sw
+  if(!groups.length&&!META.routes_around) H('div',{className:'rule-line',innerHTML:'<b>No sweeping schedule found.</b> '+(!sw   // data from before the route check
     ? `No sweeping tickets here since ${since()}. Either there's no posted sweeping, or nobody parks during it.`
     : b.wu ? `${sw[1].toLocaleString()} sweeping tickets here since ${since()}, but none of StreetsLA's posted routes covers where they were written, so there's no posted schedule to show.`
     : `Only ${sw[1]} sweeping ticket${sw[1]>1?'s':''} here since ${since()}, too few to work out a schedule.`)},sc);
+  else if(!groups.length) noSchedule(sc,b,sw?sw[1]:0);
   groups.forEach(g=>{ const [, dows, s0, s1, on]=g[0], n=g.reduce((a,x)=>a+x[7],0), tdays=g.reduce((a,x)=>a+x[8],0)/g.length,
       rate=g.reduce((a,x)=>a+x[5]*x[6],0)/g.reduce((a,x)=>a+x[6],0);
     const box=H('div',{className:'side'},sc), head=H('div',{className:'side-head'},box);
