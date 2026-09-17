@@ -144,6 +144,8 @@
   .krow{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px 12px;width:100%;text-align:left;
         appearance:none;border:0;background:none;color:inherit;font:inherit;cursor:pointer;border-radius:8px;padding:6px 8px}
   .krow:hover,.krow[aria-expanded="true"]{background:var(--well)}
+  .krow.flat,.krow.flat:hover{cursor:default;background:none}   /* data from before the kinds could be opened */
+  .krow.flat .nm::after{content:""}
   .krow .nm{font-weight:500}
   .krow .nm::after{content:"›";color:var(--ink-3);font-weight:400;margin-left:6px}
   .krow[aria-expanded="true"] .nm::after{content:"⌄"}
@@ -482,18 +484,19 @@ function renderCard(b){
     H('div',{className:'evid',textContent:'LADOT\'s data doesn\'t include the hours posted on the meters, so check the meter itself.'},mc); }
 
   const kc=H('div',{className:'card'},p); H('h4',{textContent:'What gets ticketed here'},kc);
-  const cur=charts(b), lead=b.k[0][0];
+  const cur=charts(b), lead=b.k[0][0], tappable=!!(META.kind_src||cur.size);
   if(cur.has(lead)) timeDots(kc,b,lead,cur.get(lead),true);
-  H('div',{className:'evid',style:'margin:14px 0 0',textContent:'Tap a kind below for the code LADOT writes on the ticket, and for its own times of day.'},kc);
+  if(tappable) H('div',{className:'evid',style:'margin:14px 0 0',textContent:'Tap a kind below for the code LADOT writes on the ticket, and for its own times of day.'},kc);
   const kg=H('div',{className:'kinds',style:'margin-top:6px'},kc), kmax=b.k[0][1], FEW=8;
   const extra=[];
   b.k.forEach((t,i)=>{ const kind=META.kinds[t[0]], src=(META.kind_src||[])[t[0]];
-    const row=H('button',{className:'krow',type:'button'},kg), a=H('div',{},row);
+    const row=tappable?H('button',{className:'krow',type:'button'},kg):H('div',{className:'krow flat'},kg), a=H('div',{},row);
     H('div',{className:'nm',textContent:kind},a);
     H('div',{className:'meta',textContent:`${t[2]?`$${t[2]} · `:''}${when(t)}`},a);
     const r=H('div',{},row); H('div',{className:'n',textContent:t[1].toLocaleString()},r);
     const bar=H('div',{className:'bar'},r); bar.style.width=Math.max(4,100*t[1]/kmax)+'%';
     const det=H('div',{className:'kdet'},kg); det.hidden=true;
+    if(!tappable){ if(i>=FEW) extra.push(row,det); return; }
     const note=(META.kind_note||[])[t[0]]||'';
     const codeLine=!src?'':src[0][0]==='?'?(note?'':'LADOT recorded no code or wording for these.')
       :`LADOT's ticket ${src[2]>1?'codes':'code'} ${src[0].map(c=>`<b>${esc(c)}</b>`).join(', ')}`
@@ -512,7 +515,7 @@ function renderCard(b){
     row.addEventListener('pointerleave',hideTip);
     if(i>=FEW) extra.push(row,det); });
   if(extra.length){ const more=H('button',{className:'chip sm',style:'margin-top:12px'},kc); let open=false;
-    const set=()=>{ extra.forEach(e=>{ e.hidden=!open||(e.classList.contains('kdet')&&e.previousElementSibling.getAttribute('aria-expanded')!=='true'); }); more.textContent=open?'Show fewer':`Show all ${b.k.length} kinds`; more.setAttribute('aria-expanded',open); };
+    const set=()=>{ extra.forEach(e=>{ e.hidden=!open||(e.classList.contains('kdet')&&e.previousElementSibling.getAttribute('aria-expanded')!=='true'||e.classList.contains('kdet')&&!e.childElementCount); }); more.textContent=open?'Show fewer':`Show all ${b.k.length} kinds`; more.setAttribute('aria-expanded',open); };
     more.onclick=()=>{ open=!open; set(); if(!open&&more.getBoundingClientRect().top<0) more.scrollIntoView({block:'center'}); }; set(); }
   H('div',{className:'evid',style:'margin:4px 0 14px;padding-top:12px;border-top:1px solid var(--rule)',textContent:'This card is worked out from LADOT tickets, not read from the signs, so a rule nobody was ticketed for doesn\'t show up. Check the posted signs where you park.'},p);
 }
