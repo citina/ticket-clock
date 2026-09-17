@@ -1,0 +1,532 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LA Street Rules</title>
+<!-- Hand-written page (no build step). Its data in data/ is made by analyze_city.py and published by the weekly workflow. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    color-scheme:light;
+    --plane:#f2f2ef; --surface:#fcfcfb; --well:#e8e8e2;
+    --ink:#14140f; --ink-2:#56554f; --ink-3:#8a8880;
+    --rule:#e1e0d9; --edge:#c9c8c0;
+    --accent:#2a78d6; --accent-ink:#1c5cab;
+    --panel:#1a1a19; --panel-ink:#fcfcfb;
+    --sign:#ffffff; --sign-red:#c8102e; --sign-ink:#111111;
+    --map-filter:none; --halo:rgba(20,20,15,.28);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme:dark;
+      --plane:#0d0d0d; --surface:#1a1a19; --well:#262625;
+      --ink:#ffffff; --ink-2:#c3c2b7; --ink-3:#898781;
+      --rule:#2c2c2a; --edge:#3d3d3a;
+      --accent:#3987e5; --accent-ink:#86b6ef;
+      --panel:#262625; --panel-ink:#ffffff;
+      --sign:#ebeae5; --sign-red:#b50e29; --sign-ink:#111111;
+      --map-filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.86); --halo:rgba(255,255,255,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --plane:#0d0d0d; --surface:#1a1a19; --well:#262625;
+    --ink:#ffffff; --ink-2:#c3c2b7; --ink-3:#898781;
+    --rule:#2c2c2a; --edge:#3d3d3a;
+    --accent:#3987e5; --accent-ink:#86b6ef;
+    --panel:#262625; --panel-ink:#ffffff;
+    --sign:#ebeae5; --sign-red:#b50e29; --sign-ink:#111111;
+    --map-filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.86); --halo:rgba(255,255,255,.35);
+  }
+
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{margin:0;background:var(--plane);color:var(--ink);font-family:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+       font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  main{max-width:1280px;margin:0 auto;padding:26px 20px 72px}
+  a{color:var(--accent-ink)}
+  .mast{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+        color:var(--ink-3);display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
+  .mast a{color:inherit}
+  h1{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:clamp(44px,8vw,66px);
+     line-height:.92;margin:20px 0 12px;text-wrap:balance}
+  .lede{font-size:18.5px;line-height:1.5;color:var(--ink-2);max-width:62ch;margin:0}
+  .note{font-size:12.5px;line-height:1.45;color:var(--ink-3);max-width:75ch;margin:0}
+  .intro{display:grid;grid-template-columns:minmax(0,1fr) 430px;grid-template-rows:auto 1fr;gap:0 20px;margin:0 0 26px}
+  .intro .note{grid-column:2;grid-row:1 / span 2;padding-top:24px}
+  @media (max-width:1000px){ .intro{grid-template-columns:minmax(0,1fr)} .intro .note{grid-column:1;grid-row:auto;padding-top:0;margin-top:16px} }
+  .note b{color:var(--ink-2);font-weight:500}
+  .note p{margin:0 0 6px;max-width:none}
+  .note a{color:inherit}
+  h2{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:34px;line-height:1.02;margin:8px 0 14px;text-wrap:balance}
+  p{max-width:65ch;margin:0 0 14px}
+  .code{display:inline-flex;gap:10px;align-items:center;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+        font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+  .code b{font-weight:600;color:var(--ink-2);border:1px solid var(--edge);border-radius:3px;padding:1px 6px;letter-spacing:.04em}
+  section{margin-top:56px;padding-top:28px;border-top:1px solid var(--rule)}
+  svg{display:block;max-width:100%;height:auto;overflow:visible}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin:10px 0 0;padding:0;list-style:none}
+  .legend li{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:18px;height:4px;border-radius:2px;display:inline-block;flex:none}
+  .chip{appearance:none;cursor:pointer;border:1px solid var(--edge);background:var(--surface);color:var(--ink);
+        font:500 14px "Barlow",system-ui,sans-serif;padding:5px 12px;border-radius:999px;min-height:34px}
+  .chip:hover{border-color:var(--ink-3)}
+  .chip[aria-pressed="true"]{background:var(--ink);color:var(--plane);border-color:var(--ink)}
+  .chip.sm{font-size:13px;padding:3px 10px;min-height:30px}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* ---------- finder + map ---------- */
+  .explorer{display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:20px;align-items:start}
+  .mapcol{position:sticky;top:12px}
+  @media (max-width:1000px){ .explorer{grid-template-columns:minmax(0,1fr)} .mapcol{position:static} }
+  .findbar{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center}
+  .locbtn{appearance:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--ink);background:var(--ink);color:var(--plane);
+          font:600 15px "Barlow",system-ui,sans-serif;padding:7px 14px;border-radius:8px;min-height:40px}
+  .locbtn:disabled{opacity:.6;cursor:progress}
+  .locbtn svg{width:16px;height:16px;flex:none}
+  .searchbox{position:relative;flex:1 1 260px;max-width:420px}
+  .searchbox input{font:15px "Barlow",system-ui,sans-serif;color:var(--ink);background:var(--surface);border:1px solid var(--edge);
+        border-radius:8px;padding:8px 10px;min-height:40px;width:100%}
+  .sugg{position:absolute;z-index:10;left:0;right:0;top:calc(100% + 4px);margin:0;padding:4px;list-style:none;background:var(--surface);
+        border:1px solid var(--edge);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+  .sugg li{padding:7px 10px;border-radius:6px;cursor:pointer;font-size:15px;display:flex;justify-content:space-between;gap:12px}
+  .sugg li small{color:var(--ink-3);font-size:12.5px;white-space:nowrap}
+  .sugg li[aria-selected="true"],.sugg li:hover{background:var(--well)}
+  .find-msg{font-size:14.5px;line-height:1.5;margin:12px 0 0;max-width:70ch}
+  .find-msg:empty{display:none}
+  .cands{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;max-height:132px;overflow-y:auto}
+  .cands:empty{display:none}
+  .mapwrap{position:relative;margin:12px 0 0;background:var(--surface);border:1px solid var(--rule);border-radius:12px;overflow:hidden;
+           touch-action:none;user-select:none;-webkit-user-select:none;height:clamp(360px,70vh,680px)}
+  @media (max-width:1000px){ .mapwrap{height:clamp(280px,60vh,520px)} }
+  .mapwrap svg{width:100%;height:100%;display:block;max-width:none}
+  .tiles{opacity:.72;filter:var(--map-filter)}
+  .blk{fill:none;stroke:var(--ink);stroke-opacity:.72;stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke}
+  .hit{fill:none;stroke:transparent;stroke-width:16;stroke-linecap:round;cursor:pointer;vector-effect:non-scaling-stroke}
+  .zoom{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:4px}
+  .zoom button{width:34px;height:34px;border-radius:8px;border:1px solid var(--edge);background:var(--surface);color:var(--ink);
+               font:600 18px/1 "Barlow",sans-serif;cursor:pointer}
+  .zoom button.fit{font-size:11px;font-family:"IBM Plex Mono",monospace}
+  .maptag{position:absolute;bottom:6px;font-size:11px;padding:1px 6px;border-radius:4px;color:var(--ink-2);
+          background:color-mix(in oklab,var(--surface) 88%,transparent)}
+  .maptag.r{right:8px}
+  .maptag.hint{left:50%;top:10px;bottom:auto;transform:translateX(-50%);font-size:13px;padding:4px 10px;color:var(--ink);white-space:nowrap}
+
+  /* ---------- the rules card ---------- */
+  .panel{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px 18px 6px;scroll-margin-top:12px}
+  .p-eyebrow{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+  .p-title{font-family:"Barlow Condensed","Barlow",sans-serif;font-weight:700;font-size:32px;line-height:1;margin:4px 0 6px}
+  .p-sub{font-size:14px;color:var(--ink-2)}
+  .card{border-top:1px solid var(--rule);padding:16px 0 14px;margin-top:14px}
+  .card h4{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:11px;font-weight:500;letter-spacing:.1em;
+           text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+  .side + .side{margin-top:18px;padding-top:16px;border-top:1px dashed var(--rule)}
+  .side-head{display:grid;grid-template-columns:132px 1fr;gap:14px;align-items:center}
+  .side-name{font-weight:600;font-size:15px;margin:0 0 4px}
+  .side-txt{font-size:14px;color:var(--ink-2);line-height:1.45}
+  .rule-line{font-size:14.5px;line-height:1.45}
+  .rule-line b{font-weight:600}
+  .evid{font-size:13px;line-height:1.5;color:var(--ink-2);margin-top:10px}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:13.5px;margin:10px 0 0}
+  .kv dt{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding-top:2px}
+  .kv dd{margin:0}
+  .sign{background:var(--sign);border-radius:7px;padding:5px;box-shadow:0 1px 2px rgba(0,0,0,.14),0 6px 18px rgba(0,0,0,.10)}
+  .sign-in{border:2.5px solid var(--sign-red);border-radius:4px;padding:8px 5px 9px;text-align:center;color:var(--sign-red);
+           font-family:"Barlow Condensed","Barlow",sans-serif;font-weight:700;text-transform:uppercase;line-height:1}
+  .sign-in svg{margin:0 auto 5px;width:32px;height:32px}
+  .sign .s1{font-size:18px} .sign .s2{font-size:14.5px;margin-top:4px} .sign .s3{font-size:18px;margin-top:4px} .sign .s4{font-size:12.5px;margin-top:5px;letter-spacing:.04em}
+  .sign .s5{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:9.5px;letter-spacing:.06em;margin-top:6px;color:var(--sign-ink)}
+  .odds6{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:6px 0 0}
+  .odds6 div{background:var(--well);border-radius:6px;padding:5px 0 6px;text-align:center}
+  .odds6 .k{display:block;font:10.5px "IBM Plex Mono",monospace;letter-spacing:.06em;color:var(--ink-3)}
+  .odds6 .v{display:block;font:600 15px "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+  .also{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+  .also li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 12px;font-size:14px}
+  .also .nm{font-weight:500}
+  .also .meta{grid-column:1;font-size:12.5px;color:var(--ink-2)}
+  .also .n{grid-column:2;grid-row:1;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-2);text-align:right;padding-top:2px}
+
+  .method{display:grid;grid-template-columns:160px 1fr;gap:12px 22px;font-size:14.5px;margin:18px 0 0}
+  .method dt{font-weight:600}
+  .method dd{margin:0;color:var(--ink-2);max-width:62ch}
+  @media (max-width:560px){ .method{grid-template-columns:1fr;gap:4px} .method dd{margin-bottom:12px} }
+  footer{margin-top:44px;font-size:13px;color:var(--ink-3)}
+  footer ul{padding-left:18px;margin:6px 0 0}
+  #tip{position:fixed;z-index:20;pointer-events:none;background:var(--panel);color:var(--panel-ink);font-size:12.5px;line-height:1.45;
+       padding:8px 10px;border-radius:6px;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+  @media (prefers-reduced-motion:no-preference){ .chip{transition:background-color .15s,border-color .15s} }
+</style>
+
+<main>
+  <div class="mast"><span>Curb Log · Citations · <a href="../">USC Ticket Clock</a></span><span id="mastRange">LADOT tickets · updated weekly</span></div>
+  <div class="intro">
+    <h1>LA Street Rules</h1>
+    <p class="lede">Find a block in the City of Los Angeles to see the parking rules its tickets point to: the street-sweeping day, hours and weeks, how often meter officers come by, and what else gets ticketed there.</p>
+    <div class="note">
+      <p><b>Not a guide to parking illegally.</b> This page doesn't suggest parking anywhere, or at any time, the rules don't allow. It shows when and where LADOT has written tickets, so the rules on each block and how they're enforced are easier to understand. Past tickets don't predict the next one: an officer can come by at any time.</p>
+      <p><b>Street sweeping signs.</b> Since March 2021, LA sweeps each street every other week (the 1st &amp; 3rd or the 2nd &amp; 4th time its weekday comes up in a month), but many signs still show only the day, like "No parking Thursday". LADOT says parking is legal on a street's off weeks and that it doesn't ticket then; a few tickets still get written, and LADOT says it dismisses those. The weeks on this page are from StreetsLA's list of posted routes, and <span id="notePhase">98%</span> of sweeping tickets across the city fell on them. For the official schedule, look up your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.</p>
+      <p><b>What the page loads.</b> The map images come from OpenStreetMap and the block data from this site, which GitHub hosts, one small area at a time, so both can tell roughly which part of the city you're looking at. If you use your location, it only moves the map; the exact spot isn't sent anywhere.</p>
+    </div>
+  </div>
+
+  <div class="explorer">
+    <div class="mapcol">
+      <div class="findbar">
+        <button class="locbtn" id="locBtn"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/><path d="M8 0v2.6M8 13.4V16M0 8h2.6M13.4 8H16" stroke="currentColor" stroke-width="1.6"/></svg>Use my location</button>
+        <div class="searchbox">
+          <input type="search" id="q" placeholder="Street or address, e.g. 3620 S Vermont Ave" autocomplete="off" spellcheck="false"
+                 role="combobox" aria-label="Find a street or address" aria-expanded="false" aria-controls="sugg" aria-autocomplete="list">
+          <ul class="sugg" id="sugg" role="listbox" hidden></ul>
+        </div>
+      </div>
+      <div aria-live="polite"><p class="find-msg" id="findMsg"></p><div class="cands" id="cands"></div></div>
+      <div class="mapwrap" id="mapwrap">
+        <div class="zoom"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button><button id="zfit" class="fit" aria-label="Show all of Los Angeles">LA</button></div>
+        <span class="maptag hint" id="hint" hidden>Zoom in to see the blocks</span>
+        <span class="maptag r">© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</span>
+      </div>
+      <ul class="legend" id="legend"></ul>
+    </div>
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+
+  <section id="method">
+    <div class="code"><b>Method</b> How this was measured</div>
+    <h2>How this was measured, and what it can't tell you</h2>
+    <dl class="method">
+      <dt>Data</dt>
+      <dd id="mData">LADOT parking citations (data.lacity.org, dataset 4f5p-udkv) from the last two years, rebuilt every week.</dd>
+      <dt>Blocks and sides</dt>
+      <dd>Each ticket's address is matched to the City of Los Angeles street centerlines (LA GeoHub), which list the house numbers on each side of every stretch of street. A block is one street's hundred block, and its line on the map is the part of the street those numbers cover. Tickets written at an intersection, like "5th St / Wall St", have no house number and are left out, and so are streets outside the City of Los Angeles. The centerlines also say which side of the street has the even numbers, so the card names the compass side.</dd>
+      <dt>Sweeping schedule</dt>
+      <dd>The posted day, weeks and time come from StreetsLA's map of posted sweeping routes. Each route covers an area and is swept on two days, one for each side of the street. A side gets the route day that matches the weekday of most of its sweeping tickets, among the routes those tickets sit inside. A side needs at least 8 sweeping tickets for that. A few routes, like Downtown's, are swept every week; one with no fixed time is left out. Tickets written outside the posted time aren't counted. "Ticketed on X% of sweep days" counts posted days with at least one ticket, leaving out holidays and any day with no sweeping tickets anywhere in the city.</dd>
+      <dt>Meter patrols</dt>
+      <dd>Monday to Saturday, 8 am to 8 pm, holidays left out. A visit is a group of meter tickets on one block with no gap over 10 minutes. An officer who finds every meter paid leaves no ticket, so the visit rate is adjusted for those empty visits, assuming the number of expired cars an officer finds on a visit is random (Poisson). A block needs at least 20 meter tickets. Which blocks have meters comes from LADOT's meter inventory (dataset s49e-q6j2).</dd>
+      <dt>Limits</dt>
+      <dd>A ticket only appears when someone broke the rule, so quiet blocks look less enforced than they are, and a rule nobody was ticketed for doesn't show up at all. Addresses that couldn't be matched are left out. Routes and staffing change, and none of this is a promise about next week. Always read the posted signs, and for sweeping, the city's schedule.</dd>
+    </dl>
+    <footer>
+      Sources
+      <ul>
+        <li><a href="https://data.lacity.org/Transportation/Parking-Citations/4f5p-udkv/about_data">LADOT Parking Citations</a> and <a href="https://data.lacity.org/Transportation/LADOT-Metered-Parking-Inventory-Policies/s49e-q6j2/about_data">Metered Parking Inventory</a>, data.lacity.org</li>
+        <li><a href="https://geohub.lacity.org/datasets/d3cd48afaacd4913b923fd98c6591276">Streets (Centerline)</a>, City of Los Angeles GeoHub</li>
+        <li><a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">Posted Street Sweeping Routes</a>, StreetsLA (as of July 2026): each route's area, days, weeks and posted time</li>
+        <li>Map © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, loaded from openstreetmap.org</li>
+        <li><a href="https://larchmontchronicle.com/to-adhere-to-parking-signs-or-not-to-adhere/">Larchmont Chronicle</a> on LADOT's policy for sweeping signs that still show every week, and <a href="https://lamaterial.com/p/la-wrongful-street-sweeping-tickets">L.A. Material</a> on sweeping tickets written on off weeks; the city's own lookup is at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a></li>
+        <li>For the streets around USC in more detail: <a href="../">USC Ticket Clock</a></li>
+      </ul>
+    </footer>
+  </section>
+</main>
+<div id="tip" hidden></div>
+
+<script>
+(function(){
+const NS='http://www.w3.org/2000/svg', $=s=>document.querySelector(s);
+function S(tag, attrs, parent){ const e=document.createElementNS(NS,tag); for(const k in (attrs||{})) e.setAttribute(k, attrs[k]); if(parent) parent.appendChild(e); return e; }
+function H(tag, props, parent){ const e=document.createElement(tag); Object.assign(e, props||{}); if(parent) parent.appendChild(e); return e; }
+const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], DAYLONG=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const pct=x=>Math.round(x*100)+'%';
+function fmtT(m){ m=Math.round(m); const h=Math.floor(m/60)%24, mm=m%60, ap=h>=12?'pm':'am', h12=h%12||12; return mm?`${h12}:${String(mm).padStart(2,'0')} ${ap}`:`${h12} ${ap}`; }
+function fmtRange(a,b){ const s=fmtT(a), e=fmtT(b); return s.slice(-2)===e.slice(-2) ? s.slice(0,-3)+'–'+e : s+'–'+e; }
+function usual(r){ return r.map(([a,b])=>fmtRange(a,b)).join(' or '); }
+function fmtDate(s){ return new Date(s+'T12:00:00').toLocaleDateString('en-US',{day:'numeric',month:'short',year:'numeric'}); }
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const tip=$('#tip');
+function showTip(e, html){ tip.innerHTML=html; tip.hidden=false; const r=tip.getBoundingClientRect(); let x=e.clientX+14, y=e.clientY+14;
+  if(x+r.width>innerWidth-8) x=e.clientX-r.width-14; if(y+r.height>innerHeight-8) y=e.clientY-r.height-14; tip.style.left=x+'px'; tip.style.top=y+'px'; }
+function hideTip(){ tip.hidden=true; }
+const stacked=()=>matchMedia('(max-width:1000px)').matches;
+const msg=html=>{ $('#findMsg').innerHTML=html; };
+
+/* ============ map geometry: zoom-17 Web Mercator pixels (about 1 m each in LA), shifted to a local origin ============ */
+const N17=2**17*256, PX_M=156543.03392*Math.cos(34.05*Math.PI/180)/2**17;
+function z17(lat, lon){ const r=lat*Math.PI/180; return [(lon+180)/360*N17, (1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*N17]; }
+const O=z17(34.05,-118.4).map(Math.round);   // keeps SVG numbers small enough to stay exact
+const LA=[-118.67,33.70,-118.15,34.34];       // the City of Los Angeles, roughly: the map's home view and pan limits
+const [LX0,LY1]=z17(LA[1],LA[0]).map((v,i)=>v-O[i]), [LX1,LY0]=z17(LA[3],LA[2]).map((v,i)=>v-O[i]);
+const BOX_M=800, SHOW_M=3000;                  // a found block or location shows about 800 m; blocks load once the view is under 3 km
+const TILE_URL=(z,x,y)=>`https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
+
+let META=null, STREETS=null, selected=null, fix=null;
+const cells=new Map();   // cell key -> 'loading' | [block records]
+
+/* ============ the map ============ */
+const wrap=$('#mapwrap');
+const svg=S('svg',{role:'img','aria-label':'Map of Los Angeles streets; lines are blocks with tickets'});
+wrap.insertBefore(svg, wrap.firstChild);
+const gTiles=S('g',{class:'tiles'},svg), gHalo=S('g',{},svg), gBlk=S('g',{},svg), gYou=S('g',{},svg), gHit=S('g',{},svg);
+let vb={x:(LX0+LX1)/2, y:(LY0+LY1)/2, w:LX1-LX0, h:0};
+const minW=()=>150/PX_M, maxW=()=>Math.max(LX1-LX0, (LY1-LY0)*wrap.clientWidth/Math.max(1,wrap.clientHeight));
+function setVB(){
+  const asp=wrap.clientHeight/Math.max(1,wrap.clientWidth);
+  vb.w=Math.min(maxW(),Math.max(minW(),vb.w)); vb.h=vb.w*asp;
+  const cx=Math.min(LX1,Math.max(LX0,vb.x+vb.w/2)), cy=Math.min(LY1,Math.max(LY0,vb.y+vb.h/2));
+  vb.x=cx-vb.w/2; vb.y=cy-vb.h/2;
+  svg.setAttribute('viewBox',`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  drawTiles(); drawYou(); showBlocks();
+}
+function centerOn(x, y, w){ vb.w=w; const asp=wrap.clientHeight/Math.max(1,wrap.clientWidth); vb.x=x-w/2; vb.y=y-w*asp/2; setVB(); }
+function fitLA(){ centerOn((LX0+LX1)/2,(LY0+LY1)/2,Math.max(LX1-LX0,(LY1-LY0)*wrap.clientWidth/Math.max(1,wrap.clientHeight))); }
+
+// OpenStreetMap tiles for the view only (their policy allows what a reader is looking at, nothing ahead of time)
+const tileGroups=new Map();   // zoom -> {g, tiles: Map(key -> image), pending}
+let tz=null;
+function drawTiles(){
+  const cw=wrap.clientWidth||600, dpr=Math.min(2,devicePixelRatio||1);
+  const z=Math.max(10,Math.min(19,Math.round(17+Math.log2(dpr*cw/vb.w)))), size=256*2**(17-z), pad=vb.w/cw;
+  if(!tileGroups.has(z)) tileGroups.set(z,{g:S('g',{},gTiles), tiles:new Map(), pending:0});
+  const L=tileGroups.get(z); gTiles.appendChild(L.g);   // the current zoom draws on top while the old one fills the gaps
+  const x0=Math.floor((vb.x+O[0])/size), x1=Math.floor((vb.x+vb.w+O[0])/size), y0=Math.floor((vb.y+O[1])/size), y1=Math.floor((vb.y+vb.h+O[1])/size), want=new Set();
+  for(let x=x0;x<=x1;x++) for(let y=y0;y<=y1;y++){ const key=`${x}/${y}`; want.add(key); if(L.tiles.has(key)) continue;
+    const im=S('image',{href:TILE_URL(z,x,y),x:x*size-O[0],y:y*size-O[1],width:size+pad,height:size+pad,preserveAspectRatio:'none'},L.g);
+    L.pending++; const done=()=>{ L.pending--; if(!L.pending && tz===z) dropOld(); }; im.addEventListener('load',done,{once:true}); im.addEventListener('error',done,{once:true});
+    L.tiles.set(key,im); }
+  L.tiles.forEach((im,key)=>{ if(!want.has(key)){ im.remove(); L.tiles.delete(key); } });
+  if(tz!==z){ tz=z; if(!L.pending) dropOld(); }
+}
+function dropOld(){ tileGroups.forEach((L,z)=>{ if(z!==tz){ L.g.remove(); tileGroups.delete(z); } }); }
+
+/* pan & zoom, as on the USC map: drag, pinch, ⌘/ctrl-scroll, double-click, buttons */
+function toMap(e){ const r=svg.getBoundingClientRect(); return {x:vb.x+(e.clientX-r.left)/r.width*vb.w, y:vb.y+(e.clientY-r.top)/r.height*vb.h}; }
+function zoomAt(f, cx, cy){ const nw=Math.min(maxW(),Math.max(minW(),vb.w*f)), k=nw/vb.w; vb.x=cx-(cx-vb.x)*k; vb.y=cy-(cy-vb.y)*k; vb.w=nw; setVB(); }
+wrap.addEventListener('wheel',e=>{ if(!(e.ctrlKey||e.metaKey)) return; e.preventDefault(); const p=toMap(e); zoomAt(Math.exp(e.deltaY*0.01),p.x,p.y); },{passive:false});
+const ptrs=new Map(); let dragged=false, down=null, pinch=null;
+wrap.addEventListener('pointerdown',e=>{ if(e.target.closest('.zoom')||e.target.closest('a')) return; ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); down={x:e.clientX,y:e.clientY}; dragged=false;
+  if(ptrs.size===2){ const [a,b]=[...ptrs.values()]; pinch={d:Math.hypot(a.x-b.x,a.y-b.y)}; } });
+wrap.addEventListener('pointermove',e=>{ if(!ptrs.has(e.pointerId)) return; const prev=ptrs.get(e.pointerId), r=svg.getBoundingClientRect();
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===2 && pinch){ const [a,b]=[...ptrs.values()], dd=Math.hypot(a.x-b.x,a.y-b.y), p=toMap({clientX:(a.x+b.x)/2,clientY:(a.y+b.y)/2}); zoomAt(pinch.d/dd,p.x,p.y); pinch.d=dd; dragged=true; return; }
+  if(Math.hypot(e.clientX-down.x,e.clientY-down.y)>4){ dragged=true; if(!wrap.hasPointerCapture(e.pointerId)) wrap.setPointerCapture(e.pointerId); }
+  if(dragged){ vb.x-=(e.clientX-prev.x)/r.width*vb.w; vb.y-=(e.clientY-prev.y)/r.height*vb.h; setVB(); hideTip(); } });
+const endPtr=e=>{ ptrs.delete(e.pointerId); if(ptrs.size<2) pinch=null; setTimeout(()=>{ if(!ptrs.size) dragged=false; },0); };
+wrap.addEventListener('pointerup',endPtr); wrap.addEventListener('pointercancel',endPtr);
+svg.addEventListener('dblclick',e=>{ const p=toMap(e); zoomAt(0.5,p.x,p.y); });
+$('#zin').onclick=()=>zoomAt(0.6,vb.x+vb.w/2,vb.y+vb.h/2);
+$('#zout').onclick=()=>zoomAt(1/0.6,vb.x+vb.w/2,vb.y+vb.h/2);
+$('#zfit').onclick=fitLA;
+
+/* ============ blocks: loaded a cell (about 1 km) at a time, only when zoomed in ============ */
+function showBlocks(){
+  const on=vb.w*PX_M<=SHOW_M;
+  $('#hint').hidden=on||!META; gBlk.style.display=gHit.style.display=gHalo.style.display=on?'':'none';
+  if(!on||!META) return;
+  const C=META.cell, cx0=Math.floor((vb.x+O[0])/C), cx1=Math.floor((vb.x+vb.w+O[0])/C), cy0=Math.floor((vb.y+O[1])/C), cy1=Math.floor((vb.y+vb.h+O[1])/C);
+  for(let x=cx0;x<=cx1;x++) for(let y=cy0;y<=cy1;y++) loadCell(`${x}_${y}`);
+}
+const cellSet=()=>META._cells||(META._cells=new Set(META.cells));
+function loadCell(key){
+  if(cells.has(key)) return Promise.resolve(cells.get(key));
+  if(!cellSet().has(key)){ cells.set(key,[]); return Promise.resolve([]); }
+  const p=fetch(`data/cells/${key}.json`).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); }).then(recs=>{
+    const [cx,cy]=key.split('_').map(Number), ox=cx*META.cell-O[0], oy=cy*META.cell-O[1];
+    recs.forEach(b=>{ b.ox=ox; b.oy=oy; b.d=b.g.map(ln=>{ let s=''; for(let i=0;i<ln.length;i+=2) s+=(i?'L':'M')+(ln[i]+ox)+','+(ln[i+1]+oy); return s; }).join('');
+      S('path',{d:b.d,class:'blk'},gBlk);
+      const h=S('path',{d:b.d,class:'hit','aria-label':blockName(b)},gHit);
+      h.addEventListener('click',()=>{ if(!dragged){ hideTip(); pick(b); } });
+      h.addEventListener('pointermove',e=>{ if(e.pointerType==='mouse') showTip(e,`<b>${esc(blockName(b))}</b>${b.x.length?'<br>'+esc(between(b)):''}`); });
+      h.addEventListener('pointerleave',hideTip); });
+    cells.set(key,recs); return recs;
+  }).catch(()=>{ cells.delete(key); msg('Couldn\'t load the blocks for this part of the map. Check the connection and move the map to try again.'); return []; });
+  cells.set(key,p); return p;
+}
+const hund=h=>h?`${h} block`:'1–99 block';
+const blockName=b=>`${META.names[b.s]}, ${hund(b.h)}`;
+function between(b){ const n=b.x.map(i=>META.names[i]); return n.length===2?`Between ${n[0]} and ${n[1]}`:n.length?`Near ${n[0]}`:''; }
+function drawHalo(){ gHalo.innerHTML=''; if(selected) S('path',{d:selected.d,class:'blk',style:'stroke:var(--halo);stroke-opacity:1;stroke-width:16'},gHalo); }
+function drawYou(){ gYou.innerHTML=''; if(!fix) return; const u=vb.w/(wrap.clientWidth||600);
+  S('circle',{cx:fix[0],cy:fix[1],r:7*u,fill:'var(--accent)',stroke:'var(--surface)','stroke-width':2.5,'vector-effect':'non-scaling-stroke'},gYou); }
+function blockCentre(b){ const xs=[], ys=[]; b.g.forEach(ln=>{ for(let i=0;i<ln.length;i+=2){ xs.push(ln[i]+b.ox); ys.push(ln[i+1]+b.oy); } });
+  return [(Math.min(...xs)+Math.max(...xs))/2,(Math.min(...ys)+Math.max(...ys))/2]; }
+
+/* ============ picking a block: the card, the halo, the link ============ */
+function pick(b){
+  selected=b; drawHalo(); renderCard(b);
+  try{ history.replaceState(null,'','#'+b.id); }catch(e){}
+  $('#cands').querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.id===b.id));
+  if(stacked()){ const p=$('#panel'); if(p.getBoundingClientRect().top>innerHeight-160) p.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); }
+}
+// go to a block from search or a link: load its cell, center the map on it at about 800 m
+async function goBlock(entry){
+  const [h, ci, suffix]=entry.e, key=META.cells[ci], recs=await loadCell(key), id=blockId(entry.s,h,suffix);
+  const b=recs.find(r=>r.id===id); if(!b) return;
+  const [x,y]=blockCentre(b); centerOn(x,y,vb.w*PX_M<BOX_M?vb.w:BOX_M/PX_M); pick(b);
+}
+const slug=s=>s.toUpperCase().replace(/[^A-Z0-9]+/g,'-').replace(/^-|-$/g,'');
+const blockId=(s,h,suffix)=>`${h}-${slug(META.names[s])}${suffix?'-'+suffix:''}`;
+
+/* ============ the rules card ============ */
+const OPP={north:'south',south:'north',east:'west',west:'east',northeast:'southwest',southwest:'northeast',northwest:'southeast',southeast:'northwest'};
+const phaseTxt=on=>on===1?'1st & 3rd':'2nd & 4th';
+const since=()=>fmtDate(META.start);
+function sideName(b, side){ const dir=b.e?(side==='even'?b.e:OPP[b.e]):null;
+  return dir?`${dir[0].toUpperCase()+dir.slice(1)} side (${side} numbers)`:`${side[0].toUpperCase()+side.slice(1)}-numbered side`; }
+// sweep sides, from StreetsLA's posted routes: [side, weekdays (Mon = 0), posted start, posted end (minutes),
+// weeks (1 = 1st & 3rd, 2 = 2nd & 4th, 0 = every week), share of posted days ticketed, posted days, tickets, days with tickets]
+function sweepGroups(b){ const g={}; (b.w||[]).forEach(s=>{ const k=`${s[1]}|${s[2]}|${s[3]}|${s[4]}`; (g[k]=g[k]||[]).push(s); }); return Object.values(g); }
+const dayText=dows=>dows.length===1?DAYLONG[dows[0]]:`${DAYLONG[dows[0]]} to ${DAYLONG[dows[dows.length-1]]}`;
+function nextDays(dows, on, n){ const out=[], d=new Date(); d.setHours(12,0,0,0);
+  for(let k=0;k<75&&out.length<n;k++){ const x=new Date(d.getTime()+k*864e5), nth=Math.floor((x.getDate()-1)/7)+1;
+    if(dows.includes((x.getDay()+6)%7) && (!on||nth===on||nth===on+2)) out.push(x.toLocaleDateString('en-US',{weekday:'short',day:'numeric',month:'short'})); } return out; }
+function signHTML(dows, s0, s1, on){
+  return `<div class="sign" role="img" aria-label="No parking ${fmtRange(s0,s1)} ${dayText(dows)}, street cleaning"><div class="sign-in">
+    <svg viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="23" fill="none" stroke="var(--sign-red)" stroke-width="5"/>
+    <text x="27" y="37" text-anchor="middle" font-family="Barlow Condensed, Barlow, sans-serif" font-weight="700" font-size="30" fill="var(--sign-ink)">P</text>
+    <line x1="11" y1="11" x2="43" y2="43" stroke="var(--sign-red)" stroke-width="5"/></svg>
+    <div class="s1">No parking</div><div class="s2">${fmtT(s0).toUpperCase()} TO ${fmtT(s1).toUpperCase()}</div><div class="s3">${dows.length===1?DAYLONG[dows[0]]:DAYS[dows[0]]+'–'+DAYS[dows[dows.length-1]]}</div><div class="s4">Street cleaning</div>
+    <div class="s5">${on?phaseTxt(on).toUpperCase()+' ONLY*':'EVERY WEEK'}</div></div></div>`; }
+// a ticket kind: [kind, tickets, median fine, busiest weekday, usual hours, share on weekdays]
+const when=t=>`${t[5]>=.85?'mostly weekdays':'most often '+DAYLONG[t[3]]+'s'}, usually ${usual(t[4])}`;
+function renderCard(b){
+  const p=$('#panel'); p.innerHTML='';
+  if(!b){ H('div',{className:'p-eyebrow',textContent:'Street rules'},p); H('div',{className:'p-title',textContent:'Pick a block'},p);
+    H('p',{className:'p-sub',style:'margin:8px 0 14px',textContent:'Use your location or search for a street, then tap a block on the map. Its sweeping day, hours and weeks, its meters, and what else gets ticketed there show up here.'},p); return; }
+  H('div',{className:'p-eyebrow',textContent:'Street rules'},p);
+  H('div',{className:'p-title',textContent:blockName(b)},p);
+  if(b.x.length) H('div',{className:'p-sub',textContent:between(b)},p);
+  H('div',{className:'p-sub',style:'margin-top:2px',textContent:`Worked out from ${b.n.toLocaleString()} LADOT ticket${b.n>1?'s':''} since ${since()}`},p);
+
+  const sc=H('div',{className:'card'},p); H('h4',{textContent:'Street sweeping'},sc);
+  const groups=sweepGroups(b), sw=b.k.find(t=>META.kinds[t[0]]==='Street cleaning');
+  if(!groups.length) H('div',{className:'rule-line',innerHTML:'<b>No sweeping schedule found.</b> '+(!sw
+    ? `No sweeping tickets here since ${since()}. Either there's no posted sweeping, or nobody parks during it.`
+    : b.wu ? `${sw[1].toLocaleString()} sweeping tickets here since ${since()}, but none of StreetsLA's posted routes covers where they were written, so there's no posted schedule to show.`
+    : `Only ${sw[1]} sweeping ticket${sw[1]>1?'s':''} here since ${since()}, too few to work out a schedule.`)},sc);
+  groups.forEach(g=>{ const [, dows, s0, s1, on]=g[0], n=g.reduce((a,x)=>a+x[7],0), tdays=g.reduce((a,x)=>a+x[8],0)/g.length,
+      rate=g.reduce((a,x)=>a+x[5]*x[6],0)/g.reduce((a,x)=>a+x[6],0);
+    const box=H('div',{className:'side'},sc), head=H('div',{className:'side-head'},box);
+    H('div',{innerHTML:signHTML(dows,s0,s1,on)},head);
+    const txt=H('div',{},head);
+    H('div',{className:'side-name',textContent:g.length===2?'Both sides':sideName(b,g[0][0])},txt);
+    H('div',{className:'rule-line',innerHTML:on?`<b>${phaseTxt(on)} ${dayText(dows)}</b> of the month, <b>${fmtRange(s0,s1)}</b>`:`<b>Every ${dayText(dows)}</b>, <b>${fmtRange(s0,s1)}</b>`},txt);
+    H('div',{className:'side-txt',style:'margin-top:6px',textContent:`Next: ${nextDays(dows,on,2).join(' · ')}`},txt);
+    H('div',{className:'evid',textContent:`Tickets were written on ${pct(rate)} of ${g[0][6]} sweep days here, about ${Math.round(n/Math.max(1,tdays))} each time.${n<20?` Only ${n} tickets on this side, so treat the schedule as rough.`:''}`},box); });
+  if(groups.some(g=>g.length===1)) H('div',{className:'evid',textContent:'Odd and even mean house numbers: one side of the street has the odd addresses, the other side the even ones, and each side can have its own sweeping day.'},sc);
+  if(groups.length) H('div',{className:'evid',innerHTML:'*Real signs often show only the day. The day, weeks and time here are from StreetsLA\'s list of posted routes; which side of the street gets which day is worked out from the tickets. Look up your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.'},sc);
+
+  const mc=H('div',{className:'card'},p); H('h4',{textContent:'Meters'},mc);
+  const mt=b.k.find(t=>META.kinds[t[0]]==='Meter expired'), m=b.m;
+  if(!b.sp&&!mt) H('div',{className:'rule-line',textContent:'No metered spaces on this block in LADOT\'s meter list, and no meter tickets.'},mc);
+  else {
+    H('div',{className:'rule-line',innerHTML:b.sp?`<b>${b.sp} metered space${b.sp>1?'s':''}</b> on this block in LADOT's meter list.`:`<b>No metered spaces listed</b> for this block in LADOT's meter list, though meter tickets were written at its addresses.`},mc);
+    const kv=H('dl',{className:'kv'},mc), row=(k,v)=>{ H('dt',{textContent:k},kv); H('dd',{textContent:v},kv); };
+    row('Tickets', mt?`${mt[1].toLocaleString()} since ${since()}, $${mt[2]} each · ${when(mt)}`:`none since ${since()}`);
+    if(m){ row('Officers',`most often ${fmtRange(480+m[1]*30,600+m[1]*30)} on weekdays, about ${m[0]} visit${m[0]===1?'':'s'} a weekday`);
+      H('div',{className:'evid',style:'margin-top:14px',textContent:'Chance of a meter ticket if a car stays unpaid from 8 am to 8 pm:'},mc);
+      const o=H('div',{className:'odds6'},mc);
+      DAYS.slice(0,6).forEach((dn,d)=>{ const c=H('div',{},o); H('span',{className:'k',textContent:dn},c); H('span',{className:'v',textContent:m[2][d]+'%'},c); }); }
+    else if(b.sp) H('div',{className:'evid',textContent:'Too few meter tickets here to estimate how often officers come by.'},mc);
+    H('div',{className:'evid',textContent:'LADOT\'s data doesn\'t include the hours posted on the meters, so check the meter itself.'},mc); }
+
+  const ac=H('div',{className:'card'},p); H('h4',{textContent:'Also ticketed here'},ac);
+  const others=b.k.filter(t=>!['Street cleaning','Meter expired'].includes(META.kinds[t[0]]));
+  if(!others.length) H('div',{className:'evid',style:'margin-top:0',textContent:`No other kinds of tickets here since ${since()}.`},ac);
+  const ul=H('ul',{className:'also'},ac);
+  others.forEach(t=>{ const li=H('li',{},ul); H('span',{className:'nm',textContent:META.kinds[t[0]]},li); H('span',{className:'n',textContent:`${t[1].toLocaleString()} ticket${t[1]>1?'s':''}`},li);
+    H('span',{className:'meta',textContent:`$${t[2]} · ${when(t)}`},li); });
+  H('div',{className:'evid',style:'margin:4px 0 14px;padding-top:12px;border-top:1px solid var(--rule)',textContent:'This card is worked out from LADOT tickets, not read from the signs, so a rule nobody was ticketed for doesn\'t show up. Check the posted signs where you park.'},p);
+}
+
+/* ============ search: a street, or a house number and a street ============ */
+const q=$('#q'), sugg=$('#sugg');
+let loadingStreets=null, active=-1, options=[];
+const ABBR={avenue:'ave',av:'ave',street:'st',boulevard:'blvd',bl:'blvd',drive:'dr',place:'pl',road:'rd',lane:'ln',court:'ct',north:'n',south:'s',east:'e',west:'w'};
+const words=s=>s.toLowerCase().replace(/[.,#()]/g,' ').split(/\s+/).filter(Boolean).map(w=>ABBR[w]||w);
+function getStreets(){ return loadingStreets||(loadingStreets=fetch('data/streets.json').then(r=>r.json()).then(s=>{ STREETS=s; return s; })); }
+function parseQuery(v){ const m=v.trim().match(/^(\d+)\s*(.*)$/); return m?{num:+m[1],text:m[2]}:{num:null,text:v.trim()}; }
+function findNames(text, num){
+  const qw=words(text); if(!qw.length) return [];
+  const out=[];
+  META.names.forEach((nm,i)=>{ if(!STREETS[i].length) return; const nw=words(nm);
+    if(!qw.every(w=>nw.some(x=>x.startsWith(w)))) return;
+    if(num!==null && !STREETS[i].some(e=>e[0]===Math.floor(num/100)*100)) return;
+    const exact=qw.filter(w=>nw.includes(w)).length;
+    out.push([i, -exact, nw.length, -STREETS[i].length]); });
+  return out.sort((a,b)=>a[1]-b[1]||a[2]-b[2]||a[3]-b[3]).slice(0,8).map(r=>r[0]);
+}
+function renderSugg(){ sugg.innerHTML=''; sugg.hidden=!options.length; q.setAttribute('aria-expanded',!!options.length);
+  options.forEach((o,k)=>{ const li=H('li',{id:'opt'+k,role:'option'},sugg); li.append(o.label); H('small',{textContent:o.note},li);
+    li.setAttribute('aria-selected',k===active); li.addEventListener('mousedown',e=>{ e.preventDefault(); choose(o); }); });
+  if(active>=0) q.setAttribute('aria-activedescendant','opt'+active); else q.removeAttribute('aria-activedescendant'); }
+async function suggest(){
+  const v=q.value; if(!v.trim()||!META){ options=[]; renderSugg(); return; }
+  await getStreets(); if(q.value!==v) return;
+  const {num,text}=parseQuery(v);
+  options=findNames(text,num).map(i=>{ const n=STREETS[i].length;
+    return {s:i,num,label:num!==null?`${num} ${META.names[i]}`:META.names[i],note:num!==null?hund(Math.floor(num/100)*100):`${n} block${n>1?'s':''}`}; });
+  active=options.length?0:-1; renderSugg();
+}
+q.addEventListener('focus',()=>{ if(META) getStreets(); });
+q.addEventListener('input',suggest);
+q.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){ if(!options.length) return; e.preventDefault(); active=(active+(e.key==='ArrowDown'?1:options.length-1))%options.length; renderSugg(); }
+  else if(e.key==='Enter'){ e.preventDefault(); if(options[active]) choose(options[active]); else if(q.value.trim()) nothingFound(); }
+  else if(e.key==='Escape'){ options=[]; renderSugg(); } });
+q.addEventListener('blur',()=>setTimeout(()=>{ options=[]; renderSugg(); },100));
+function nothingFound(){ msg(`No street with LADOT tickets matches “${esc(q.value.trim())}”. This page covers streets in the City of Los Angeles; try just the street name, like “Vermont”.`); $('#cands').innerHTML=''; }
+function choose(o){
+  options=[]; renderSugg(); q.blur();
+  const entries=STREETS[o.s].map(e=>({s:o.s,e})), name=META.names[o.s], box=$('#cands'); box.innerHTML='';
+  const chips=(list, label)=>list.forEach(en=>{ const c=H('button',{className:'chip sm',textContent:label(en)},box); c.dataset.id=blockId(en.s,en.e[0],en.e[2]); c.onclick=()=>goBlock(en); });
+  const zipOf=en=>en.e[2]?` (${String(en.e[2]).split('-')[0]})`:'';
+  if(o.num!==null){ const h=Math.floor(o.num/100)*100, hits=entries.filter(en=>en.e[0]===h);
+    if(hits.length===1){ msg(`<b>${esc(name)}, ${hund(h)}</b>`); goBlock(hits[0]); return; }
+    msg(`<b>${esc(name)}</b> has a ${hund(h)} in ${hits.length} places. Pick the ZIP code you want:`); chips(hits,en=>`${hund(h)}${zipOf(en)}`); return; }
+  if(entries.length===1){ msg(`<b>${esc(name)}</b> has one block with tickets.`); goBlock(entries[0]); return; }
+  msg(`<b>${esc(name)}</b> has ${entries.length} blocks with tickets. Pick one, or search again with a house number:`);
+  chips(entries.slice().sort((a,b)=>a.e[0]-b.e[0]),en=>`${en.e[0]||'1–99'}${zipOf(en)}`);
+}
+
+/* ============ location: only moves the map ============ */
+$('#locBtn').addEventListener('click',()=>{
+  const btn=$('#locBtn');
+  if(!navigator.geolocation||!window.isSecureContext){ msg('This browser can\'t share a location with the page. Search for your street instead.'); return; }
+  btn.disabled=true; msg('Finding your location…'); $('#cands').innerHTML='';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    btn.disabled=false; const {latitude:lat, longitude:lon}=pos.coords;
+    if(lat<LA[1]||lat>LA[3]||lon<LA[0]||lon>LA[2]){ fix=null; drawYou();
+      const r=Math.PI/180, km=Math.round(2*6371*Math.asin(Math.sqrt(Math.sin((lat-34.02)*r/2)**2+Math.cos(lat*r)*Math.cos(34.02*r)*Math.sin((lon+118.41)*r/2)**2)));
+      msg(`You're about ${Math.max(1,km).toLocaleString()} km from Los Angeles. This page only covers streets in the City of Los Angeles; you can still search for one.`); return; }
+    fix=z17(lat,lon).map((v,i)=>v-O[i]); centerOn(fix[0],fix[1],BOX_M/PX_M);
+    msg('The map shows the blocks around your location. Tap yours to see its rules.');
+    checkEmpty();
+  }, err=>{ btn.disabled=false;
+    msg(err.code===1?'Location is off for this page. Search for your street instead, or allow location for this site in your browser and try again.'
+      :err.code===3?'Finding your location took too long. Try again, or search for your street.':'Couldn\'t get your location. Try again, or search for your street.');
+    if(err.code===1) q.focus(); }, {enableHighAccuracy:false, timeout:15000, maximumAge:60000});
+});
+// inside LA's outline but no blocks around: say why instead of showing an empty map
+async function checkEmpty(){ const C=META.cell, keys=[];
+  for(let x=Math.floor((vb.x+O[0])/C);x<=Math.floor((vb.x+vb.w+O[0])/C);x++) for(let y=Math.floor((vb.y+O[1])/C);y<=Math.floor((vb.y+vb.h+O[1])/C);y++) keys.push(`${x}_${y}`);
+  const inView=b=>b.g.some(ln=>{ for(let i=0;i<ln.length;i+=2){ const x=ln[i]+b.ox, y=ln[i+1]+b.oy; if(x>=vb.x&&x<=vb.x+vb.w&&y>=vb.y&&y<=vb.y+vb.h) return true; } return false; });
+  const recs=(await Promise.all(keys.map(loadCell))).flat();
+  if(!recs.some(inView)) msg('No blocks with LADOT tickets right around your location. This page covers the City of Los Angeles; cities inside or next to it, like Beverly Hills, West Hollywood, Culver City and Santa Monica, write their own tickets.'); }
+
+/* ============ legend ============ */
+function legend(){ const lg=$('#legend'); lg.innerHTML='';
+  const item=(css,txt)=>{ const li=H('li',{},lg); H('span',{className:'sw'},li).style.cssText=css; li.append(txt); };
+  item('background:var(--ink);opacity:.72','a block with LADOT tickets since '+since()+' (tap it)');
+  item('height:10px;border-radius:5px;background:var(--halo)','the block on the card');
+  item('width:12px;height:12px;border-radius:50%;background:var(--accent)','your location');
+  const li=H('li',{textContent:'Streets without a line had no tickets matched to them. Cities inside or next to LA, like Beverly Hills and Culver City, aren\'t covered.'},lg); li.style.cssText='flex-basis:100%;font-size:12px;color:var(--ink-3)'; }
+
+/* ============ start ============ */
+renderCard(null);
+fitLA();
+fetch('data/index.json').then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); }).then(async m=>{
+  META=m;
+  $('#mastRange').textContent=`LADOT tickets · ${fmtDate(m.start)} – ${fmtDate(m.end)} · updated weekly`;
+  $('#notePhase').textContent=(m.phase*100).toFixed(1)+'%';
+  $('#mData').textContent=`LADOT parking citations (data.lacity.org, dataset 4f5p-udkv): all ${m.total.toLocaleString()} tickets written in the City of Los Angeles in the two years from ${fmtDate(m.start)} to ${fmtDate(m.end)}. ${m.matched.toLocaleString()} of them (${pct(m.matched/m.total)}) have an address that matches a block. The page is rebuilt every week from LADOT's latest data, and the two-year window moves with it.`;
+  legend(); showBlocks();
+  const id=decodeURIComponent(location.hash.slice(1));
+  if(id){ const s=await getStreets(); for(let i=0;i<s.length;i++) for(const e of s[i]) if(blockId(i,e[0],e[2])===id) return goBlock({s:i,e}); }
+}).catch(()=>msg('The block data didn\'t load. Try reloading the page.'));
+
+// keep the map's shape and tiles right when the width changes (not on height-only changes like a phone's URL bar)
+let lastW=innerWidth, rt=0;
+addEventListener('resize',()=>{ if(innerWidth===lastW) return; lastW=innerWidth; clearTimeout(rt); rt=setTimeout(setVB,150); });
+})();
+</script>

@@ -16,6 +16,13 @@ block and it shows:
 Below the map: campus-wide evidence (every-other-week sweeping, officer arrival
 times, meter waves).
 
+**[LA Street Rules](https://citina.github.io/ticket-clock/streets/)** (`docs/streets/`) does the
+same for every block in the City of Los Angeles: search a street or address, or use your
+location to move the map, then tap a block for its sweeping schedule per side, meter
+patrols and unpaid odds, and every kind of ticket written there. It uses the last two years
+of tickets, matched to the city's street centerlines by address, and the same posted-route
+rule for sweeping as the USC page.
+
 A companion to [Curb Log](https://citina.github.io/curb-log/), which uses
 LADOT's sensors to measure available parking on Vermont Ave from W 36th St down to about
 W 37th St (both sides), and on W 36th St just west of Vermont.
@@ -49,6 +56,9 @@ tickets. To check your own street, look it up at
 ./basemap.py           # docs/basemap.jpg (36 OpenStreetMap tiles at zoom 16, cached in .tilecache/)
 ./analyze.py           # data/bundle.json (every number the page shows)
 ./build.py             # docs/index.html (one self-contained file)
+
+./fetch_city.py        # data/city/: two years of city-wide tickets (~450 MB), street centerlines, meter inventory, posted sweeping routes
+./analyze_city.py      # docs/streets/data/ (~16 MB of JSON, not committed); serve docs/ and open /streets/
 ```
 
 Python 3 with pandas, numpy, scipy and Pillow. The raw downloads and the tile cache
@@ -58,7 +68,11 @@ are not committed; they regenerate from the commands above.
 
 `.github/workflows/weekly.yml` reruns fetch, analyze and build every Monday on GitHub
 Actions, commits the new `data/bundle.json` and `docs/index.html`, and starts
-`pages.yml` to publish `docs/`. Run it by hand with `gh workflow run weekly.yml`. If
+`pages.yml` to publish `docs/`. A second job rebuilds LA Street Rules' city-wide data and
+uploads it to the `city-data` release (overwritten each week, so the repo doesn't grow);
+`pages.yml` copies that release into `docs/streets/data/` before publishing. If the city
+data's ticket count falls more than 10%, or a month comes back thin, that job stops and
+last week's release stays up. Run it by hand with `gh workflow run weekly.yml`. If
 the ticket count falls more than 1% from the last build, it stops without publishing.
 USC term dates in `citations.py` run through fall 2027; the run log warns once the
 newest ticket is past them.
@@ -67,7 +81,10 @@ newest ticket is past them.
 |---|---|
 | `citations.py` | shared loading: address parsing, street-name cleanup, holidays, USC term dates, posted sweeping routes, map projection |
 | `analyze.py` | per-block geometry, sweeping schedule per side, meter visit rates, campus charts |
-| `template.html` | the page; `build.py` fills in the data and the basemap |
+| `template.html` | the USC page; `build.py` fills in the data and the basemap |
+| `fetch_city.py` | city-wide downloads for LA Street Rules, a rolling two years of tickets |
+| `analyze_city.py` | address matching to street centerlines, per-block rules, ~1 km map cells, search index |
+| `docs/streets/index.html` | LA Street Rules, hand-written (no build step); its map images load live from OpenStreetMap |
 
 ## Method in brief
 

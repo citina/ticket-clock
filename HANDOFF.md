@@ -2,10 +2,12 @@
 
 Live: https://citina.github.io/ticket-clock/ · Repo: https://github.com/citina/ticket-clock (public, `main`)
 Companion site: Curb Log (citina/curb-log). The masthead reads "Curb Log · Citations"; keep the family look.
-State as of 2026-09-16, commit `643f11f` (weekly bot data on top of `953c769`).
+State as of 2026-09-16: the USC page with StreetsLA posted routes and the 760px text width (see
+VISUAL_CHANGES.md), plus LA Street Rules, described at the end.
 
-Two pieces of work are planned: more visual tuning, and a new "near me" tab that finds the parking
-rules for the street you're standing on. Notes for both are at the end.
+Two pages now: the USC Ticket Clock (`docs/index.html`, built from `template.html`) and **LA Street
+Rules** (`docs/streets/`), the city-wide "rules for my street" page that grew out of the planned
+"near me" tab. Visual candidates for the USC page are listed near the end.
 
 ## How the page is built
 
@@ -134,48 +136,62 @@ Ranked roughly by payoff:
 8. On desktop the disclaimer is taller than the title and lede, so there's empty space between the
    lede and the map controls. Shortening the sweeping-signs paragraph would close it.
 
-## Notes for the "near me" tab
+## LA Street Rules (`docs/streets/`)
 
-**What the data can and can't do.** `data/bundle.json` has 306 blocks with `seg` (a fitted line in
-**map-pixel** coordinates), the per-side sweeping schedule, metered spaces, meter visit rates and the
-top violation kinds. There are no lat/lon values and no street geometry beyond those lines, and
-`frame` holds only `W`, `H`, `mpp` (1.98 m per pixel) — not the map's origin, so today the page
-cannot turn a GPS fix into a map position. Two ways to fix that:
+Decisions Citina made on 2026-09-16 (keep them unless she asks):
 
-- **Add the origin to the bundle** (`analyze.py` line 220 builds it; `citations.py` `frame()` already
-  computes `x0`/`y0` from `BOX` = s 34.012, n 34.035, w −118.300, e −118.272 at `ZOOM` 16,
-  `TILE` 256). Correct and keeps working if the box ever moves, but it means rerunning
-  `fetch_citations.py` + `analyze.py`, and the weekly bot will keep it fresh.
-- **Hardcode `BOX`/`ZOOM`/`TILE` in the template** and reimplement the Web Mercator `deg2num`
-  in JS. No Python rerun, good for a prototype, but the constants then live in two places.
+- **Its own page**, not a tab on the USC page, so the USC page stays clean. The USC masthead has one
+  small "LA Street Rules" link; the streets page links back the same way.
+- **The whole City of Los Angeles**, a rolling two years of tickets (same window as the USC page).
+- **Sweeping schedule from StreetsLA's posted routes, the same rule as the USC page** (asked for on
+  2026-09-16): day, weeks and posted time from the route; tickets only decide which side gets which
+  route day. `load_routes(..., weekly=True)` also reads the every-week routes the USC box doesn't
+  have (Downtown "DT 1–4" Monday to Friday 1–4 am, Skid Row); "Adams Bl" ("As Available") is left
+  out. The layer's `Odd_Even` field is the week pair (Odd = 1st & 3rd), not the side of the street.
+- **Location only moves the map** (no accuracy matching or pick lists): it centers an ~800 m view on
+  the reader, who taps their block. No precise location is needed.
+- **Map images load live from OpenStreetMap** (tile.openstreetmap.org), same look as the USC basemap
+  (faded, inverted in dark mode). Bulk-downloading tiles for the city is against OSM's policy, so the
+  page only requests what's in view. The disclaimer's "What the page loads" part says OSM and GitHub
+  can tell roughly which area a reader looks at.
+- **City data is published as the `city-data` release**, overwritten weekly, not committed.
 
-With either, lat/lon → pixel → nearest block is a point-to-segment distance over 306 blocks: trivial
-to compute, and `mpp` turns the result into metres ("about 40 m away").
+How it works:
 
-**Geolocation.** `navigator.geolocation` needs HTTPS (Pages is fine) and a permission prompt; it
-fails or is refused often, so the search box must work on its own. Typical phone accuracy (10–50 m)
-is around one block, so show the nearest few candidates and let the reader pick rather than asserting
-one. The map box is only about 2.5 × 2.5 km around campus: anyone outside it needs a plain "this page
-only covers the streets around USC" answer, not a wrong nearest block.
+- `fetch_city.py` → `data/city/` (gitignored): monthly ticket CSVs for the window (old months are
+  deleted, the last two refetched), LA GeoHub street centerlines (`Street_Information/MapServer/36`,
+  85k segments with address ranges per side and intersection IDs), LADOT's meter inventory, and
+  StreetsLA's posted sweeping routes for the whole city (~870 route days, 36 MB).
+- `analyze_city.py` (~5 min) → `docs/streets/data/` (gitignored, ~16 MB, 4.3 MB as the release
+  tarball): tickets are matched to a centerline segment by street name, direction, suffix and house
+  number (88% of tickets; intersections and unaddressable places like LAX's World Way are left out).
+  A block is street + hundred block, split where a name repeats elsewhere (IDs then get the ZIP, e.g.
+  `#100-W-1ST-ST-90012`). Its line is cut from the segments by address; cross streets come from the
+  intersections at its ends; the centerline ranges give the compass side of the even numbers.
+  Output: `index.json` (dates, counts, street names, ticket kinds, which cells exist; ~46 KB
+  gzipped, loads with the page), `streets.json` (each street's blocks; ~98 KB, loads on search),
+  `cells/<x>_<y>.json` (blocks in ~1 km zoom-17 Web Mercator cells, loaded as the map shows them,
+  only when the view is under 3 km wide). It stops if a month in the window came back thin.
+- `citations.py` now also holds `LABELS`, `SWEEP`, `compass` and `usual_hours`, shared by both
+  analyses (moved from `analyze.py`; the USC bundle was checked byte-identical after the move).
+- `docs/streets/index.html` is hand-written, no build step. Deep links: `#3600-S-VERMONT-AVE`.
+- `weekly.yml`: jobs `update` (USC, as before), `city` (fetch, analyze, check the count hasn't fallen
+  >10%, upload to the `city-data` release) and `deploy` (starts `pages.yml` even if one job failed).
+  `pages.yml` downloads the release into `docs/streets/data/` before publishing; if the release is
+  missing it warns and the page says its data didn't load.
+- The `city-data` release was first uploaded by hand on 2026-09-16 (tickets through 2026-09-14). If
+  it's ever deleted, run `gh workflow run weekly.yml` to rebuild it.
 
-**Search.** The page already indexes streets and blocks for its search box (`template.html` 486), so
-street/block search can be reused. Address geocoding would need an external service, which the page
-currently doesn't use at all (it's self-contained, and nothing leaves the reader's browser); if it's
-ever added, check the service's terms and say plainly in the disclaimer what gets sent.
+Previewing: run `./fetch_city.py` and `./analyze_city.py`, serve `docs/`, open `/streets/`.
 
-**Where the tab lives.** Two options: a second view inside `index.html` (no build change, shares the
-data and the panel code, the hash can carry the tab), or a second page built from its own template
-(own URL, but `build.py` must render it and — the easy thing to miss — `weekly.yml`'s `git add` line
-names `data/bundle.json` and `docs/index.html` only, so a new file would silently go stale; the
-basemap base64 also doubles the bytes unless the second page skips the map).
-
-**Wording.** A "what are the rules where I'm standing" screen invites "so can I park here right now?".
-The rules on the page are inferred from tickets, so it should show the schedule and the evidence, and
-never a verdict. The same rules apply: no copy implying a time is safe, plain-language places, the
-disclaimer visible on the new tab too.
+Known gaps: tickets written at intersections (7.6%) aren't shown; about 5% of blocks name no cross
+street; the meter card has no posted meter hours (LADOT's data doesn't include them) and uses all
+weeks, not USC class weeks, so 3600 S Vermont's odds differ a little between the two pages. A side with
+fewer than 8 sweeping tickets shows no schedule even inside a posted route, as on the USC page.
 
 ## Committing
 
-Commit `template.html` and `docs/index.html`, plus `README.md` if touched. End commit messages with
+Commit `template.html` and `docs/index.html`, plus `README.md` if touched. For LA Street Rules, commit
+`docs/streets/index.html` and the scripts; its data is never committed (the release carries it). End commit messages with
 the Co-Authored-By line. Pushing deploys the site through `pages.yml`. This handoff is committed at
 the repo root; update it when the state above changes.

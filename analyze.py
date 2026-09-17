@@ -20,24 +20,6 @@ VISIT_GAP = 10        # minutes: meter tickets closer than this on one block = o
 SEP_MIN, CONS_MIN = 4.0, 0.75  # metres / share: when odd and even addresses sit on clear sides
 SLOT0, NSLOT = 8 * 60, 24      # half hours from 8:00 am to 8:00 pm (meter hours)
 
-LABELS = {
-    "?": "Not recorded", "NO PARK/STREET CLEAN": "Street cleaning", "RED ZONE": "Red zone", "NO STOP/STANDING": "No stopping",
-    "NO STOP/STAND": "No stopping", "STOP/STAND PROHIBIT": "No stopping", "DISPLAY OF TABS": "Expired tabs",
-    "NO PARKING": "No parking", "DISPLAY OF PLATES": "Missing plates", "BLOCKING DRIVEWAY": "Blocking driveway",
-    "18 IN. CURB/2 WAY": "Too far from curb", "FIRE HYDRANT": "Fire hydrant", "DOUBLE PARKING": "Double parking",
-    "STANDNG IN ALLEY": "Standing in alley", "STANDING IN ALLEY": "Standing in alley",
-    "PARKED OVER TIME LIMIT": "Over time limit", "PARKED ON SIDEWALK": "On sidewalk",
-    "YELLOW ZONE": "Loading zone", "PARKED IN BUS ZONE": "Bus zone", "PK IN BUS ZONE": "Bus zone",
-    "NO STOP/STAND AM": "No stopping, AM rush", "NO STOP/STAND PM": "No stopping, PM rush",
-    "NO EVIDENCE OF REG": "No registration", "CARSHARE PARKING": "Car-share space", "WHITE ZONE": "Passenger zone",
-    "PREFERENTIAL PARKING": "Permit district", "PREF PARKING": "Permit district", "COMM VEH OVER TIME LIMIT": "Commercial over limit",
-    "EXCEED 72HRS-ST": "Parked over 72 hours", "OVERNIGHT PARKING": "Overnight parking", "HANDICAP/NO PLACARD": "Disabled space",
-    "PARKED IN CROSSWALK": "In crosswalk", "WITHIN 15FT OF HYDRANT": "Fire hydrant", "LOADING ZONE": "Loading zone",
-    "8069B NO PARK ST CLN": "Street cleaning", "8056E4 RED ZONE": "Red zone", "8069A NO STOP/STAND": "No stopping",
-}
-# Street cleaning is code 80.69BS; a few handhelds write it as 8069BS with its own description
-SWEEP = {"NO PARK/STREET CLEAN", "8069B NO PARK ST CLN"}
-
 d = load()
 END = end_date(d)
 F = frame()
@@ -51,40 +33,6 @@ hol = holidays(START, END)
 if END > pd.Timestamp(TERMS[-1][1]):
     print(f"warning: USC term dates in citations.py stop at {TERMS[-1][1]}; add the next semester or meter stats lose class weeks")
 print(f"{len(d):,} tickets; window {START.date()} to {END.date()}: {len(w):,}")
-
-
-def compass(vx, vy):
-    """Direction of a pixel-space vector (+x east, +y south) as one of 8 compass words."""
-    ang = (math.degrees(math.atan2(-vy, vx)) + 360) % 360
-    return ["east", "northeast", "north", "northwest", "west", "southwest", "south", "southeast"][int((ang + 22.5) // 45) % 8]
-
-
-def usual_hours(mins, share=.5):
-    """Clock-hour ranges holding the busiest `share` of tickets, as [[start, end], ...] in minutes.
-
-    One quartile range misleads when tickets come at two times of day (fire hydrant:
-    1-4 am and midday gives "3:34 am-1:58 pm"). Instead take the fewest hours that
-    cover `share`, join runs split by one quiet hour, and keep the two biggest runs.
-    """
-    c = np.bincount(np.asarray(mins, dtype=int) // 60 % 24, minlength=24)
-    pick = np.zeros(24, bool)
-    for hr in np.argsort(-c, kind="stable"):
-        if c[pick].sum() >= share * c.sum():
-            break
-        pick[hr] = True
-    pick |= np.roll(pick, 1) & np.roll(pick, -1)
-    if pick.all():
-        return [[0, 1440]]
-    s0 = int(np.argmin(pick))  # an unpicked hour, so no run wraps past the scan start
-    runs, a = [], None
-    for i in range(s0, s0 + 25):
-        if i < s0 + 24 and pick[i % 24]:
-            a = i if a is None else a
-        elif a is not None:
-            runs.append((int(c[[j % 24 for j in range(a, i)]].sum()), a % 24, i - a))
-            a = None
-    runs = sorted(sorted(runs, reverse=True)[:2], key=lambda r: r[1])
-    return [[h * 60, (h + n) * 60] for _, h, n in runs]
 
 
 # ---------- block geometry: all years, for a steadier line ----------

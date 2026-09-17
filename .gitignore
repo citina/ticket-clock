@@ -3,6 +3,10 @@ data/citations_usc.csv
 data/meters_usc.csv
 data/sweep_routes.geojson
 data/*.part
+# City-wide downloads (~450 MB) — regenerate with ./fetch_city.py
+data/city/
+# LA Street Rules data — regenerate with ./analyze_city.py; published as the city-data release asset
+docs/streets/data/
 # OSM tile cache — regenerate with ./basemap.py
 .tilecache/
 

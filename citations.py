@@ -1,4 +1,4 @@
-"""Shared loading, geometry and calendar helpers for the USC ticket analysis."""
+"""Shared loading, geometry and calendar helpers for the USC and city-wide ticket analyses."""
 import json
 import math
 import re
@@ -35,6 +35,26 @@ SUFFIXES = {"ST", "AVE", "BLVD", "PL", "DR", "WAY", "CT", "LN", "RD", "TER", "WA
 DIRS = {"N", "S", "E", "W", "NORTH", "SOUTH", "EAST", "WEST", "REAR", "OF"}
 ADDR = re.compile(r"(\d{2,5})\s+(.+)")
 METER = "8813B"  # code 88.13B; some handhelds write it without dots (8813B+)
+
+
+# Ticket descriptions in plain words; anything not listed is shown capitalized as LADOT wrote it
+LABELS = {
+    "?": "Not recorded", "NO PARK/STREET CLEAN": "Street cleaning", "RED ZONE": "Red zone", "NO STOP/STANDING": "No stopping",
+    "NO STOP/STAND": "No stopping", "STOP/STAND PROHIBIT": "No stopping", "DISPLAY OF TABS": "Expired tabs",
+    "NO PARKING": "No parking", "DISPLAY OF PLATES": "Missing plates", "BLOCKING DRIVEWAY": "Blocking driveway",
+    "18 IN. CURB/2 WAY": "Too far from curb", "FIRE HYDRANT": "Fire hydrant", "DOUBLE PARKING": "Double parking",
+    "STANDNG IN ALLEY": "Standing in alley", "STANDING IN ALLEY": "Standing in alley",
+    "PARKED OVER TIME LIMIT": "Over time limit", "PARKED ON SIDEWALK": "On sidewalk",
+    "YELLOW ZONE": "Loading zone", "PARKED IN BUS ZONE": "Bus zone", "PK IN BUS ZONE": "Bus zone",
+    "NO STOP/STAND AM": "No stopping, AM rush", "NO STOP/STAND PM": "No stopping, PM rush",
+    "NO EVIDENCE OF REG": "No registration", "CARSHARE PARKING": "Car-share space", "WHITE ZONE": "Passenger zone",
+    "PREFERENTIAL PARKING": "Permit district", "PREF PARKING": "Permit district", "COMM VEH OVER TIME LIMIT": "Commercial over limit",
+    "EXCEED 72HRS-ST": "Parked over 72 hours", "OVERNIGHT PARKING": "Overnight parking", "HANDICAP/NO PLACARD": "Disabled space",
+    "PARKED IN CROSSWALK": "In crosswalk", "WITHIN 15FT OF HYDRANT": "Fire hydrant", "LOADING ZONE": "Loading zone",
+    "8069B NO PARK ST CLN": "Street cleaning", "8056E4 RED ZONE": "Red zone", "8069A NO STOP/STAND": "No stopping",
+}
+# Street cleaning is code 80.69BS; a few handhelds write it as 8069BS with its own description
+SWEEP = {"NO PARK/STREET CLEAN", "8069B NO PARK ST CLN"}
 
 
 def parse_loc(s):
@@ -135,16 +155,28 @@ def clock(s):
     return (int(m[1]) % 12 + 12 * (m[3] == "p")) * 60 + int(m[2] or 0)
 
 
-def load_routes(path=ROUTES):
+def load_routes(path=ROUTES, weekly=False):
     """One dict per route day: route, dow, on (1 = 1st & 3rd weeks, 2 = 2nd & 4th), posted
-    window s0-s1 in minutes, and the polygon rings (lon, lat) of the area it covers."""
-    out = []
+    window s0-s1 in minutes, and the polygon rings (lon, lat) of the area it covers.
+
+    weekly=True (the city-wide page) also reads the few routes swept every week (on = 0): Skid Row,
+    and Downtown's "Monday to Friday" routes, which become one route day per weekday with `dows`
+    listing all five. Routes with no fixed time, like "As Available", are left out with a warning."""
+    out, skipped = [], []
     for f in json.loads(path.read_text())["features"]:
         p, geom = f["properties"], f["geometry"]
+        on = {"1 & 3": 1, "2 & 4": 2, **({"Weekly": 0} if weekly else {})}.get(p["Weeks"])
+        span, times = p["Posted_Day"].split(" to "), p["Posted_Time"].split("-")
+        if on is None or len(times) != 2 or any(d not in DAYNUM for d in span) or (len(span) > 1 and not weekly):
+            skipped.append(f'{p["Route"]} ({p["Posted_Day"]}, {p["Weeks"]}, {p["Posted_Time"]})')
+            continue
         parts = [geom["coordinates"]] if geom["type"] == "Polygon" else geom["coordinates"]
-        start, end = p["Posted_Time"].split("-")
-        out.append(dict(route=p["Route"].split()[0], dow=DAYNUM[p["Posted_Day"]], on={"1 & 3": 1, "2 & 4": 2}[p["Weeks"]],
-                        s0=clock(start), s1=clock(end), rings=[np.asarray(r, float) for q in parts for r in q]))
+        rings = [np.asarray(r, float) for q in parts for r in q]
+        dows = list(range(DAYNUM[span[0]], DAYNUM[span[-1]] + 1))
+        for dow in dows:
+            out.append(dict(route=p["Route"].split()[0], dow=dow, dows=dows, on=on, s0=clock(times[0]), s1=clock(times[1]), rings=rings))
+    if skipped:
+        print(f"warning: {len(skipped)} posted sweeping route days left out: " + "; ".join(skipped))
     return out
 
 
@@ -186,3 +218,38 @@ def to_px(lat, lon):
     f = frame()
     x, y = deg2num(lat, lon)
     return x * TILE - f["x0"], y * TILE - f["y0"]
+
+
+# ---- shared by the USC and city-wide analyses ----
+def compass(vx, vy):
+    """Direction of a pixel-space vector (+x east, +y south) as one of 8 compass words."""
+    ang = (math.degrees(math.atan2(-vy, vx)) + 360) % 360
+    return ["east", "northeast", "north", "northwest", "west", "southwest", "south", "southeast"][int((ang + 22.5) // 45) % 8]
+
+
+def usual_hours(mins, share=.5):
+    """Clock-hour ranges holding the busiest `share` of tickets, as [[start, end], ...] in minutes.
+
+    One quartile range misleads when tickets come at two times of day (fire hydrant:
+    1-4 am and midday gives "3:34 am-1:58 pm"). Instead take the fewest hours that
+    cover `share`, join runs split by one quiet hour, and keep the two biggest runs.
+    """
+    c = np.bincount(np.asarray(mins, dtype=int) // 60 % 24, minlength=24)
+    pick = np.zeros(24, bool)
+    for hr in np.argsort(-c, kind="stable"):
+        if c[pick].sum() >= share * c.sum():
+            break
+        pick[hr] = True
+    pick |= np.roll(pick, 1) & np.roll(pick, -1)
+    if pick.all():
+        return [[0, 1440]]
+    s0 = int(np.argmin(pick))  # an unpicked hour, so no run wraps past the scan start
+    runs, a = [], None
+    for i in range(s0, s0 + 25):
+        if i < s0 + 24 and pick[i % 24]:
+            a = i if a is None else a
+        elif a is not None:
+            runs.append((int(c[[j % 24 for j in range(a, i)]].sum()), a % 24, i - a))
+            a = None
+    runs = sorted(sorted(runs, reverse=True)[:2], key=lambda r: r[1])
+    return [[h * 60, (h + n) * 60] for _, h, n in runs]

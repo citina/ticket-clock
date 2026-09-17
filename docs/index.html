@@ -51,6 +51,7 @@
   .mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
   .mast{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
         color:var(--ink-3);display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
+  .mast a{color:inherit}
   h1{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:clamp(44px,8vw,66px);
      line-height:.92;margin:20px 0 12px;text-wrap:balance}
   .lede{font-size:18.5px;line-height:1.5;color:var(--ink-2);max-width:var(--measure);margin:0}
@@ -207,7 +208,7 @@
 </style>
 
 <main>
-  <div class="mast"><span>Curb Log · Citations</span><span id="mastRange">LADOT tickets</span></div>
+  <div class="mast"><span>Curb Log · Citations · <a href="streets/">LA Street Rules</a></span><span id="mastRange">LADOT tickets</span></div>
   <div class="intro">
   <h1>USC Ticket Clock</h1>
   <p class="lede" id="lede">Click a street on the map to see when parking enforcement comes by: the street-sweeping schedule and when the officer really shows up, how often meter officers walk past, and what else gets ticketed there.</p>
