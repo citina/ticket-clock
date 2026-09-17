@@ -51,10 +51,10 @@ Rules** (`docs/streets/`), the city-wide "rules for my street" page that grew ou
 |---|---|
 | 1–6 | charset, **viewport meta** (phones need it), title, fonts |
 | 8–43 | Color tokens: light on `:root`, dark under `prefers-color-scheme` (guarded) **and** `[data-theme="dark"]`. Keep all three in sync. |
-| 44–98 | Base CSS: body, `.intro` grid, `.note`, headings, chips, legend |
+| 44–98 | Base CSS: body, `--measure`, `.intro`, `.lede-note`, `.note`, headings, chips, legend |
 | 99–167 | Explorer, map, panel, sign, meter heat, odds |
 | 168–207 | Verdict (summary cards), heatmap, method, tooltip |
-| 209–240 | `<main>`: masthead, `.intro` (title + lede left, disclaimer right), explorer |
+| 209–240 | `<main>`: masthead, `.intro` (title, lede, `.lede-note` pitch), explorer |
 | 240–331 | Sections: `#answers`, `#sweep`, `#meters`, `#method` + footer sources |
 | 337–371 | Helpers: `S`/`T`/`H`, time and date formatting, tooltip, meter maths |
 | 377–496 | Map: SVG over the basemap, layers gHalo/gBase/gCol/gSel/gHit. `drawColor` 410, `drawSel` 438, pan/zoom 445, `focusBlock` 469, `sizeMap` 474, `revealPanel` 480, search 486 |
@@ -66,9 +66,10 @@ ticks (Google Fonts).
 
 ## Layout (chosen 2026-09-13)
 
-One 1240px grid for the whole page. `main` is `max-width:1280px`; `.intro` and `.explorer` share
-`minmax(0,1fr) 430px`, so the title sits over the map and the disclaimer over the panel. Sections
-below share that left edge; prose keeps a readable measure, charts fill the width, and the three
+One 1240px grid for the whole page. `main` is `max-width:1280px`; `.explorer` is
+`minmax(0,1fr) 430px` (map, then panel), with the title, lede and pitch above it. Sections below
+share that left edge. Blocks of text share one width, `--measure` (760px); the Sources list and the
+closing "Not a guide" note span the full width. Charts fill the width, and the three
 summary answers become cards in a row above 1000px. Under 1000px everything stacks and the map is
 capped at 72% of the screen height; tapping a block scrolls the panel title into view.
 
@@ -87,15 +88,19 @@ chart) and redraw on width changes, so text never scales down. Stacked-layout gr
   block the current view has nothing else to show for. No weekday may be grey again.
 - Meter mode uses a sequential accent-blue scale by officer visits per weekday.
 - Selection halos draw **under** the colored lines (`gHalo` before `gCol`) so a selected block keeps
-  its own colors. In dark mode the basemap is inverted with `--map-filter`.
+  its own colors. In dark mode the basemap is inverted with `--map-filter` (Safari ignores CSS filters
+  on elements inside an SVG, so on iPhones it stays light; LA Street Rules keeps its map light on
+  purpose, see below).
 
 ## Decisions Citina made (keep them)
 
 - The "Rebuilding officer patrols" section and the two-officer route map were removed on purpose.
 - No copy implying a time is safe from tickets ("gap at 3 pm", "3 pm quiet hour" were removed).
   **But keep** the per-block "The quietest stretch is …" line.
-- The disclaimer stays small and unobtrusive (12.5px, `--ink-3`, no border), in the intro's right
-  column. Two parts: "Not a guide to parking illegally" and "Street sweeping signs".
+- The disclaimer stays small and unobtrusive (12.5px, `--ink-3`, no border). Since 2026-09-16
+  "Not a guide to parking illegally" is the last thing on the page (`.note.end`), and "Street
+  sweeping signs" is an `.aside` after the sweeping section's opening paragraph. Under the lede, the
+  `.lede-note` pitch says signs often leave out the week.
 - Places in plain language: "Vermont Ave from W 36th St down to about W 37th St (both sides)", never
   "Vermont 36xx". Curb Log measures "available parking", not "free parking".
 - Search and the block buttons never zoom; they pan only if the block is off-screen, and searching a
@@ -108,13 +113,14 @@ chart) and redraw on width changes, so text never scales down. Stacked-layout gr
 ## The sweeping-sign story (checked 2026-09-13)
 
 LA has swept every other week since March 2021, but ~75,000 signs still show only the weekday.
-LADOT says parking is legal on a street's off weeks and that it doesn't ticket then
-([Larchmont Chronicle, Mar 2025](https://larchmontchronicle.com/to-adhere-to-parking-signs-or-not-to-adhere/));
-about 12,500 tickets were still written on unscheduled days since 2021
-([L.A. Material, Jul 2026](https://lamaterial.com/p/la-wrongful-street-sweeping-tickets)), and LADOT
-says it dismisses those. Our own data agrees: a side is ticketed on 39.6% of its scheduled days,
+LADOT says parking is legal on a street's off weeks
+([Larchmont Chronicle, Mar 2025](https://larchmontchronicle.com/to-adhere-to-parking-signs-or-not-to-adhere/)),
+and its [weekly update of March 4, 2021](https://ladot.lacity.gov/dotnews/weekly-update-march-4-2021)
+said officers would enforce sweeping only on days sweeping happens. On 2026-09-16 Citina had the
+pages stop saying off-week tickets still get written (and dropped the L.A. Material source), so
+don't bring that back. Our own data agrees: a side is ticketed on 39.6% of its scheduled days,
 1.05% of its other-week days, and 0% of 5th-week days. Signs won't change until the City Council
-makes the schedule permanent. This is in the page disclaimer and the README.
+makes the schedule permanent. Both pages' "Street sweeping signs" note and the README say this.
 
 ## Open visual candidates (not requests)
 
@@ -133,8 +139,6 @@ Ranked roughly by payoff:
 5. The third summary stat ("3 meter waves a day") is weaker than the other two.
 6. The legend note under the map runs 2–3 lines.
 7. The `.code` eyebrow's explanation lives in a `title` tooltip, invisible on touch.
-8. On desktop the disclaimer is taller than the title and lede, so there's empty space between the
-   lede and the map controls. Shortening the sweeping-signs paragraph would close it.
 
 ## LA Street Rules (`docs/streets/`)
 
@@ -150,11 +154,19 @@ Decisions Citina made on 2026-09-16 (keep them unless she asks):
   out. The layer's `Odd_Even` field is the week pair (Odd = 1st & 3rd), not the side of the street.
 - **Location only moves the map** (no accuracy matching or pick lists): it centers an ~800 m view on
   the reader, who taps their block. No precise location is needed.
-- **Map images load live from OpenStreetMap** (tile.openstreetmap.org), same look as the USC basemap
-  (faded, inverted in dark mode). Bulk-downloading tiles for the city is against OSM's policy, so the
+- **Map images load live from OpenStreetMap** (tile.openstreetmap.org), faded like the USC basemap.
+  **The map stays light in dark mode** (asked for on 2026-09-17, after seeing the USC map stay light on
+  an iPhone): its background, block lines and halo use `--map-*` tokens that dark mode doesn't
+  override, and the legend's line swatches sit on a bit of that light background. Bulk-downloading tiles for the city is against OSM's policy, so the
   page only requests what's in view. The disclaimer's "What the page loads" part says OSM and GitHub
   can tell roughly which area a reader looks at.
 - **City data is published as the `city-data` release**, overwritten weekly, not committed.
+- **The block card** (2026-09-17): the sign carries the posted rule, so a side shows only its name and
+  the next two sweep dates in bold. The meter card is spaces, officer visits a weekday and the
+  six-day unpaid odds (the meter ticket count lives in the kinds list). "What gets ticketed here"
+  lists every kind like the USC card (8 shown, "Show all N kinds" / "Show fewer"), under a dot chart
+  of the block's most ticketed kind by half hour (grey band = posted sweeping time when that kind is
+  street cleaning).
 
 How it works:
 
@@ -174,6 +186,12 @@ How it works:
   only when the view is under 3 km wide). It stops if a month in the window came back thin.
 - `citations.py` now also holds `LABELS`, `SWEEP`, `compass` and `usual_hours`, shared by both
   analyses (moved from `analyze.py`; the USC bundle was checked byte-identical after the move).
+- Ticket kinds on both pages are named by violation code (`CODE_KINDS` and `kind_label` in
+  `citations.py`), because the handhelds spell one rule many ways ("STANDNG IN ALLEY",
+  "OVNIGHT PRK W/OUT PE"); `LABELS` by description is only the fallback. All no-stopping
+  codes are "No stopping": their AM/PM descriptions don't match when they're written. A new code
+  shows LADOT's own description until it's added to the table. Each block lists every kind, and
+  `hh` holds its most ticketed kind by half hour for the card's dot chart.
 - `docs/streets/index.html` is hand-written, no build step. Deep links: `#3600-S-VERMONT-AVE`.
 - `weekly.yml`: jobs `update` (USC, as before), `city` (fetch, analyze, check the count hasn't fallen
   >10%, upload to the `city-data` release) and `deploy` (starts `pages.yml` even if one job failed).
@@ -187,7 +205,9 @@ Previewing: run `./fetch_city.py` and `./analyze_city.py`, serve `docs/`, open `
 Known gaps: tickets written at intersections (7.6%) aren't shown; about 5% of blocks name no cross
 street; the meter card has no posted meter hours (LADOT's data doesn't include them) and uses all
 weeks, not USC class weeks, so 3600 S Vermont's odds differ a little between the two pages. A side with
-fewer than 8 sweeping tickets shows no schedule even inside a posted route, as on the USC page.
+fewer than 8 sweeping tickets shows no schedule even inside a posted route, as on the USC page, and
+the "No sweeping schedule found" text is worked out from tickets only: it doesn't check whether a
+posted route covers the block.
 
 ## Committing
 
