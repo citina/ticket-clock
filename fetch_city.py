@@ -13,6 +13,8 @@
 """
 import datetime as dt
 import json
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -27,9 +29,19 @@ STREETS = "https://maps.lacity.org/lahub/rest/services/Street_Information/MapSer
 FIELDS = "ASSETID,INT_ID_FROM,INT_ID_TO,ADLF,ADLT,ADRF,ADRT,ZIP_L,ZIP_R,TDIR,STNAME,STSFX,SFXDIR,STATUS,Street_Designation"
 
 
-def get(url, params, timeout=600):
-    with urllib.request.urlopen(url + "?" + urllib.parse.urlencode(params), timeout=timeout) as r:
-        return r.read()
+def get(url, params, timeout=600, tries=4):
+    """One request, retried on a server error: the city's map server hands out the odd 502, and a
+    single one shouldn't throw away a download that takes minutes."""
+    for k in range(tries):
+        try:
+            with urllib.request.urlopen(url + "?" + urllib.parse.urlencode(params), timeout=timeout) as r:
+                return r.read()
+        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as e:
+            code = getattr(e, "code", None)
+            if k == tries - 1 or (code is not None and code < 500):
+                raise
+            print(f"warning: {url.split('/')[2]} said {code or e}; retrying in {20 * (k + 1)}s")
+            time.sleep(20 * (k + 1))
 
 
 def months(start, end):
