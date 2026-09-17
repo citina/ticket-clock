@@ -10,6 +10,7 @@
     --plane:#f2f2ef; --surface:#fcfcfb; --well:#e8e8e2;
     --ink:#14140f; --ink-2:#56554f; --ink-3:#8a8880;
     --rule:#e1e0d9; --edge:#c9c8c0;
+    --measure:640px;  /* one width for every block of text, so their right edges line up */
     --accent:#2a78d6; --accent-ink:#1c5cab;
     --panel:#1a1a19; --panel-ink:#fcfcfb; --panel-ink-2:#b6b5ab; --panel-rule:rgba(255,255,255,.12);
     --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#4a3aa7;
@@ -52,24 +53,21 @@
         color:var(--ink-3);display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
   h1{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:clamp(44px,8vw,66px);
      line-height:.92;margin:20px 0 12px;text-wrap:balance}
-  .lede{font-size:18.5px;line-height:1.5;color:var(--ink-2);max-width:62ch;margin:0}
-  .note{font-size:12.5px;line-height:1.45;color:var(--ink-3);max-width:75ch;margin:0}
-  /* the intro sits on the explorer's grid: title and lede over the map, the disclaimer over the panel */
-  .intro{display:grid;grid-template-columns:minmax(0,1fr) 430px;grid-template-rows:auto 1fr;gap:0 20px;margin:0 0 26px}
-  .intro .note{grid-column:2;grid-row:1 / span 2;padding-top:24px}
-  @media (max-width:1000px){ .intro{grid-template-columns:minmax(0,1fr)} .intro .note{grid-column:1;grid-row:auto;padding-top:0;margin-top:16px} }
+  .lede{font-size:18.5px;line-height:1.5;color:var(--ink-2);max-width:var(--measure);margin:0}
+  .note{font-size:12.5px;line-height:1.45;color:var(--ink-3);max-width:var(--measure);margin:0}
+  .intro{margin:0 0 26px}
   .note b{color:var(--ink-2);font-weight:500}
   .note p{margin:0 0 6px;max-width:none}
   .note a{color:inherit}
   .note.end{margin-top:40px}
   h2{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:34px;line-height:1.02;margin:8px 0 14px;text-wrap:balance}
-  p{max-width:65ch;margin:0 0 14px}
+  p{max-width:var(--measure);margin:0 0 14px}
   .code{display:inline-flex;gap:10px;align-items:center;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;
         font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
   .code b{font-weight:600;color:var(--ink-2);border:1px solid var(--edge);border-radius:3px;padding:1px 6px;letter-spacing:.04em}
   section{margin-top:56px;padding-top:28px;border-top:1px solid var(--rule)}
   figure{margin:24px 0 30px}
-  figcaption{font-size:13.5px;line-height:1.5;color:var(--ink-2);margin-top:10px;max-width:72ch}
+  figcaption{font-size:13.5px;line-height:1.5;color:var(--ink-2);margin-top:10px;max-width:var(--measure)}
   .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
   svg{display:block;max-width:100%;height:auto;overflow:visible}
   .fig-title{font-weight:600;font-size:15.5px;margin:0 0 2px}
@@ -182,7 +180,8 @@
     .vrow + .vrow{border-top:0;border-left:1px solid var(--panel-rule)}
     .vq{order:-2} .vn{order:-1;text-align:left;font-size:36px}
   }
-  .aside{max-width:75ch}
+  .aside{max-width:var(--measure);border-left:3px solid var(--accent);padding:4px 0 4px 16px;margin:26px 0;font-size:15px;color:var(--ink-2)}
+  .aside b{color:var(--ink)}
   .c-miss{fill:none;stroke:var(--edge);stroke-width:1}
   .c-hol{fill:var(--well);stroke:none}
   #cal svg{max-width:none}
@@ -195,12 +194,12 @@
   .notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px 24px;margin:16px 0 0;padding:0;list-style:none;font-size:14px;color:var(--ink-2)}
   .notes b{color:var(--ink);font-weight:600;display:block}
   .tool{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px}
-  .method{display:grid;grid-template-columns:160px 1fr;gap:12px 22px;font-size:14.5px;margin:18px 0 0}
+  .method{display:grid;grid-template-columns:160px 1fr;gap:12px 22px;font-size:14.5px;margin:18px 0 0;max-width:var(--measure)}
   .method dt{font-weight:600}
-  .method dd{margin:0;color:var(--ink-2);max-width:62ch}
+  .method dd{margin:0;color:var(--ink-2)}
   @media (max-width:560px){ .method{grid-template-columns:1fr;gap:4px} .method dd{margin-bottom:12px} }
   footer{margin-top:44px;font-size:13px;color:var(--ink-3)}
-  footer ul{padding-left:18px;margin:6px 0 0}
+  footer ul{padding-left:18px;margin:6px 0 0;max-width:var(--measure)}
   #tip{position:fixed;z-index:20;pointer-events:none;background:var(--panel);color:var(--panel-ink);font-size:12.5px;line-height:1.45;
        padding:8px 10px;border-radius:6px;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
   #tip b{font-weight:600}
@@ -212,9 +211,6 @@
   <div class="intro">
   <h1>USC Ticket Clock</h1>
   <p class="lede" id="lede">Click a street on the map to see when parking enforcement comes by: the street-sweeping schedule and when the officer really shows up, how often meter officers walk past, and what else gets ticketed there.</p>
-  <div class="note">
-    <p><b>Street sweeping signs.</b> Since March 2021, LA sweeps each street every other week (the 1st &amp; 3rd or the 2nd &amp; 4th time its weekday comes up in a month), but many signs were never updated and still show only the day, like "No parking Thursday". LADOT says parking is legal on a street's off weeks, and when the change began it said officers would enforce street sweeping only on days that sweeping happens (<a href="https://ladot.lacity.gov/dotnews/weekly-update-march-4-2021">LADOT, March 2021</a>). The weeks on this page are from <a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">StreetsLA's list</a> of posted routes, and <span id="notePhase">98%</span> of sweeping tickets near campus fell on them. For the official schedule, look up your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.</p>
-  </div>
   </div>
 
   <div class="explorer" id="explorer">
@@ -263,6 +259,9 @@
     <div class="code" title="The violation code printed on the ticket"><b>80.69BS</b> Ticket code · No park / street clean</div>
     <h2>Street sweeping runs every other week, almost to the minute</h2>
     <p id="sweepIntro"></p>
+    <div class="aside">
+      <b>Street sweeping signs.</b> Many signs were never updated for the every-other-week schedule and still show only the day, like "No parking Thursday". LADOT says parking is legal on a street's off weeks, and when the change began it said officers would enforce street sweeping only on days that sweeping happens (<a href="https://ladot.lacity.gov/dotnews/weekly-update-march-4-2021">LADOT, March 2021</a>). The weeks on this page are from <a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">StreetsLA's list</a> of posted routes. For the official schedule, look up your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.
+    </div>
     <figure>
       <div class="fig-title">One block, every Tuesday for two years</div>
       <div class="fig-sub" id="calSub">600 block of W 28th St, even-numbered side. Each square is one Tuesday.</div>
@@ -295,8 +294,8 @@
       <div class="fig-sub">Average number written in each hour, per day. Holidays excluded.</div>
       <div class="scroll"><div class="heat" id="heat"></div></div>
     </figure>
-    <div class="aside" style="border-left:3px solid var(--accent);padding:4px 0 4px 16px;margin:26px 0;font-size:15px;color:var(--ink-2)">
-      <b style="color:var(--ink)">Checking against Curb Log's sensors.</b> Meter tickets record the space ID, like <span class="mono">C964</span>, and those are the same IDs Curb Log's sensors use. From 12 May to 30 June 2026, 168 meter tickets were written on sensored spaces. For 83% of them, the sensor showed the space occupied at that moment. The ticketed cars had been parked for a median of 2 h 20 min, and half of them drove off within an hour of the ticket.
+    <div class="aside">
+      <b>Checking against Curb Log's sensors.</b> Meter tickets record the space ID, like <span class="mono">C964</span>, and those are the same IDs Curb Log's sensors use. From 12 May to 30 June 2026, 168 meter tickets were written on sensored spaces. For 83% of them, the sensor showed the space occupied at that moment. The ticketed cars had been parked for a median of 2 h 20 min, and half of them drove off within an hour of the ticket.
     </div>
   </section>
 
@@ -374,7 +373,6 @@ const allDay=(m,dw,f)=>stayP(m,dw,0,24,f);
 const visitsPerDay=m=>{ let s=0; for(let d=0; d<5; d++) for(let j=0;j<24;j++) s+=m.r[d][j]; return m.c*s/5; };
 
 /* ============ header bits ============ */
-$('#notePhase').textContent=pct(D.phase);
 $('#mastRange').textContent=`LADOT tickets · 2014 – ${fmtDate(D.end,true).replace(/^\w+, /,'')} · updated weekly`;
 $('#mData').textContent=`LADOT parking citations (data.lacity.org, dataset 4f5p-udkv). I kept all ${D.total.toLocaleString()} tickets inside a box of about 2.5 × 2.5 km around campus, from 2014 to ${fmtDate(D.end,true)}. Everything on the page uses the ${D.window.toLocaleString()} tickets written in the two years from ${fmtDate(D.start,true)}, so it reflects how enforcement works now. The page is rebuilt every week from LADOT's latest data, and the two-year window moves with it. Which blocks have meters comes from LADOT's meter inventory (dataset s49e-q6j2), so blocks whose meters never drew a ticket still count.`;
 

@@ -28,8 +28,8 @@ and whether it applies to LA Street Rules. Started 2026-09-16 on `main` at `d8ac
 
 ## Changes
 
-HANDOFF.md still describes the disclaimer as two parts at the top and cites L.A. Material. Changes 1
-and 5 below replace that, so update HANDOFF.md to match when you merge.
+HANDOFF.md still describes the disclaimer as two parts at the top and cites L.A. Material. Changes 1,
+5 and 7 below replace that, so update HANDOFF.md to match when you merge.
 
 ### 1. "Street sweeping signs": LADOT's own source, no "tickets still get written"
 
@@ -87,3 +87,36 @@ Commit: `97ae462` · Applies: **yes**
   The note at the top now holds only "Street sweeping signs".
 - On LA Street Rules: move its "Not a guide to parking illegally." paragraph to the end of the page
   the same way. Ask Citina before moving its other disclaimer parts, such as "What the page loads".
+
+### 6. One width for every block of text
+
+Commit: not saved yet · Applies: **yes**
+
+- Citina didn't like text boxes of different widths (the disclaimer at the end was narrower than the
+  Sources list above it, which ran the full page width). All text now shares one width:
+  `--measure:640px` on `:root` (a layout value, so it isn't repeated in the dark-mode blocks).
+- It's used by `.lede`, `p`, `figcaption`, `.note`, `.aside`, `footer ul`, and the whole `.method`
+  grid (label column plus text column; `.method dd` lost its own `max-width`). At 1440px every text
+  block runs from the same left edge to the same right edge. Charts, the map and the summary cards
+  keep the full width.
+- LA Street Rules has the same rules with the old mixed widths (`.lede` 62ch, `.note` 75ch, `p` 65ch,
+  `.method dd` 62ch, `.find-msg` 70ch, no limit on `footer ul`). Give them the same `--measure`.
+
+### 7. "Street sweeping signs" moved from the top of the page to the sweeping section
+
+Commit: not saved yet · Applies: **maybe** (ask Citina where it goes)
+
+- Citina found the note's spot in the top-right corner, above the block panel, odd. It is now a side
+  note (`.aside`, thin accent bar on the left) right after the opening paragraph of "Street sweeping
+  runs every other week". The top of the page is only the title and intro; the `.intro` grid and the
+  `.intro .note` rules are gone, and so is the `#notePhase` span and the line of script that filled it.
+- The "Checking against Curb Log's sensors" note used inline styles for the same look; those moved
+  into the `.aside` rule so both notes share it.
+- Two phrases were cut because the paragraph just above already says them: "Since March 2021, LA
+  sweeps each street every other week (the 1st & 3rd or the 2nd & 4th …)" and "98% of sweeping
+  tickets near campus fell on them". The note now starts "Many signs were never updated for the
+  every-other-week schedule and still show only the day". The LADOT sentence and links from change 1
+  are unchanged.
+- LA Street Rules uses the same top-right `.intro .note` layout but has no sweeping section to move the
+  note into, so ask Citina where it should go.
+
