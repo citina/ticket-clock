@@ -256,16 +256,20 @@ for st, h, k in blocks:
 # ---------- what gets ticketed, per block ----------
 viol = d.violation_description.fillna("?").str.strip()
 d["meter"] = d.violation_code.fillna("").str.replace(".", "", regex=False).str.startswith(METER)
-d["kind"] = np.where(d.meter, "Meter expired", viol.map(lambda v: LABELS.get(v, v.capitalize())))
 d["sweep"] = viol.isin(SWEEP)
-d["fine"] = pd.to_numeric(d.fine_amount, errors="coerce")
+code_viol = d.violation_code.fillna("") + "|" + viol   # name each code and description pair once
+names_of = {cv: kind_label(*cv.split("|", 1)) for cv in code_viol.unique()}
+d["kind"] = np.where(d.meter, "Meter expired", np.where(d.sweep, "Street cleaning", code_viol.map(names_of)))
+fine = pd.to_numeric(d.fine_amount, errors="coerce")
+d["fine"] = fine.where(fine > 0)   # some handhelds write $0 on tickets that carry a fine
 d["wk"] = d.dow < 5
 kinds, kind_ix = [], {}
 g = d.groupby(["b", "kind"])
 top = pd.DataFrame({"n": g.size(), "fine": g.fine.median(), "wk": g.wk.mean()}).reset_index()
 top = top.merge(d.groupby(["b", "kind", "dow"]).size().reset_index(name="c")
               .sort_values(["c", "dow"], ascending=[False, True], kind="mergesort").drop_duplicates(["b", "kind"])[["b", "kind", "dow"]], on=["b", "kind"])
-top = top.sort_values(["b", "n"], ascending=[True, False]).groupby("b").head(6)
+top = top.sort_values(["b", "n"], ascending=[True, False])
+print(f"{d.kind.nunique()} kinds of ticket; up to {top.groupby('b').size().max()} on one block")
 hours = d.assign(hr=d.mins // 60).groupby(["b", "kind", "hr"]).size()
 tops = collections.defaultdict(list)
 for b, kind, n, fine, wk, dow in top[["b", "kind", "n", "fine", "wk", "dow"]].itertuples(index=False):
@@ -275,6 +279,12 @@ for b, kind, n, fine, wk, dow in top[["b", "kind", "n", "fine", "wk", "dow"]].it
     hc = hours.loc[(b, kind)]
     tops[b].append([kind_ix[kind], int(n), int(fine) if fine == fine else 0, int(dow),
                     usual_hours(np.repeat(hc.index.values * 60, hc.values)), round(float(wk), 2)])
+
+# the block's most ticketed kind, counted by the half hour it was written (midnight = 0), for the dot plot
+first = top.drop_duplicates("b").set_index("b").kind
+tk = d[d.kind.values == first.reindex(d.b).values]
+halfhours = np.zeros((len(blocks), 48), int)
+np.add.at(halfhours, (tk.b.values, (tk.mins // 30).values), 1)
 
 # ---------- street sweeping, per side: the same rule as the USC page ----------
 # The posted day, weeks and time come from StreetsLA's routes. Each route covers an area and is swept on two
@@ -409,6 +419,8 @@ for k, (st, h, part) in enumerate(blocks):
         rec["wu"] = unrouted[k]
     if meters.get(k):
         rec["m"] = meters[k]
+    nz = np.flatnonzero(halfhours[k])
+    rec["hh"] = [int(nz[0])] + halfhours[k][nz[0]:nz[-1] + 1].tolist()   # first half hour, then the counts
     if spaces.get(k):
         rec["sp"] = spaces[k]
     cells[(cx, cy)].append(rec)

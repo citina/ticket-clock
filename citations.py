@@ -37,7 +37,7 @@ ADDR = re.compile(r"(\d{2,5})\s+(.+)")
 METER = "8813B"  # code 88.13B; some handhelds write it without dots (8813B+)
 
 
-# Ticket descriptions in plain words; anything not listed is shown capitalized as LADOT wrote it
+# Ticket descriptions in plain words, for codes CODE_KINDS doesn't list; anything else is shown capitalized as LADOT wrote it
 LABELS = {
     "?": "Not recorded", "NO PARK/STREET CLEAN": "Street cleaning", "RED ZONE": "Red zone", "NO STOP/STANDING": "No stopping",
     "NO STOP/STAND": "No stopping", "STOP/STAND PROHIBIT": "No stopping", "DISPLAY OF TABS": "Expired tabs",
@@ -55,6 +55,63 @@ LABELS = {
 }
 # Street cleaning is code 80.69BS; a few handhelds write it as 8069BS with its own description
 SWEEP = {"NO PARK/STREET CLEAN", "8069B NO PARK ST CLN"}
+
+# The handhelds spell one rule many ways ("STANDNG IN ALLEY", "OVNIGHT PRK W/OUT PE", "8813B METER
+# EXPIRED"), so both pages name a ticket by its code, with dots, brackets and the repeat-offence marks
+# (+ - # *) taken off; LABELS only covers codes missing here. Sweeping and meter tickets are told apart
+# by SWEEP and METER, not by this table.
+CODE_KINDS = {
+    "?": "Not recorded", "NOVIOL": "Not recorded",
+    "8056E4": "Red zone", "8936": "Red zone", "8058L": "Permit district", "80581": "Car-share space",
+    "5200": "Missing plates", "5200A": "Missing plates", "5200B": "Missing plates", "5202": "Missing plates",
+    "5201": "Plate position", "5201F": "Plate cover", "4464": "Altered plate",
+    "5204": "Expired tabs", "5204A": "Expired tabs",
+    "4000": "Expired registration", "4000A": "Expired registration", "4000A1": "Expired registration",
+    "4454A": "No registration card", "4462B": "Wrong registration",
+    "22500M": "Bus lane", "22500I": "Bus zone", "803611": "Tour bus zone", "803611D1": "Tour bus zone",
+    "803611D2": "Tour bus zone", "803611D3": "Tour bus zone",
+    "8069B": "No parking", "1564260": "No parking", "89391B": "No parking",
+    "8069A": "No stopping", "8069AA": "No stopping", "8069AP": "No stopping", "89391A": "No stopping",
+    "8070": "Anti-gridlock zone", "22500H": "Double parking", "1564250": "Double parking",
+    "8061": "Standing in alley", "8069C": "Over time limit", "89391C": "Over time limit",
+    "80692": "Commercial over limit", "22514": "Fire hydrant", "22500D": "Fire station entrance",
+    "225001": "Fire lane", "8072": "Red flag day", "22500E": "Blocking driveway", "80551": "Emergency driveway",
+    "22502": "Too far from curb", "22502A": "Too far from curb", "22502E": "Too far from curb",
+    "8049": "Too far from curb", "8942": "Too far from curb", "8051": "Wrong side of street", "8051A": "Wrong side of street",
+    "8073": "Angle parked",
+    "8056E1": "Passenger zone", "8939": "Passenger zone", "8056E2": "Loading zone", "8938": "Loading zone", "8709D": "Loading zone",
+    "17104H": "Loading zone", "8056E3": "Green zone", "8056E2Z": "Zero-emission zone", "80661D": "Taxi zone",
+    "80732": "Parked over 72 hours", "80731": "Stored on street", "8054": "Overnight parking", "8054H1": "Overnight parking",
+    "8711": "RV overnight", "80694": "Oversized vehicle", "22507A": "Oversized vehicle", "8069D": "Vehicle over 6 ft tall",
+    "80691": "Trailer", "80691A": "Trailer", "80691C": "Trailer", "80691D": "Trailer",
+    "22500F": "On sidewalk", "8053": "On parkway", "22500B": "In crosswalk", "8055A3": "Near crosswalk",
+    "22500N4": "Near crosswalk (warning)", "22500A": "In intersection", "22526": "In intersection",
+    "22500C": "Safety zone", "22500K": "On bridge", "22500G": "Blocking excavation", "8709A": "Railroad track",
+    "22521": "Railroad track", "21211B": "Bike lane", "21210": "Bicycle parking",
+    "8813A": "Meter expired", "8861": "Meter misuse", "8863A": "Lot meter expired", "8863B": "Lot meter expired",
+    "8803": "Outside space lines", "8803A": "Outside space lines", "8853": "Outside space lines",
+    "8940A": "Outside space lines", "8940B": "Outside space lines", "8709K": "Outside space lines",
+    "8864": "City lot rules", "8864A": "City lot rules", "8864A1": "City lot rules", "8866": "EV charging space",
+    "225078": "Disabled space", "225078A": "Disabled space", "225078B": "Disabled space", "225078C": "Disabled space",
+    "225078C1": "Disabled space", "225078C2": "Disabled space", "22500L": "Wheelchair ramp", "22522": "Wheelchair ramp",
+    "2251156B": "Placard misuse", "2251157": "Placard misuse", "2251157A": "Placard misuse",
+    "2251157B": "Placard misuse", "2251157C": "Placard misuse",
+    "80714": "Private property", "17104C": "Private property", "22658": "Private property", "80713": "Front yard",
+    "21113": "Public grounds", "21113A": "Public grounds", "8603": "City park area", "8606": "City park area",
+    "6344K2": "City park area", "6344K7": "City park area", "6344K8": "City park area",
+    "8709B": "Posted no-parking area", "8706B": "Posted no-parking area", "1520070": "Posted signs", "21461A": "Posted signs",
+    "572521D": "Fire road", "572521E": "Fire road", "80751": "Car alarm", "8755": "For-sale sign",
+    "8753": "Mobile billboard", "8754": "Advertising on vehicle", "8501": "Repairing vehicle on street",
+    "8074": "Cleaning vehicle on street", "22517": "Door left open", "22515": "Engine left running",
+    "22523A": "Abandoned vehicle", "22523B": "Abandoned vehicle", "26710": "Windshield", "27465B": "Bald tires",
+    "22513": "Tow truck", "8940": "Parking area rules", "22504A": "Unincorporated area", "22511": "Veterans exemption", "5025D": "Other",
+}
+
+
+def kind_label(code, desc):
+    """The plain name for a ticket from its code, falling back to LABELS and then LADOT's own words."""
+    k = re.sub(r"[.()\s]", "", code.upper()).rstrip("+-#*") if isinstance(code, str) else "?"
+    return CODE_KINDS.get(k) or LABELS.get(desc) or desc.capitalize()
 
 
 def parse_loc(s):

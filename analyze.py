@@ -25,8 +25,10 @@ END = end_date(d)
 F = frame()
 MPP = F["m_per_px"]
 d["x"], d["y"] = to_px(d.lat.values, d.lon.values)
-d["kind"] = np.where(d.meter, "Meter expired", d.viol.map(lambda v: LABELS.get(v, v.capitalize())))
 d["sweep"] = d.viol.isin(SWEEP)
+code_viol = d.violation_code.fillna("") + "|" + d.viol   # name each code and description pair once
+names_of = {cv: kind_label(*cv.split("|", 1)) for cv in code_viol.unique()}
+d["kind"] = np.where(d.meter, "Meter expired", np.where(d.sweep, "Street cleaning", code_viol.map(names_of)))
 START = END - WINDOW + pd.Timedelta(days=1)
 w = d[(d.date >= START) & (d.date <= END)].copy()
 hol = holidays(START, END)
@@ -75,7 +77,8 @@ for (st, bl), g in w.dropna(subset=["street", "block"]).groupby(["street", "bloc
     top = []
     for kind, h in g.groupby("kind"):
         wk = h[h.dow < 5]
-        top.append([kind, len(h), int(h.fine.median()) if h.fine.notna().any() else 0,
+        fines = h.fine[h.fine > 0]   # some handhelds write $0 on tickets that carry a fine
+        top.append([kind, len(h), int(fines.median()) if len(fines) else 0,
                     int(h.dow.mode()[0]), usual_hours(h.mins), round(len(wk) / len(h), 2)])
     top.sort(key=lambda r: -r[1])
     index[(st, bl)] = len(blocks)
