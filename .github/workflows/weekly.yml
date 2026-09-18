@@ -6,8 +6,9 @@ name: weekly update
 #
 # Two jobs run side by side: `update` commits the USC page's data, and `city` rebuilds
 # LA Street Rules' city-wide data (~16 MB) and publishes it as the city-data release
-# instead of committing it, so the repo doesn't grow every week. `deploy` then starts
-# pages.yml, which puts that release into docs/streets/data/.
+# instead of committing it, so the repo doesn't grow every week. Its raw downloads are kept
+# between runs in the city-downloads release. `deploy` then starts pages.yml, which puts the
+# city-data release into docs/streets/data/.
 on:
   schedule:
     - cron: "17 14 * * 1"   # Mondays 14:17 UTC (7:17 am PDT, 6:17 am PST)
@@ -84,8 +85,36 @@ jobs:
           python-version: "3.9"
       - run: pip install pandas==1.3.4 numpy==1.26.4 scipy==1.12.0
 
+      # Last week's downloads (data/city/, ~450 MB, ~100 MB packed), so fetch_city.py only refreshes
+      # what's due and keeps an older copy when a city server is down. They live in a release, not the
+      # Actions cache, because GitHub drops caches unused for 7 days and this runs every 7 days.
+      - name: Get last week's downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release download city-downloads --pattern city-downloads.tar.gz --dir "$RUNNER_TEMP"; then
+            mkdir -p data && tar -xzf "$RUNNER_TEMP/city-downloads.tar.gz" -C data
+            echo "restored $(ls data/city/tickets | wc -l) ticket months and $(ls data/city | wc -l) entries"
+          else
+            echo "no city-downloads release yet: downloading everything"
+          fi
+
       - name: Fetch city-wide tickets, street centerlines and meters
-        run: python3 fetch_city.py
+        run: python3 -u fetch_city.py | tee fetch.log
+
+      - name: Keep the downloads for next week
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sed -n 's/^warning: /::warning::/p' fetch.log
+          tar -czf "$RUNNER_TEMP/city-downloads.tar.gz" -C data city
+          if gh release view city-downloads >/dev/null 2>&1; then
+            gh release upload city-downloads "$RUNNER_TEMP/city-downloads.tar.gz" --clobber
+          else
+            gh release create city-downloads "$RUNNER_TEMP/city-downloads.tar.gz" --latest=false \
+              --title "LA Street Rules downloads" \
+              --notes "The raw downloads behind LA Street Rules (data/city/), kept between weekly runs so each run only refreshes what's due. Not the page's data; that's the city-data release."
+          fi
 
       # analyze_city.py itself stops if a month in the window came back thin
       - name: Analyze

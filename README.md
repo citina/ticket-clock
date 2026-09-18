@@ -70,7 +70,10 @@ are not committed; they regenerate from the commands above.
 Actions, commits the new `data/bundle.json` and `docs/index.html`, and starts
 `pages.yml` to publish `docs/`. A second job rebuilds LA Street Rules' city-wide data and
 uploads it to the `city-data` release (overwritten each week, so the repo doesn't grow);
-`pages.yml` copies that release into `docs/streets/data/` before publishing. If the city
+`pages.yml` copies that release into `docs/streets/data/` before publishing. Its raw downloads
+are kept in the `city-downloads` release, so each run only refreshes the recent ticket months, a
+few older ones, and the street centerlines once a month; if a city server is down, it keeps the
+older copy and says so in the run log. If the city
 data's ticket count falls more than 10%, or a month comes back thin, that job stops and
 last week's release stays up. Run it by hand with `gh workflow run weekly.yml`. If
 the ticket count falls more than 1% from the last build, it stops without publishing.

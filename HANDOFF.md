@@ -175,9 +175,14 @@ Decisions Citina made on 2026-09-16 (keep them unless she asks):
 How it works:
 
 - `fetch_city.py` → `data/city/` (gitignored): monthly ticket CSVs for the window (old months are
-  deleted, the last two refetched), LA GeoHub street centerlines (`Street_Information/MapServer/36`,
-  85k segments with address ranges per side and intersection IDs), LADOT's meter inventory, and
-  StreetsLA's posted sweeping routes for the whole city (~870 route days, 36 MB).
+  deleted), LA GeoHub street centerlines (`Street_Information/MapServer/36`, 85k segments with
+  address ranges per side and intersection IDs), LADOT's meter inventory, and StreetsLA's posted
+  sweeping routes for the whole city (~870 route days, 36 MB). `fetched.json` records when each
+  file was downloaded. Each run refetches the last two ticket months, the six older months with the
+  oldest copies (so each month is rechecked about monthly), the meters and routes, and the
+  centerlines once their copy is 4 weeks old. A failed download keeps the older copy with a warning;
+  a file with no copy yet still stops the run. Downloads retry server errors and non-JSON answers
+  (maps.lacity.org was down for ~90 minutes on 2026-09-17 and failed three runs before this).
 - `analyze_city.py` (~5 min) → `docs/streets/data/` (gitignored, ~16 MB, 4.3 MB as the release
   tarball): tickets are matched to a centerline segment by street name, direction, suffix and house
   number (88% of tickets; intersections and unaddressable places like LAX's World Way are left out).
@@ -194,11 +199,15 @@ How it works:
   `citations.py`), because the handhelds spell one rule many ways ("STANDNG IN ALLEY",
   "OVNIGHT PRK W/OUT PE"); `LABELS` by description is only the fallback. All no-stopping
   codes are "No stopping": their AM/PM descriptions don't match when they're written. A new code
-  shows LADOT's own description until it's added to the table. Each block lists every kind, and
-  `hh` holds its most ticketed kind by half hour for the card's dot chart.
+  shows LADOT's own description until it's added to the table. Each block lists every kind; `hh`
+  holds the dot-chart counts (see "The block card" above).
 - `docs/streets/index.html` is hand-written, no build step. Deep links: `#3600-S-VERMONT-AVE`.
-- `weekly.yml`: jobs `update` (USC, as before), `city` (fetch, analyze, check the count hasn't fallen
-  >10%, upload to the `city-data` release) and `deploy` (starts `pages.yml` even if one job failed).
+- `weekly.yml`: jobs `update` (USC, as before), `city` (restore last week's downloads from the
+  `city-downloads` release, fetch, save them back, analyze, check the count hasn't fallen >10%,
+  upload to the `city-data` release) and `deploy` (starts `pages.yml` even if one job failed). The
+  downloads live in a release rather than the Actions cache because GitHub drops caches unused for
+  7 days, which a weekly run would keep hitting. If `city-downloads` is deleted, the next run just
+  downloads everything again.
   `pages.yml` downloads the release into `docs/streets/data/` before publishing; if the release is
   missing it warns and the page says its data didn't load.
 - The `city-data` release was first uploaded by hand on 2026-09-16 (tickets through 2026-09-14). If

@@ -3,13 +3,20 @@
 
 - tickets/YYYY-MM.csv: every LADOT parking citation in the last two years (plus the month the window
   starts in), one file per month (data.lacity.org 4f5p-udkv, about 160k rows / 17 MB a month).
-  Months already on disk are kept, the last two are always refetched since the feed keeps filling
-  them in, and months that fall out of the window are deleted, so the download doesn't grow.
+  The last two months are refetched every run since the feed keeps filling them in, plus the six
+  older months whose copies are oldest, so each month is rechecked about once a month. Months that
+  fall out of the window are deleted, so the download doesn't grow.
 - centerlines.json: the City of Los Angeles street centerlines with address ranges per side
   and the intersection at each end (LA GeoHub, Street_Information MapServer layer 36, ~85k segments).
+  They barely change, so they're refetched once the copy is four weeks old.
 - meters.csv: LADOT's metered parking inventory for the whole city (s49e-q6j2, ~35k spaces).
 - sweep_routes.geojson: StreetsLA's posted sweeping routes for the whole city (~870 route days),
   the same layer fetch_citations.py saves for the USC box.
+- fetched.json: the date each file above was downloaded.
+
+The weekly workflow keeps data/city/ between runs (the city-downloads release). When a download fails
+and an older copy is on disk, that copy is kept with a warning, so a city server that's down for a day
+doesn't stop the rebuild; a file with no copy yet still stops it.
 """
 import datetime as dt
 import json
@@ -58,6 +65,25 @@ def get_json(url, params, **kw):
             time.sleep(20 * (k + 1))
 
 
+def refresh(name, fetch):
+    """Run fetch(path), which writes data/city/<name> and returns a line to print. If it fails and an
+    older copy exists, keep that copy and say so."""
+    path = CITY / name
+    try:
+        print(fetch(path))
+        fetched[name] = today.isoformat()
+    except Exception as e:
+        if not path.exists():
+            raise
+        print(f"warning: couldn't refresh {name} ({str(e)[:120]}); keeping the copy from {fetched.get(name, 'an earlier run')}")
+
+
+def write(path, body):
+    tmp = path.with_suffix(".part")   # a run that dies halfway leaves the old copy, not half a file
+    tmp.write_bytes(body)
+    tmp.replace(path)
+
+
 def months(start, end):
     m = start.replace(day=1)
     while m <= end:
@@ -66,46 +92,82 @@ def months(start, end):
         m = nxt
 
 
-# ---- tickets, a month at a time ----
+NL = b"\n"
+ROLL = 6          # older ticket months refetched per run, the ones whose copies are oldest
+STREETS_DAYS = 28  # the centerlines are refetched once the copy is this old
+
 tdir = CITY / "tickets"
 tdir.mkdir(parents=True, exist_ok=True)
 today = dt.date.today()
+MANIFEST = CITY / "fetched.json"
+fetched = json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {}   # file -> date downloaded
+age = lambda name: (today - dt.date.fromisoformat(fetched[name])).days if name in fetched else 10 ** 6
+
+# ---- tickets, a month at a time ----
 start = (pd.Timestamp(today) - WINDOW).date().replace(day=1)
 for old in tdir.glob("*.csv"):
     if old.stem < f"{start:%Y-%m}":
         old.unlink()
-recent = {m for m, _ in list(months(start, today))[-2:]}
-for m, nxt in months(start, today):
-    out = tdir / f"{m:%Y-%m}.csv"
-    if out.exists() and m not in recent:
+        fetched.pop(f"tickets/{old.name}", None)
+window = list(months(start, today))
+recent = {m for m, _ in window[-2:]}
+due = recent | set(sorted((m for m, _ in window if m not in recent), key=lambda m: -age(f"tickets/{m:%Y-%m}.csv"))[:ROLL])
+
+
+def month_fetcher(m, nxt):
+    def fetch(path):
+        body = get(TICKETS, {"$select": COLS, "$where": f'issue_date >= "{m}" and issue_date < "{nxt}"',
+                             "$order": "issue_date", "$limit": "2000000"})
+        write(path, body)
+        return f"{path.name} {body.count(NL) - 1} tickets"
+    return fetch
+
+
+for m, nxt in window:
+    name = f"tickets/{m:%Y-%m}.csv"
+    if (CITY / name).exists() and m not in due:
         continue
-    body = get(TICKETS, {"$select": COLS, "$where": f'issue_date >= "{m}" and issue_date < "{nxt}"',
-                         "$order": "issue_date", "$limit": "2000000"})
-    tmp = out.with_suffix(".part")
-    tmp.write_bytes(body)
-    tmp.replace(out)
-    print(out.name, body.count(b"\n") - 1, "tickets")
+    refresh(name, month_fetcher(m, nxt))
+
 
 # ---- street centerlines, 1,000 per request ----
-feats, off = [], 0
-while True:
-    page = get_json(STREETS, {"where": "1=1", "outFields": FIELDS, "outSR": "4326", "orderByFields": "OBJECTID",
-                              "resultOffset": off, "resultRecordCount": 1000, "f": "geojson"}, timeout=120)
-    feats += page["features"]
-    off += len(page["features"])
-    if not page["features"] or not (page.get("exceededTransferLimit") or page.get("properties", {}).get("exceededTransferLimit")):
-        break
-(CITY / "centerlines.json").write_text(json.dumps({"type": "FeatureCollection", "features": feats}, separators=(",", ":")))
-print("centerlines.json", len(feats), "segments")
+def fetch_streets(path):
+    feats, off = [], 0
+    while True:
+        page = get_json(STREETS, {"where": "1=1", "outFields": FIELDS, "outSR": "4326", "orderByFields": "OBJECTID",
+                                  "resultOffset": off, "resultRecordCount": 1000, "f": "geojson"}, timeout=120)
+        feats += page["features"]
+        off += len(page["features"])
+        if not page["features"] or not (page.get("exceededTransferLimit") or page.get("properties", {}).get("exceededTransferLimit")):
+            break
+    write(path, json.dumps({"type": "FeatureCollection", "features": feats}, separators=(",", ":")).encode())
+    return f"centerlines.json {len(feats)} segments"
+
+
+if age("centerlines.json") >= STREETS_DAYS or not (CITY / "centerlines.json").exists():
+    refresh("centerlines.json", fetch_streets)
+else:
+    print(f"centerlines.json: keeping the copy from {fetched['centerlines.json']}")
+
 
 # ---- metered spaces ----
-body = get("https://data.lacity.org/resource/s49e-q6j2.csv",
-           {"$select": "spaceid,blockface,metertype,ratetype,raterange,timelimit,latlng", "$order": "spaceid", "$limit": "100000"}, timeout=120)
-(CITY / "meters.csv").write_bytes(body)
-print("meters.csv", body.count(b"\n") - 1, "spaces")
+def fetch_meters(path):
+    body = get("https://data.lacity.org/resource/s49e-q6j2.csv",
+               {"$select": "spaceid,blockface,metertype,ratetype,raterange,timelimit,latlng", "$order": "spaceid", "$limit": "100000"}, timeout=120)
+    write(path, body)
+    return f"meters.csv {body.count(NL) - 1} spaces"
+
+
+refresh("meters.csv", fetch_meters)
+
 
 # ---- posted sweeping routes: day, week pair, posted time and area ----
-routes = get_json("https://services1.arcgis.com/PTh9WC0Sf2WS7AAq/arcgis/rest/services/Posted_Street_Sweeping_Routes_Update/FeatureServer/0/query",
-                  {"where": "1=1", "outFields": "Route,Posted_Time,Posted_Day,Weeks", "returnGeometry": "true", "outSR": "4326", "f": "geojson"}, timeout=120)
-(CITY / "sweep_routes.geojson").write_text(json.dumps(routes, separators=(",", ":")))   # an ArcGIS error is a 200 with no features
-print("sweep_routes.geojson", len(routes["features"]), "posted sweeping route days")
+def fetch_routes(path):
+    routes = get_json("https://services1.arcgis.com/PTh9WC0Sf2WS7AAq/arcgis/rest/services/Posted_Street_Sweeping_Routes_Update/FeatureServer/0/query",
+                      {"where": "1=1", "outFields": "Route,Posted_Time,Posted_Day,Weeks", "returnGeometry": "true", "outSR": "4326", "f": "geojson"}, timeout=120)
+    write(path, json.dumps(routes, separators=(",", ":")).encode())
+    return f"sweep_routes.geojson {len(routes['features'])} posted sweeping route days"   # an ArcGIS error is a 200 with no features
+
+
+refresh("sweep_routes.geojson", fetch_routes)
+MANIFEST.write_text(json.dumps(fetched, indent=1, sort_keys=True))
