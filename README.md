@@ -73,7 +73,8 @@ uploads it to the `city-data` release (overwritten each week, so the repo doesn'
 `pages.yml` copies that release into `docs/streets/data/` before publishing. Its raw downloads
 are kept in the `city-downloads` release, so each run only refreshes the recent ticket months, a
 few older ones, and the street centerlines once a month; if a city server is down, it keeps the
-older copy and says so in the run log. If the city
+older copy and says so in the run log. A file with no older copy stops the run, but everything else it
+downloaded is still kept, so the next run only needs that file. If the city
 data's ticket count falls more than 10%, or a month comes back thin, that job stops and
 last week's release stays up. Run it by hand with `gh workflow run weekly.yml`. If
 the ticket count falls more than 1% from the last build, it stops without publishing.

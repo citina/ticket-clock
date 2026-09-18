@@ -20,6 +20,7 @@ doesn't stop the rebuild; a file with no copy yet still stops it.
 """
 import datetime as dt
 import json
+import sys
 import time
 import urllib.error
 import urllib.parse
@@ -65,16 +66,22 @@ def get_json(url, params, **kw):
             time.sleep(20 * (k + 1))
 
 
+missing = []   # files with no copy yet that couldn't be downloaded; the run fails at the end, after the rest
+
+
 def refresh(name, fetch):
     """Run fetch(path), which writes data/city/<name> and returns a line to print. If it fails and an
-    older copy exists, keep that copy and say so."""
+    older copy exists, keep that copy and say so. With no copy, carry on with the other files and fail at
+    the end, so what did download is kept for the next run."""
     path = CITY / name
     try:
         print(fetch(path))
         fetched[name] = today.isoformat()
     except Exception as e:
         if not path.exists():
-            raise
+            print(f"error: couldn't download {name} ({str(e)[:120]}), and there's no earlier copy")
+            missing.append(name)
+            return
         print(f"warning: couldn't refresh {name} ({str(e)[:120]}); keeping the copy from {fetched.get(name, 'an earlier run')}")
 
 
@@ -171,3 +178,5 @@ def fetch_routes(path):
 
 refresh("sweep_routes.geojson", fetch_routes)
 MANIFEST.write_text(json.dumps(fetched, indent=1, sort_keys=True))
+if missing:
+    sys.exit(f"stopping: no copy of {', '.join(missing)}; the rest is downloaded and kept for the next run")

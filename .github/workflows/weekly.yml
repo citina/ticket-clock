@@ -100,13 +100,17 @@ jobs:
           fi
 
       - name: Fetch city-wide tickets, street centerlines and meters
+        id: fetch
         run: python3 -u fetch_city.py | tee fetch.log
 
+      # Kept even when a download failed (a city server down and no older copy): the next run then only
+      # needs the file that's missing. Analyze and publish still wait for a full set.
       - name: Keep the downloads for next week
+        if: ${{ !cancelled() && steps.fetch.outcome != 'skipped' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          sed -n 's/^warning: /::warning::/p' fetch.log
+          sed -n 's/^warning: /::warning::/p; s/^error: /::error::/p' fetch.log
           tar -czf "$RUNNER_TEMP/city-downloads.tar.gz" -C data city
           if gh release view city-downloads >/dev/null 2>&1; then
             gh release upload city-downloads "$RUNNER_TEMP/city-downloads.tar.gz" --clobber
