@@ -287,10 +287,10 @@ for b, kind, n, fine, wk, dow in top[["b", "kind", "n", "fine", "wk", "dow"]].it
     tops[b].append([kind_ix[kind], int(n), int(fine) if fine == fine else 0, int(dow),
                     usual_hours(np.repeat(hc.index.values * 60, hc.values)), round(float(wk), 2)])
 
-# For the card: every code LADOT writes a kind under, its own wordings, and a plain line about the rule
+# For the card: the code LADOT writes a kind under most often, and a plain line about the rule
 src = (d.groupby(["kind", d.violation_code.fillna("?"), viol]).size().reset_index(name="c")
        .sort_values("c", ascending=False))
-CODE_CAP, DESC_CAP = 6, 3   # the commonest few; the rest are counted, not listed
+CODE_CAP, DESC_CAP = 1, 0   # the card shows only the commonest code; the rest are counted, not listed
 kind_src = []
 for k in kinds:
     x = src[src.kind == k]
