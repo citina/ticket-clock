@@ -181,7 +181,7 @@ for lab, dset in (("term", term_days), ("off", mdays.difference(term_days))):
 
 bundle = dict(frame=dict(W=F["W"], H=F["H"], mpp=round(MPP, 3)), start=str(START.date()), end=str(END.date()),
               total=len(d), window=len(w), phase=round(phase_hits / phase_all, 3),
-              share=dict(sweep=round(float(d.sweep.mean()), 3), meter=round(float(d.meter.mean()), 3)),
+              share=dict(sweep=round(float(w.sweep.mean()), 3), meter=round(float(w.meter.mean()), 3)),
               fines=dict(sweep=int(w[w.sweep].fine.median()), meter=int(m.fine.median())),
               rules=dict(sweep_min=SWEEP_MIN, min_tix=MIN_TIX),
               blocks=blocks, cal=cal, lag_hist=lag_hist, heat=heat)

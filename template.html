@@ -52,6 +52,16 @@
   .mast{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
         color:var(--ink-3);display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
   .mast a{color:inherit}
+  .mast .site{white-space:nowrap}
+  .mast .here{color:var(--ink)}
+  /* sister sites, at the end of the page */
+  .sibs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:16px 0 0}
+  @media (max-width:640px){ .sibs{grid-template-columns:minmax(0,1fr)} }
+  .sib{display:block;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:16px 18px;color:inherit;text-decoration:none}
+  .sib:hover{border-color:var(--ink-3)}
+  .sib-name{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:26px;line-height:1.05;color:var(--ink)}
+  .sib-name::after{content:" →";color:var(--ink-3);font-weight:600}
+  .sib-txt{font-size:14.5px;line-height:1.5;color:var(--ink-2);margin:6px 0 0}
   h1{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:clamp(44px,8vw,66px);
      line-height:.92;margin:20px 0 12px;text-wrap:balance}
   .lede{font-size:18.5px;line-height:1.5;color:var(--ink-2);max-width:var(--measure);margin:0}
@@ -114,6 +124,9 @@
   .maptag{position:absolute;bottom:6px;font-size:11px;padding:1px 6px;border-radius:4px;color:var(--ink-2);
           background:color-mix(in oklab,var(--surface) 88%,transparent)}
   .maptag.r{right:8px} .maptag.l{left:8px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-3)}
+  .maptag .touch{display:none}
+  @media (pointer:coarse){ .maptag .mouse{display:none} .maptag .touch{display:inline} }
+  @media (max-width:560px){ .maptag.l{top:10px;bottom:auto} }   /* phones: the hint and the credit don't fit on one line */
   .seg{fill:none;stroke-linecap:round}
   .hit{fill:none;stroke:transparent;stroke-width:16;cursor:pointer}
 
@@ -210,7 +223,7 @@
 </style>
 
 <main>
-  <div class="mast"><span>Curb Log · Citations · <a href="streets/">LA Street Rules</a></span><span id="mastRange">LADOT tickets</span></div>
+  <nav class="mast" aria-label="Sister sites"><span><a class="site" href="https://citina.github.io/curb-log/">Curb Log</a> · <span class="site here" aria-current="page">USC Ticket Clock</span> · <a class="site" href="streets/">LA Street Rules</a></span><span id="mastRange">Updated weekly</span></nav>
   <div class="intro">
   <h1>USC Ticket Clock</h1>
   <p class="lede" id="lede">Click a street on the map to see when parking enforcement comes by: the street-sweeping schedule and when the officer really shows up, how often meter officers walk past, and what else gets ticketed there.</p>
@@ -229,7 +242,7 @@
       </div>
       <div class="mapwrap" id="mapwrap">
         <div class="zoom"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button><button id="zfit" class="fit" aria-label="Show whole area">ALL</button></div>
-        <span class="maptag l">drag to move · pinch or ⌘/ctrl-scroll to zoom</span>
+        <span class="maptag l"><span class="mouse">drag to move · ⌘/ctrl-scroll to zoom</span><span class="touch">drag to move · pinch to zoom</span></span>
         <span class="maptag r">© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</span>
       </div>
       <ul class="legend" id="mapLegend"></ul>
@@ -330,6 +343,13 @@
       </ul>
     </footer>
   </section>
+  <section id="sisters">
+    <div class="code"><b>More</b> Sister sites</div>
+    <div class="sibs">
+      <a class="sib" href="streets/"><div class="sib-name">LA Street Rules</div><div class="sib-txt">Any block in the City of Los Angeles: search a street or use your location for its sweeping day, hours and weeks, how often meter officers come by, and what else gets ticketed there.</div></a>
+      <a class="sib" href="https://citina.github.io/curb-log/"><div class="sib-name">Curb Log</div><div class="sib-txt">How many parking spaces are available right now on Vermont Ave from W 36th St down to about W 37th St (both sides) and on W 36th St just west of Vermont, and how that usually changes by the half hour on weekdays, from LADOT's parking sensors.</div></a>
+    </div>
+  </section>
   <div class="note end">
     <p><b>Not a guide to parking illegally.</b> This page doesn't suggest parking anywhere, or at any time, the rules don't allow. It shows when and where LADOT has written tickets, so the rules on each block and how they're enforced are easier to understand. Past tickets don't predict the next one: an officer can come by at any time, and a quiet hour in the data can still end in a ticket.</p>
   </div>
@@ -377,7 +397,7 @@ const allDay=(m,dw,f)=>stayP(m,dw,0,24,f);
 const visitsPerDay=m=>{ let s=0; for(let d=0; d<5; d++) for(let j=0;j<24;j++) s+=m.r[d][j]; return m.c*s/5; };
 
 /* ============ header bits ============ */
-$('#mastRange').textContent=`LADOT tickets · 2014 – ${fmtDate(D.end,true).replace(/^\w+, /,'')} · updated weekly`;
+$('#mastRange').textContent=`Data through ${fmtDate(D.end,true).replace(/^\w+, /,'')} · updated weekly`;
 $('#mData').textContent=`LADOT parking citations (data.lacity.org, dataset 4f5p-udkv). I kept all ${D.total.toLocaleString()} tickets inside a box of about 2.5 × 2.5 km around campus, from 2014 to ${fmtDate(D.end,true)}. Everything on the page uses the ${D.window.toLocaleString()} tickets written in the two years from ${fmtDate(D.start,true)}, so it reflects how enforcement works now. The page is rebuilt every week from LADOT's latest data, and the two-year window moves with it. Which blocks have meters comes from LADOT's meter inventory (dataset s49e-q6j2), so blocks whose meters never drew a ticket still count.`;
 
 /* ============ map ============ */
@@ -427,7 +447,7 @@ function drawColor(){
     const ns=BL.filter(b=>!b.sweep.length), nm=ns.filter(b=>b.mspaces).length;
     metLegend(lg, `metered, no sweeping schedule found (${nm} blocks)`);
     const li=H('li',{},lg); H('span',{className:'sw bar'},li).style.background='var(--ink-3)'; li.append(`no sweeping schedule found (${ns.length-nm} blocks)`);
-    legendNote(lg, `No schedule found means fewer than ${D.rules.sweep_min} sweeping tickets on either side in two years (${ns.filter(b=>!b.sweep_n).length} of these ${ns.length} blocks had none). Streets with no line had fewer than ${D.rules.min_tix} tickets of any kind, too few to show.`);
+    legendNote(lg, `No schedule found: fewer than ${D.rules.sweep_min} sweeping tickets on either side in two years. Streets with no line: fewer than ${D.rules.min_tix} tickets of any kind.`);
   } else {
     const mb=BL.filter(b=>b.meter), vmax=Math.max(...mb.map(b=>visitsPerDay(b.meter)));
     mb.forEach(b=>{ const s=visitsPerDay(b.meter)/vmax;
@@ -438,7 +458,7 @@ function drawColor(){
     const few=BL.filter(b=>!b.meter&&b.mspaces); few.forEach(metDots);
     metLegend(lg, `metered, too few meter tickets to model (${few.length})`);
     const l2=H('li',{},lg); H('span',{className:'sw bar'},l2).style.background='var(--ink-3)'; l2.append('no meters');
-    legendNote(lg, `Streets with no line had fewer than ${D.rules.min_tix} tickets of any kind in two years, too few to show.`);
+    legendNote(lg, `Streets with no line: fewer than ${D.rules.min_tix} tickets of any kind in two years.`);
   }
 }
 function drawSel(){
@@ -533,10 +553,10 @@ function signHTML(s){
     <div class="s1">No parking</div><div class="s2">${fmtT(s.s0).toUpperCase()} TO ${fmtT(s.s1).toUpperCase()}</div><div class="s3">${DAYLONG[s.dow]}</div><div class="s4">Street cleaning</div>
     <div class="s5">${phaseTxt(s.on).toUpperCase()} ONLY*</div></div></div>`; }
 // two lanes, first tickets then last tickets, drawn at the host's real width so the text stays full size;
-// the axis is the posted window with 10 minutes either side, so the shaded window reads as a band
+// the axis is the posted window itself, so the shaded band is as wide as the text above it
 function arrivalStrip(host, s, arr, fin){
-  const Wd=Math.max(260,Math.round(host.clientWidth)||380), l=10, r=10, t0=s.s0, span=s.s1-s.s0, pad=10, x=m=>l+(m+pad)/(span+2*pad)*(Wd-l-r), bw=7;
-  const col=m=>Math.floor((x(m)-l)/bw);
+  const Wd=Math.max(260,Math.round(host.clientWidth)||380), t0=s.s0, span=s.s1-s.s0, x=m=>m/span*Wd;
+  const ncol=Math.round(Wd/7), bw=Wd/ncol, col=m=>Math.max(0,Math.min(ncol-1,Math.floor(x(m)/bw)));
   // one dot per sweep day, stacked in 7px columns; very tall stacks squeeze instead of wrapping
   const lanes=[[arr,'var(--accent)','First ticket',''],[fin,'var(--s2)','Last ticket','3 2']].map(([a,c,nm,dash])=>{
     const n={}; a.forEach(m=>{ const k=col(m); n[k]=(n[k]||0)+1; });
@@ -548,13 +568,13 @@ function arrivalStrip(host, s, arr, fin){
   lanes.forEach(L=>{ const md=median(L.a), cnt={};
     S('rect',{x:x(0),y:L.y0,width:x(span)-x(0),height:L.h,rx:4,class:'win'},g);
     L.a.forEach(m=>{ const k=col(m), c=cnt[k]=(cnt[k]||0)+1;
-      S('circle',{cx:l+k*bw+bw/2,cy:L.base-3.5-(c-1)*L.step,r:3.2},g).style.fill=L.c; });
+      S('circle',{cx:k*bw+bw/2,cy:L.base-3.5-(c-1)*L.step,r:3.2},g).style.fill=L.c; });
     S('line',{x1:x(md),x2:x(md),y1:L.y0-3,y2:L.base,stroke:'var(--ink)','stroke-width':1.5,'stroke-dasharray':L.dash},g);
     S('circle',{cx:x(0)+4,cy:L.y0-9,r:4},g).style.fill=L.c;
     const tt=S('text',{x:x(0)+13,y:L.y0-5,class:'lab'},g); T('tspan',{},tt,`${L.nm}: usually `); T('tspan',{class:'lab strong'},tt,fmtT(t0+md)); });
-  S('line',{x1:l,x2:Wd-r,y1:axis,y2:axis,class:'axis'},g);
+  S('line',{x1:0,x2:Wd,y1:axis,y2:axis,class:'axis'},g);
   const every=x(30)-x(0)>=46?30:60;  // half-hour labels only when they have room
-  for(let m=0;m<=span;m+=30){ S('line',{x1:x(m),x2:x(m),y1:axis,y2:axis+4,class:'axis'},g); if(m%every===0) T('text',{x:x(m),y:axis+16,'text-anchor':'middle',class:'tick'},g,fmtT(t0+m).replace(' am','a').replace(' pm','p')); }
+  for(let m=0;m<=span;m+=30){ S('line',{x1:x(m),x2:x(m),y1:axis,y2:axis+4,class:'axis'},g); if(m%every===0) T('text',{x:x(m),y:axis+16,'text-anchor':m===0?'start':m===span?'end':'middle',class:'tick'},g,fmtT(t0+m).replace(' am','a').replace(' pm','p')); }
   const hit=S('rect',{x:0,y:0,width:Wd,height:Hd,fill:'transparent'},g);
   hover(hit,()=>`${arr.length} sweep days with tickets · one dot per day in each row<br>Lines: the usual time · Shaded: the posted window`);
   H('ul',{className:'legend',innerHTML:`<li><span class="sw win"></span>posted window, ${fmtRange(s.s0,s.s1)}</li>`},host);
@@ -636,7 +656,7 @@ function select(i, focus){
     arrivalStrip(box, s, arr, fin);
     if(n<20) H('div',{className:'empty',style:'font-size:12.5px',textContent:`Only ${n} tickets on this side, so treat the schedule as rough.`},box); });
   if(sweepGroups(b).some(g=>g.length===1)) H('div',{className:'empty',style:'font-size:12.5px;margin-top:12px',textContent:'Odd and even mean house numbers: one side of the street has the odd addresses, the other side the even ones, and each side can have its own sweeping day.'},sc);
-  if(b.sweep.length) H('div',{className:'empty',style:'font-size:12px;margin-top:10px',innerHTML:'*Real signs often show only the day. The day, weeks and time here are from <a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">StreetsLA\'s list</a> of posted routes; which side of the street gets which day is worked out from the tickets. Look up your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.'},sc);
+  if(b.sweep.length) H('div',{className:'empty',style:'font-size:12px;margin-top:10px',innerHTML:'*Signs often show only the day. Weeks and times are from <a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">StreetsLA\'s posted routes</a>; check your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.'},sc);
   if(b.meter) meterCard(H('div',{className:'card'},p), b);
   // everything ticketed here
   const kc=H('div',{className:'card'},p); H('h4',{textContent:'What gets ticketed here'},kc);
