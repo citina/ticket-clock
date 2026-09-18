@@ -351,9 +351,10 @@ alldays = alldays[~alldays.isin(list(hol))]
 weeks_n = {"posted": [0, 0, 0], "other": [0, 0, 0], "fifth": [0, 0, 0]}
 year2 = START + pd.DateOffset(years=1)
 off_first = 0                     # tickets outside the posted weeks in the window's first year (routes that changed?)
-example = None                    # the side with the most sweeping tickets on a one-day, every-other-week route
+example = None                    # the side with the most sweeping tickets on a one-day, every-other-week route; its
+                                  # calendar counts like its card: on the sweep weekday, in the posted hours
 for (b, side), x in sc.groupby(["b", "side"]):
-    grp = x
+    n_all = len(x)
     key = b * 2 + (side == "odd")
     if key not in best:
         unrouted[b] += 1
@@ -385,8 +386,8 @@ for (b, side), x in sc.groupby(["b", "side"]):
             weeks_n[c][1] += len(set(sel.date) & dset)
             weeks_n[c][2] += len(dset)
         off_first += int(((tcat != "posted") & (x.date < year2).values).sum())
-        if len(r["dows"]) == 1 and (example is None or len(grp) > example[0]):
-            example = (len(grp), b, side, r, grp)
+        if len(r["dows"]) == 1 and (example is None or n_all > example[0]):
+            example = (n_all, b, side, r, x)
     pk = (tuple(r["dows"]), r["on"])
     if pk not in posted_days:
         weeks = [1, 2, 3, 4, 5] if r["on"] == 0 else [r["on"], r["on"] + 2]

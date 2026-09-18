@@ -183,6 +183,20 @@
   .fig-lead b{color:var(--ink);font-weight:600}
   .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
   #cal svg{max-width:none}
+  /* the example block's sign on the street (Google's Street View, in its own frame) beside the sign this page draws */
+  .cmp{display:flex;gap:18px 28px;align-items:flex-start}
+  .cmp-a{flex:1 1 auto;min-width:0;max-width:560px}
+  .cmp-b{flex:none}
+  .cmp-b .sign{width:150px}
+  .cmp-next{margin-top:10px}
+  .cmp-next b{display:block;white-space:nowrap}
+  .cmp-next i{font-style:normal}
+  /* narrow: our sign goes under the photo, with the next dates beside it, one a line */
+  @media (max-width:600px){ .cmp{flex-direction:column} .cmp-a{align-self:stretch;max-width:none}
+    .cmp-sign{display:flex;align-items:center;gap:18px} .cmp-next{margin:0} .cmp-next b span{display:block} .cmp-next i{display:none} }
+  .cmp-k{font:500 11px "IBM Plex Mono",ui-monospace,Menlo,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+  .sv{position:relative;aspect-ratio:4/3;border-radius:6px;overflow:hidden;background:var(--well);border:1px solid var(--edge)}
+  .sv iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   .tick.strong{fill:var(--ink);font-weight:600}
   .c-miss{fill:none;stroke:var(--edge);stroke-width:1}
   .c-hol{fill:var(--well);stroke:none}
@@ -245,6 +259,14 @@
         <li><span class="sw" style="background:var(--well)"></span>city holiday</li>
       </ul>
       <figcaption id="calCap"></figcaption>
+    </figure>
+    <figure id="signFig" hidden>
+      <div class="cmp">
+        <div class="cmp-a"><div class="cmp-k" id="signWhen">On the street</div>
+          <div class="sv"><iframe id="signView" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div></div>
+        <div class="cmp-b"><div class="cmp-k">On this page</div><div id="signOurs"></div></div>
+      </div>
+      <figcaption id="signCap"></figcaption>
     </figure>
   </section>
 
@@ -695,16 +717,30 @@ async function checkEmpty(){ const cx=vb.x+vb.w/2, cy=vb.y+vb.h/2, c=Math.cos(ro
 /* ============ one block side's sweep weekday for two years (META.cal; data from before 2026-09-18 has none) ============ */
 const T=(tag, attrs, parent, text)=>{ const e=S(tag,attrs,parent); e.textContent=text; return e; };
 const ord=n=>n+({1:'st',2:'nd',3:'rd'}[n]||'th');
+// Street View of the sign on an example block side we've looked at; the example can change as the window rolls,
+// and then there's no photo
+const SIGNS={'11100-W-WEDDINGTON-ST odd':{pano:'PnrvyYgTBvDKtOlsuI8cWA',at:[34.1669971,-118.374518],h:322.85,t:3.2,z:4,
+  when:'Oct 2025',says:'No parking 10 AM to 12 noon Friday, street sweeping'}};
 function calText(){
   const c=META.cal; if(!c||!c.id) return false;
+  const sv=SIGNS[c.id+' '+c.side];
   const b={s:c.s,h:c.h,x:c.x||[],e:c.e}, day=DAYLONG[c.dow], low=t=>t[0].toLowerCase()+t.slice(1);
   // the counts are the tickets on the plot: this side's sweeping tickets on its weekday, and those in the posted weeks
   const pair=[c.on,c.on+2], all=c.rows.reduce((a,r)=>a+r[2],0), inw=c.rows.reduce((a,r)=>a+(pair.includes(r[1])?r[2]:0),0);
   const share=inw===all?`all ${all.toLocaleString()}`:`${inw/all>=.995?'over 99%':pct(inw/all)} of them (${inw.toLocaleString()})`;
-  $('#calLead').innerHTML=`This is the block side with the most sweeping tickets among streets swept every other week: the ${hund(b.h)} of ${esc(META.names[b.s])}, `
-    +`${esc(low(sideName(b,c.side)))}${b.x.length?', '+esc(low(between(b))):''}. In the past two years, <b>${all.toLocaleString()} sweeping tickets</b> were written here on ${day}s. `
-    +`Its posted schedule is the ${phaseTxt(c.on)} ${day}s, ${fmtRange(c.s0,c.s1)}, and <b>${share}</b> came on those ${day}s, even though many signs show only the day, like “No parking ${day}”. `
-    +`Each square below is one ${day}. <a href="#${esc(c.id)}" id="calLink">See it on the map</a>`;
+  $('#calLead').innerHTML=`The ${esc(low(sideName(b,c.side)).replace(/ \(.+\)$/,''))} of the ${hund(b.h)} of ${esc(META.names[b.s])} has the most sweeping tickets of any block swept every other week: `
+    +`<b>${all.toLocaleString()} on ${day}s</b> in the past two years. It's swept on the ${phaseTxt(c.on)} ${day}s, ${fmtRange(c.s0,c.s1)}, and <b>${share}</b> came on those ${day}s, `
+    +`${sv?`though the sign there doesn't say which ${day}s`:`though many signs show only the day, like “No parking ${day}”`}. Each square is one ${day}. <a href="#${esc(c.id)}" id="calLink">See it on the map</a>`;
+  if(sv){ const f=$('#signView'), at=sv.at.join(',');
+    f.title=`Google Street View of the sweeping sign on the ${hund(b.h)} of ${META.names[b.s]}`;
+    // loaded once the section shows: loaded while hidden, at no size, Street View drops the view's heading and zoom
+    f.dataset.src=`https://www.google.com/maps/embed?pb=!4v1758200000000!6m8!1m7!1s${sv.pano}!2m2!1d${sv.at[0]}!2d${sv.at[1]}!3f${sv.h}!4f${sv.t}!5f${sv.z}`;
+    $('#signWhen').textContent=`On the street · Street View, ${sv.when}`;
+    $('#signOurs').innerHTML=`<div class="cmp-sign">${signHTML([c.dow],c.s0,c.s1,c.on)}`
+      +`<div class="side-txt cmp-next">Next:<b>${nextDays([c.dow],c.on,2).map(d=>`<span>${d}</span>`).join('<i> · </i>')}</b></div></div>`;
+    $('#signCap').innerHTML=`The street sign reads “${sv.says}”. *This page's weeks come from StreetsLA's posted routes. `
+      +`<a href="https://www.google.com/maps/@${at},3a,20y,${sv.h}h,${90+sv.t}t/data=!3m4!1e1!3m2!1s${sv.pano}!2e0" target="_blank" rel="noopener">Open in Google Maps</a>`;
+    $('#signFig').hidden=false; }
   $('#calLink').onclick=async e=>{ e.preventDefault(); const s=await getStreets();
     for(let i=0;i<s.length;i++) for(const en of s[i]) if(blockId(i,en[0],en[2])===c.id){ await goBlock({s:i,e:en});
       wrap.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); return; } };
@@ -717,8 +753,8 @@ function drawCal(){
   const gap=4, left=64, top=38, cw=Math.max(22,Math.min(44,Math.floor((host.clientWidth-left)/months.length)-gap));
   const Wd=left+months.length*(cw+gap), Hd=top+5*(cw+gap);
   const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,width:Wd,role:'img','aria-label':`Every ${DAYLONG[c.dow]} for two years on one block side`},host);
-  months.forEach((m,i)=>{ const x=left+i*(cw+gap)+cw/2, mo=+m.slice(5); T('text',{x,y:top-9,'text-anchor':'middle',class:'tick'},g,'JFMAMJJASOND'[mo-1]);
-    if(mo===1||i===0) T('text',{x:x-cw/2,y:top-25,class:'tick strong'},g,m.slice(0,4)); });
+  months.forEach((m,i)=>{ const x=left+i*(cw+gap)+cw/2, mo=+m.slice(5); T('text',{x,y:top-9,'text-anchor':'middle',class:'tick'},g,'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ')[mo-1]);
+    if(mo===1||(i===0&&mo<12)) T('text',{x:x-cw/2,y:top-25,class:'tick strong'},g,m.slice(0,4)); });
   for(let r=1;r<=5;r++) T('text',{x:left-10,y:top+(r-1)*(cw+gap)+cw/2+4,'text-anchor':'end',class:'tick'+(pair.includes(r)?' strong':'')},g,ord(r)+' '+DAYS[c.dow]);
   const maxN=Math.max(1,...rows.map(r=>r[2]));
   rows.forEach(([d,nth,n,hol])=>{ const i=months.indexOf(d.slice(0,7));
@@ -747,7 +783,7 @@ fetch('data/index.json').then(r=>{ if(!r.ok) throw new Error(r.status); return r
   $('#mastRange').textContent=`Data through ${fmtDate(m.end)} · updated weekly`;
   $('#mData').textContent=`LADOT parking citations (data.lacity.org, dataset 4f5p-udkv): all ${m.total.toLocaleString()} tickets written in the City of Los Angeles in the two years from ${fmtDate(m.start)} to ${fmtDate(m.end)}. ${m.matched.toLocaleString()} of them (${pct(m.matched/m.total)}) have an address that matches a block. The page is rebuilt every week from LADOT's latest data, and the two-year window moves with it.`;
   legend(); showBlocks();
-  if(calText()){ $('#sweep').hidden=false; drawCal(); }
+  if(calText()){ $('#sweep').hidden=false; drawCal(); const f=$('#signView'); if(f.dataset.src) f.src=f.dataset.src; }
   const id=decodeURIComponent(location.hash.slice(1));
   if(id){ const s=await getStreets(); for(let i=0;i<s.length;i++) for(const e of s[i]) if(blockId(i,e[0],e[2])===id) return goBlock({s:i,e}); }
 }).catch(()=>msg('The block data didn\'t load. Try reloading the page.'));

@@ -698,8 +698,8 @@ function drawCal(){
   const gap=4, left=64, top=38, cw=Math.max(22,Math.min(44,Math.floor((host.clientWidth-left)/months.length)-gap));
   const Wd=left+months.length*(cw+gap), Hd=top+5*(cw+gap);
   const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,width:Wd,role:'img','aria-label':'Every Tuesday for two years on one block'},host);
-  months.forEach((m,i)=>{ const x=left+i*(cw+gap)+cw/2, mo=+m.slice(5); T('text',{x,y:top-9,'text-anchor':'middle',class:'tick'},g,'JFMAMJJASOND'[mo-1]);
-    if(mo===1||i===0) T('text',{x:x-cw/2,y:top-25,class:'tick strong'},g,m.slice(0,4)); });
+  months.forEach((m,i)=>{ const x=left+i*(cw+gap)+cw/2, mo=+m.slice(5); T('text',{x,y:top-9,'text-anchor':'middle',class:'tick'},g,'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ')[mo-1]);
+    if(mo===1||(i===0&&mo<12)) T('text',{x:x-cw/2,y:top-25,class:'tick strong'},g,m.slice(0,4)); });
   const hitRows=new Set(cal.filter(c=>c[2]>0).map(c=>c[1]));
   for(let r=1;r<=5;r++) T('text',{x:left-10,y:top+(r-1)*(cw+gap)+cw/2+4,'text-anchor':'end',class:'tick'+(hitRows.has(r)?' strong':'')},g,ord(r)+' Tue');
   const maxN=Math.max(...cal.map(c=>c[2]));
