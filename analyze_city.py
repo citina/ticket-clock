@@ -344,7 +344,16 @@ for dow, x in on_mode.groupby("dow"):
 sweeps = collections.defaultdict(list)
 unrouted = collections.Counter()  # block -> sides with enough tickets but no posted route around them
 phase_hits = phase_all = off_time = in_route = 0
+# Where the tickets on a side's sweep weekday fall: in its posted weeks, in the other pair, or on a 5th week, when no
+# every-other-week route is swept. Per category: [tickets, days with tickets, days], holidays left out.
+alldays = pd.date_range(START, END)
+alldays = alldays[~alldays.isin(list(hol))]
+weeks_n = {"posted": [0, 0, 0], "other": [0, 0, 0], "fifth": [0, 0, 0]}
+year2 = START + pd.DateOffset(years=1)
+off_first = 0                     # tickets outside the posted weeks in the window's first year (routes that changed?)
+example = None                    # the side with the most sweeping tickets on a one-day, every-other-week route
 for (b, side), x in sc.groupby(["b", "side"]):
+    grp = x
     key = b * 2 + (side == "odd")
     if key not in best:
         unrouted[b] += 1
@@ -359,16 +368,51 @@ for (b, side), x in sc.groupby(["b", "side"]):
     off_time += int((~posted).sum())
     in_route += len(x)
     x = x[posted]
+    # how many of those fell in the posted weeks: signs often show only the weekday, and the card says how
+    # many of the tickets on that weekday came in the swept weeks (every-week routes: all of them)
+    in_weeks = int(((x.date.dt.day - 1) // 7 + 1).isin([r["on"], r["on"] + 2]).sum()) if r["on"] else len(x)
+    if r["on"]:
+        pair = [r["on"], r["on"] + 2]
+        wd = alldays[np.isin(alldays.dayofweek, r["dows"])]
+        wn = (wd.day - 1) // 7 + 1
+        cat_days = {"posted": set(wd[np.isin(wn, pair)]), "fifth": set(wd[wn == 5])}
+        cat_days["other"] = set(wd) - cat_days["posted"] - cat_days["fifth"]
+        tn = ((x.date.dt.day - 1) // 7 + 1).values
+        tcat = np.where(np.isin(tn, pair), "posted", np.where(tn == 5, "fifth", "other"))
+        for c, dset in cat_days.items():
+            sel = x[tcat == c]
+            weeks_n[c][0] += len(sel)
+            weeks_n[c][1] += len(set(sel.date) & dset)
+            weeks_n[c][2] += len(dset)
+        off_first += int(((tcat != "posted") & (x.date < year2).values).sum())
+        if len(r["dows"]) == 1 and (example is None or len(grp) > example[0]):
+            example = (len(grp), b, side, r, grp)
     pk = (tuple(r["dows"]), r["on"])
     if pk not in posted_days:
         weeks = [1, 2, 3, 4, 5] if r["on"] == 0 else [r["on"], r["on"] + 2]
         posted_days[pk] = set(days[np.isin(days.dayofweek, r["dows"]) & np.isin(nth_all, weeks)])
     cd, tdays = posted_days[pk], set(x.date)   # both Timestamps; numpy datetime64 values would never match
-    sweeps[b].append([side, r["dows"], r["s0"], r["s1"], r["on"], round(len(tdays & cd) / max(1, len(cd)), 2), len(cd), len(x), len(tdays)])
+    sweeps[b].append([side, r["dows"], r["s0"], r["s1"], r["on"], round(len(tdays & cd) / max(1, len(cd)), 2), len(cd), len(x), len(tdays), in_weeks])
 print(f"{sum(len(v) for v in sweeps.values()):,} block sides matched to a posted sweeping route;",
       f"{sum(unrouted.values()):,} sides with enough tickets but no posted route around them")
 print(f"{phase_hits / phase_all:.1%} of their sweeping tickets on the posted weeks;",
       f"{off_time:,} of {in_route:,} outside the posted time (not counted)")
+wp, wo, wf = weeks_n["posted"], weeks_n["other"], weeks_n["fifth"]
+print(f"tickets on a side's sweep weekday: {wp[0]:,} in its posted weeks, {wo[0]:,} in the other pair, {wf[0]:,} on 5th weeks",
+      f"({off_first:,} of the {wo[0] + wf[0]:,} outside the posted weeks in the window's first year);",
+      f"days with tickets: {wp[1] / max(1, wp[2]):.1%} of posted, {wo[1] / max(1, wo[2]):.2%} of other-pair,",
+      f"{wf[1] / max(1, wf[2]):.2%} of 5th-week days")
+
+# The page's calendar: every one of that side's sweep weekdays over the window, as [date, nth of the month,
+# its sweeping tickets that day, holiday]; the block's name and sides are added when the cells are written.
+cal = None
+if example:
+    _, cb, cside, cr, ct = example
+    per_day = ct.groupby("date").size()
+    wdays = pd.date_range(START, END)
+    wdays = wdays[wdays.dayofweek == cr["dows"][0]]
+    cal = dict(block=int(cb), side=cside, dow=int(cr["dows"][0]), on=int(cr["on"]), s0=int(cr["s0"]), s1=int(cr["s1"]),
+               n=len(ct), rows=[[str(t.date()), int((t.day - 1) // 7 + 1), int(per_day.get(t, 0)), int(t in hol)] for t in wdays])
 
 # A block with no side matched to a route still gets the posted route days around it, so the card can say
 # which days the routes give it (without which side is which) or that no route covers it. The test points
@@ -483,6 +527,8 @@ for k, (st, h, part) in enumerate(blocks):
         rec["sp"] = spaces[k]
     cells[(cx, cy)].append(rec)
     index.append((rec["s"], int(h), f"{cx}_{cy}", suffix))
+    if cal and k == cal["block"]:
+        cal.update(id=bid, s=rec["s"], h=int(h), x=rec["x"], e=rec["e"])
 sizes = []
 for (cx, cy), recs in cells.items():
     body = json.dumps(recs, separators=(",", ":"))
@@ -498,7 +544,11 @@ for s_ix, h, key, suffix in index:
     streets[s_ix].append([h, cell_ix[key], suffix] if suffix else [h, cell_ix[key]])
 meta = dict(start=str(START.date()), end=str(END.date()), total=total, matched=len(d), phase=round(phase_hits / phase_all, 3),
             cell=CELL, sweep_min=SWEEP_MIN, routes_around=True, chart_min=KIND_MIN,
-            names=names, kinds=kinds, kind_src=kind_src, kind_note=kind_note, cells=cell_keys)
+            names=names, kinds=kinds, kind_src=kind_src, kind_note=kind_note, cells=cell_keys,
+            weeks=dict(posted=wp, other=wo, fifth=wf, off_first_year=off_first))
+if cal:
+    del cal["block"]
+    meta["cal"] = cal
 (OUT / "index.json").write_text(json.dumps(meta, separators=(",", ":")))
 (OUT / "streets.json").write_text(json.dumps(streets, separators=(",", ":")))
 sizes = np.array(sizes)
