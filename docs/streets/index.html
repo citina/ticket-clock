@@ -144,6 +144,9 @@
   .rule-line{font-size:14.5px;line-height:1.45}
   .rule-line b{font-weight:600}
   .evid{font-size:13px;line-height:1.5;color:var(--ink-2);margin-top:10px}
+  .signs{display:flex;flex-wrap:wrap;gap:14px 16px;margin:12px 0 4px}
+  .signs>div{width:132px}
+  .signs .side-txt{margin-top:8px}
   .sign{background:var(--sign);border-radius:7px;padding:5px;box-shadow:0 1px 2px rgba(0,0,0,.14),0 6px 18px rgba(0,0,0,.10)}
   .sign-in{border:2.5px solid var(--sign-red);border-radius:4px;padding:8px 5px 9px;text-align:center;color:var(--sign-red);
            font-family:"Barlow Condensed","Barlow",sans-serif;font-weight:700;text-transform:uppercase;line-height:1}
@@ -521,7 +524,7 @@ function signHTML(dows, s0, s1, on){
     <svg viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="23" fill="none" stroke="var(--sign-red)" stroke-width="5"/>
     <text x="27" y="37" text-anchor="middle" font-family="Barlow Condensed, Barlow, sans-serif" font-weight="700" font-size="30" fill="var(--sign-ink)">P</text>
     <line x1="11" y1="11" x2="43" y2="43" stroke="var(--sign-red)" stroke-width="5"/></svg>
-    <div class="s1">No parking</div><div class="s2">${fmtT(s0).toUpperCase()} TO ${fmtT(s1).toUpperCase()}</div><div class="s3">${dows.length===1?DAYLONG[dows[0]]:DAYS[dows[0]]+'–'+DAYS[dows[dows.length-1]]}</div><div class="s4">Street cleaning</div>
+    <div class="s1">No parking</div><div class="s2">${fmtT(s0).toUpperCase()} TO ${fmtT(s1).toUpperCase()}</div><div class="s3">${dows.length===1?DAYLONG[dows[0]]:dows.every((d,i)=>!i||d===dows[i-1]+1)?DAYS[dows[0]]+'–'+DAYS[dows[dows.length-1]]:dows.map(d=>DAYS[d]).join(' & ')}</div><div class="s4">Street cleaning</div>
     <div class="s5">${on?phaseTxt(on).toUpperCase()+' ONLY*':'EVERY WEEK'}</div></div></div>`; }
 // a ticket kind: [kind, tickets, median fine, busiest weekday, usual hours, share on weekdays]; b.k[0] is the most ticketed
 // one kind by the half hour its tickets were written (hh: first half hour, then the counts), a dot for every `per` tickets
@@ -547,21 +550,22 @@ function timeDots(host, b, ki, hh){
 }
 const when=t=>`${t[5]>=.85?'mostly weekdays':'most often '+DAYLONG[t[3]]+'s'}, usually ${usual(t[4])}`;
 // no side matched to a route: the posted route days around the block (b.wr), without which side gets which, or none
-const dayList=ds=>ds.length===1?DAYLONG[ds[0]]:ds.length===2?`${DAYLONG[ds[0]]} and ${DAYLONG[ds[1]]}`
-  :ds.every((d,i)=>!i||d===ds[i-1]+1)?`${DAYLONG[ds[0]]} to ${DAYLONG[ds[ds.length-1]]}`:ds.slice(0,-1).map(d=>DAYLONG[d]).join(', ')+' and '+DAYLONG[ds[ds.length-1]];
 function noSchedule(host, b, n){
   const lookup=' Look up your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.';
   const tix=n?`${n.toLocaleString()} sweeping ticket${n>1?'s were':' was'} written here since ${since()}`:`No sweeping tickets were written here since ${since()}`;
   if(!b.wr){ H('div',{className:'rule-line',innerHTML:`<b>No sweeping schedule found.</b> None of StreetsLA's posted sweeping routes covers this block. ${tix}.${lookup}`},host); return; }
   const g=new Map(); b.wr.forEach(([dows,s0,s1,on])=>{ const k=`${on}|${s0}|${s1}`; if(!g.has(k)) g.set(k,new Set()); dows.forEach(d=>g.get(k).add(d)); });
-  const parts=[...g].map(([k,set])=>{ const [on,s0,s1]=k.split('|').map(Number), ds=[...set].sort((a,c)=>a-c);
-    return {on, days:ds.length, txt:on?`${dayList(ds)}, ${phaseTxt(on)} weeks, ${fmtRange(s0,s1)}`:`every ${dayList(ds)}, ${fmtRange(s0,s1)}`}; });
-  const cap=t=>t[0].toUpperCase()+t.slice(1), split=parts.length>1||parts.some(x=>x.on&&x.days>1);
-  H('div',{className:'rule-line',innerHTML:`StreetsLA's posted sweeping routes around this block: ${parts.map(x=>`<b>${esc(cap(x.txt))}</b>`).join(' or ')}.`},host);
-  const which=!n?`${tix}, so the tickets can't show which side gets which.`
-    :b.wu?`${tix}, but not inside these routes on their days, so they can't show which side gets which.`
-    :`Only ${tix[0].toLowerCase()+tix.slice(1)}, too few to show which side gets which.`;
-  H('div',{className:'evid',innerHTML:(split?`Each side of the street gets one of these, and the list doesn't say which. ${which}`:`${tix}.`)+lookup},host);
+  const parts=[...g].map(([k,set])=>{ const [on,s0,s1]=k.split('|').map(Number); return {on,s0,s1,ds:[...set].sort((a,c)=>a-c)}; });
+  const split=parts.length>1||parts.some(x=>x.on&&x.ds.length>1);
+  // the tickets first, then the posted routes as signs; an every-other-week route's days go on a sign each, as each side gets its own
+  H('div',{className:'rule-line',innerHTML:!split||!n?`<b>${tix}.</b>`
+    :b.wu?`<b>${tix}</b>, but not inside these routes on their days, so they can't show which side gets which.`
+    :`<b>Only ${tix[0].toLowerCase()+tix.slice(1)}</b>, too few to show which side gets which.`},host);
+  const signs=parts.flatMap(x=>x.on?x.ds.map(d=>({...x,dows:[d]})):[{...x,dows:x.ds}]), row=H('div',{className:'signs'},host);
+  signs.forEach(x=>{ const c=H('div',{innerHTML:signHTML(x.dows,x.s0,x.s1,x.on)},row);
+    H('div',{className:'side-txt',innerHTML:`Next: <b>${nextDays(x.dows,x.on,1)[0]}</b>`},c); });
+  H('div',{className:'evid',innerHTML:`${signs.some(x=>x.on)?'*':''}From <a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">StreetsLA's posted routes</a> around this block.`
+    +`${split?' Each side of the street gets one of these, and the list doesn\'t say which.':''}${lookup}`},host);
 }
 function renderCard(b){
   const p=$('#panel'); p.innerHTML='';
@@ -599,13 +603,12 @@ function renderCard(b){
   const mt=b.k.some(t=>META.kinds[t[0]]==='Meter expired'), m=b.m;
   if(!b.sp&&!mt) H('div',{className:'rule-line',textContent:'No metered spaces on this block in LADOT\'s meter list, and no meter tickets.'},mc);
   else {
-    H('div',{className:'rule-line',innerHTML:b.sp?`<b>${b.sp} metered space${b.sp>1?'s':''}</b> on this block in LADOT's meter list.`:`<b>No metered spaces listed</b> for this block in LADOT's meter list, though meter tickets were written at its addresses.`},mc);
+    H('div',{className:'rule-line',innerHTML:b.sp?`<b>${b.sp} metered space${b.sp>1?'s':''}</b> on this block. ${b.sp>1?'Their hours are on the meters':'Its hours are on the meter'}.`:`<b>No metered spaces listed</b> for this block in LADOT's meter list, though meter tickets were written at its addresses.`},mc);
     if(m){ H('div',{className:'side-txt',style:'margin-top:6px',textContent:`About ${m[0]} officer visit${m[0]===1?'':'s'} a weekday, most often ${fmtRange(480+m[1]*30,600+m[1]*30)}.`},mc);
       H('div',{className:'evid',style:'margin-top:14px',textContent:'Chance of a meter ticket if a car stays unpaid from 8 am to 8 pm:'},mc);
       const o=H('div',{className:'odds6'},mc);
       DAYS.slice(0,6).forEach((dn,d)=>{ const c=H('div',{},o); H('span',{className:'k',textContent:dn},c); H('span',{className:'v',textContent:m[2][d]+'%'},c); }); }
-    else if(b.sp) H('div',{className:'evid',textContent:'Too few meter tickets here to estimate how often officers come by.'},mc);
-    H('div',{className:'evid',textContent:'LADOT\'s data doesn\'t include the hours posted on the meters, so check the meter itself.'},mc); }
+    else if(b.sp) H('div',{className:'evid',textContent:'Too few meter tickets here to estimate how often officers come by.'},mc); }
 
   const kc=H('div',{className:'card'},p); H('h4',{textContent:'What gets ticketed here'},kc);
   const cur=charts(b), tappable=!!(META.kind_src||cur.size);
@@ -788,7 +791,7 @@ fetch('data/index.json').then(r=>{ if(!r.ok) throw new Error(r.status); return r
   if(calText()){ $('#sweep').hidden=false; drawCal(); const f=$('#signView'); if(f.dataset.src) f.src=f.dataset.src; }
   const id=decodeURIComponent(location.hash.slice(1));
   if(id){ const s=await getStreets(); for(let i=0;i<s.length;i++) for(const e of s[i]) if(blockId(i,e[0],e[2])===id) return goBlock({s:i,e}); }
-}).catch(()=>msg('The block data didn\'t load. Try reloading the page.'));
+}).catch(e=>{ console.error(e); msg('The block data didn\'t load. Try reloading the page.'); });
 
 // keep the map's shape and tiles right when the width changes (not on height-only changes like a phone's URL bar)
 let lastW=innerWidth, rt=0;
