@@ -1,5 +1,9 @@
 # USC Ticket Clock
 
+LA sweeps most streets every other week, but many signs still show only the day, and
+near USC I kept guessing when enforcement would actually come by. The city has already
+written the answer, one ticket at a time. This project reads it.
+
 When does parking enforcement come by the streets around USC? This project reads
 every LADOT parking ticket written in a 2.5 × 2.5 km box around the University
 Park campus (about 315k since 2014) and turns them into a clickable map. Pick a
@@ -123,3 +127,11 @@ of this replaces the posted sign.
 
 Data: LADOT Parking Citations, data.lacity.org. Posted Street Sweeping Routes, StreetsLA.
 Basemap © OpenStreetMap contributors.
+
+## Who made this
+
+Citina Liang, a PhD candidate in Industrial & Systems Engineering at USC
+Viterbi, who models how people behave and how diseases spread to help public health make
+better decisions, with Claude Code. The two pages here are the
+second and third of three about parking in Los Angeles; the first is
+[Curb Log](https://github.com/citina/curb-log).
