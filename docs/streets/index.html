@@ -234,7 +234,7 @@
   <div class="intro">
     <h1>LA Street Rules</h1>
     <p class="lede">Find a block in the City of Los Angeles to see the parking rules its tickets point to: the street-sweeping day, hours and weeks, how often meter officers come by, and what else gets ticketed there.</p>
-    <p class="lede-note"><b>Signs often leave out the week.</b> Most LA streets are swept every other week, but many sweeping signs still show only the day, like "No parking Thursday". This page shows which weeks each block is swept and the next sweep dates.</p>
+    <p class="lede-note"><b>Sweeping signs often don't say which weeks.</b> Most LA streets are swept every other week, like the 2nd &amp; 4th Thursdays of the month, but many signs still say just "No parking Thursday". This page shows which weeks each block is swept and the next sweep dates. <a href="#sweep" id="exLink" hidden>See an example</a></p>
   </div>
 
   <div class="explorer">
@@ -265,7 +265,7 @@
 
   <section id="sweep" hidden>
     <div class="code"><b>Example</b> The busiest sweeping block</div>
-    <h2>Many signs show only the day. Sweeping tickets come in the swept weeks.</h2>
+    <h2 id="calTitle">Sweeping tickets come in the swept weeks</h2>
     <figure id="signFig" hidden>
       <div class="cmp">
         <div class="cmp-a"><div class="cmp-k" id="signWhen">On the street</div>
@@ -282,7 +282,6 @@
         <li><span class="sw" style="border:1px solid var(--edge)"></span>none written</li>
         <li><span class="sw" style="background:var(--well)"></span>city holiday</li>
       </ul>
-      <figcaption id="calCap"></figcaption>
     </figure>
   </section>
 
@@ -794,15 +793,14 @@ function calText(){
   const b={s:c.s,h:c.h,x:c.x||[],e:c.e}, day=DAYLONG[c.dow], low=t=>t[0].toLowerCase()+t.slice(1);
   // the counts are the tickets on the plot: this side's sweeping tickets on its weekday, and those in the posted weeks
   const pair=[c.on,c.on+2], all=c.rows.reduce((a,r)=>a+r[2],0), inw=c.rows.reduce((a,r)=>a+(pair.includes(r[1])?r[2]:0),0);
-  const share=inw===all?`<b>All ${all.toLocaleString()}</b> of its ${day} sweeping tickets`
-    :`<b>${inw/all>=.995?'Over 99%':pct(inw/all)}</b> of its ${all.toLocaleString()} ${day} sweeping tickets`;
+  const share=inw===all?`<b>all ${all.toLocaleString()}</b>`:`<b>${inw/all>=.995?'over 99%':pct(inw/all)} of them (${inw.toLocaleString()})</b>`;
   const mon=s=>new Date(s+'T12:00:00').toLocaleDateString('en-US',{month:'short',year:'numeric'});
-  // the example is the busiest side swept every other week; in the 2024-26 data it's also the busiest of any block
-  // (682 in its posted hours, 409 for the next side, weekly routes further behind)
+  // "only" just when every one of them came in the swept weeks (Citina: never claim 100% otherwise)
+  $('#calTitle').textContent=`On this block, sweeping tickets came ${inw===all?'only ':''}in the swept weeks, not every ${day} as the sign shows`;
   $('#calLead').innerHTML=`From ${mon(META.start)} to ${mon(META.end)}, the ${esc(low(sideName(b,c.side)).replace(/ \(.+\)$/,''))} of the ${hund(b.h)} of ${esc(META.names[b.s])} `
-    +`got the most sweeping tickets of any block in the City of LA. ${sv?`The sign there reads “${esc(sv.says)}”. `:''}`
-    +`${share} came on the scheduled ${phaseTxt(c.on)} ${day}s, ${sv?`though the sign doesn't say which ${day}s`:`though many signs show only the day, like “No parking ${day}”`}. `
-    +`Each square is one ${day}. <a href="#${esc(c.id)}" id="calLink">See it on the map</a>`;
+    +`got <b>${all.toLocaleString()} sweeping tickets on ${day}s</b>. `
+    +(sv?`The sign on the street there reads “${esc(sv.says)}”, without saying which weeks. `:`Many signs show only the day, like “No parking ${day}”, without saying which weeks. `)
+    +`However, ${share} came on the scheduled ${phaseTxt(c.on)} ${day}s (the grid below shows when they came). <a href="#${esc(c.id)}" id="calLink">See it on the map</a>`;
   if(sv){ const f=$('#signView'), at=sv.at.join(',');
     f.title=`Google Street View of the sweeping sign on the ${hund(b.h)} of ${META.names[b.s]}`;
     // loaded once the section shows: loaded while hidden, at no size, Street View drops the view's heading and zoom
@@ -835,8 +833,6 @@ function drawCal(){
     if(n>0&&!hol) r.style.fill=`color-mix(in oklab, var(--accent) ${45+Math.round(55*n/maxN)}%, var(--surface))`;
     r.addEventListener('pointermove',e=>{ if(e.pointerType==='mouse') showTip(e,`<b>${fmtDate(d)}</b> · ${ord(nth)} ${DAYLONG[c.dow]}<br>${hol?'City holiday':n?n+' sweeping ticket'+(n>1?'s':''):'No sweeping tickets'}`); });
     r.addEventListener('pointerleave',hideTip); });
-  const on=rows.filter(r=>pair.includes(r[1])&&!r[3]), off=rows.filter(r=>!pair.includes(r[1])&&!r[3]);
-  $('#calCap').textContent=`Tickets were written on ${on.filter(r=>r[2]>0).length} of ${on.length} non-holiday ${phaseTxt(c.on)} ${DAYLONG[c.dow]}s, and on ${off.filter(r=>r[2]>0).length} of ${off.length} other ${DAYLONG[c.dow]}s.`;
 }
 
 /* ============ legend: only what the map shows right now, in plain words ============ */
@@ -862,7 +858,10 @@ fetch('data/index.json').then(r=>{ if(!r.ok) throw new Error(r.status); return r
   $('#mastRange').textContent=`Data through ${fmtDate(m.end)} · updated weekly`;
   $('#mData').textContent=`LADOT parking citations (data.lacity.org, dataset 4f5p-udkv): all ${m.total.toLocaleString()} tickets written in the City of Los Angeles in the two years from ${fmtDate(m.start)} to ${fmtDate(m.end)}. ${m.matched.toLocaleString()} of them (${pct(m.matched/m.total)}) have an address that matches a block. The page is rebuilt every week from LADOT's latest data, and the two-year window moves with it.`;
   showBlocks();
-  if(calText()){ $('#sweep').hidden=false; drawCal(); const f=$('#signView'); if(f.dataset.src) f.src=f.dataset.src; }
+  if(calText()){ $('#sweep').hidden=false; drawCal(); const f=$('#signView'); if(f.dataset.src) f.src=f.dataset.src;
+    // the intro's link down to the example; scrolls without changing the address, which names the block on the card
+    const ex=$('#exLink'); ex.hidden=false; ex.onclick=e=>{ e.preventDefault();
+      $('#sweep').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); }; }
   const id=decodeURIComponent(location.hash.slice(1));
   if(id){ const s=await getStreets(); for(let i=0;i<s.length;i++) for(const e of s[i]) if(blockId(i,e[0],e[2])===id) return goBlock({s:i,e}); }
 }).catch(e=>{ console.error(e); msg('The block data didn\'t load. Try reloading the page.'); });
