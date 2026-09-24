@@ -66,6 +66,7 @@ tickets. To check your own street, look it up at
 ```
 ./fetch_city.py        # data/city/: two years of city-wide tickets (~450 MB), street centerlines, meter inventory, posted sweeping routes
 ./analyze_city.py      # docs/streets/data/ (~16 MB of JSON, not committed); serve docs/ and open /streets/
+./neighborhoods.py     # docs/streets/hoods.json (the map's neighborhood outlines, committed; only rerun if the city updates them)
 
 ./fetch_citations.py   # data/citations_usc.csv (~45 MB, data.lacity.org 4f5p-udkv), data/meters_usc.csv (meter inventory, s49e-q6j2),
                        # data/sweep_routes.geojson (StreetsLA posted sweeping routes, ArcGIS Online)
@@ -103,6 +104,7 @@ Run either by hand with `gh workflow run weekly.yml`.
 | `fetch_city.py` | city-wide downloads for LA Street Rules, a rolling two years of tickets |
 | `analyze_city.py` | address matching to street centerlines, per-block rules, ~1 km map cells, search index |
 | `docs/streets/index.html` | LA Street Rules, hand-written (no build step); its map images load live from OpenStreetMap |
+| `neighborhoods.py` | the LA Times' City of LA neighborhood outlines for LA Street Rules' map, from LA GeoHub |
 | `citations.py` | shared loading: address parsing, street-name cleanup, holidays, USC term dates, posted sweeping routes, map projection |
 | `analyze.py` | per-block geometry, sweeping schedule per side, meter visit rates, campus charts |
 | `template.html` | the USC page; `build.py` fills in the data and the basemap |
