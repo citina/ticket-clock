@@ -163,6 +163,24 @@
   /* posted sweeping window behind the arrival dots; mixed from ink so it holds up in dark mode */
   .win{fill:color-mix(in oklab, var(--ink) 10%, var(--surface))}
   .sw.win{background:color-mix(in oklab, var(--ink) 10%, var(--surface))}
+  /* the example block's sign on the street (Google's Street View, in its own frame) beside the sign this page draws,
+     as on LA Street Rules */
+  .cmp{display:flex;gap:18px 28px;align-items:flex-start}
+  .cmp-a{flex:1 1 auto;min-width:0;max-width:560px}
+  .cmp-b{flex:none}
+  .cmp-b .sign{width:150px}
+  .cmp-next{margin-top:10px}
+  .cmp-next b{display:block;white-space:nowrap}
+  .cmp-next i{font-style:normal}
+  /* narrow: our sign goes under the photo, with the next dates beside it, one a line */
+  @media (max-width:600px){ .cmp{flex-direction:column} .cmp-a{align-self:stretch;max-width:none}
+    .cmp-sign{display:flex;align-items:center;gap:18px} .cmp-next{margin:0} .cmp-next b span{display:block} .cmp-next i{display:none} }
+  .cmp-k{font:500 11px "IBM Plex Mono",ui-monospace,Menlo,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+  .cmp-cap{font-size:13.5px;line-height:1.5;color:var(--ink-2);margin:10px 0 22px;max-width:var(--measure)}
+  .cmp-notes{margin:0;padding-left:18px}
+  .cmp-notes li+li{margin-top:3px}
+  .sv{position:relative;aspect-ratio:4/3;border-radius:6px;overflow:hidden;background:var(--well);border:1px solid var(--edge)}
+  .sv iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 
   .mheat{display:grid;grid-template-columns:30px repeat(24,minmax(0,1fr));gap:2px;margin:4px 0 0}
   .mheat .hl{font:10px "IBM Plex Mono",monospace;color:var(--ink-3);white-space:nowrap}
@@ -283,6 +301,18 @@
     </div>
     <figure id="calFig">
       <div class="fig-title">One block, every Tuesday for two years</div>
+      <div id="signPair" hidden>
+        <div class="cmp">
+          <div class="cmp-a"><div class="cmp-k">On the street · Street View, Mar 2025</div>
+            <div class="sv"><iframe id="signView" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"
+              title="Google Street View of the sweeping sign on the 600 block of W 28th St"></iframe></div></div>
+          <div class="cmp-b"><div class="cmp-k">On this page</div><div id="signOurs"></div></div>
+        </div>
+        <div class="cmp-cap"><ul class="cmp-notes">
+          <li>The street sign reads “No parking 8 AM–11 AM Tuesday, street cleaning”. <a href="https://www.google.com/maps/@34.0268619,-118.2790699,3a,19y,202.94h,91.57t/data=!3m4!1e1!3m2!1s0CKMyijHGY5ugvMXMzsdyA!2e0" target="_blank" rel="noopener">Open in Google Maps</a></li>
+          <li>This page shows the schedule and the next two sweep days. *The weeks come from StreetsLA's posted routes.</li>
+        </ul></div>
+      </div>
       <div class="fig-sub" id="calSub"></div>
       <div class="scroll" id="cal"></div>
       <ul class="legend">
@@ -696,8 +726,13 @@ $('#sweepIntro').innerHTML=`In March 2021, LA cut street sweeping to every other
   const all=cal.reduce((a,c)=>a+c[2],0), inw=cal.reduce((a,c)=>a+(c[1]===1||c[1]===3?c[2]:0),0);
   const mon=d=>new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',year:'numeric'});
   $('#calSub').innerHTML=`From ${mon(cal[0][0])} to ${mon(cal[cal.length-1][0])}, the even-numbered side of the 600 block of W 28th St got <b>${all} sweeping tickets on Tuesdays</b>. `
-    +`The sign on the street there reads “No parking 8 AM–11 AM Tuesday, street cleaning” (<a href="https://www.google.com/maps/@34.0268619,-118.2790699,3a,19y,202.94h,91.57t/data=!3m4!1e1!3m2!1s0CKMyijHGY5ugvMXMzsdyA!2e0" target="_blank" rel="noopener">Street View, Mar 2025</a>), without saying which weeks. However, `
+    +`The sign on the street there reads “No parking 8 AM–11 AM Tuesday, street cleaning”, without saying which weeks. However, `
     +`<b>${inw===all?'all '+all:(inw/all>=.995?'over 99%':Math.round(100*inw/all)+'%')+' of them ('+inw+')'}</b> came on the scheduled 1st &amp; 3rd Tuesdays (the grid below shows when they came).`; }
+// the block's own sign in Street View beside ours; the photo is of this side, so it shows only while the data still has it
+{ const b=BL.find(b=>b.id==='600-28TH-ST'), s=b&&b.sweep.find(s=>s.side==='even'&&s.dow===1);
+  if(s){ $('#signOurs').innerHTML=`<div class="cmp-sign">${signHTML(s)}<div class="side-txt cmp-next">Next:<b>${nextDays(s,2).map(d=>`<span>${d}</span>`).join('<i> · </i>')}</b></div></div>`;
+    $('#signView').src='https://www.google.com/maps/embed?pb=!4v1758200000000!6m8!1m7!1s0CKMyijHGY5ugvMXMzsdyA!2m2!1d34.0268619!2d-118.2790699!3f202.94!4f1.57!5f4';
+    $('#signPair').hidden=false; } }
 // the intro's link down to this example; scrolls without changing the address, which names the block on the card
 $('#exLink').onclick=e=>{ e.preventDefault(); $('#calFig').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); };
 function drawCal(){
