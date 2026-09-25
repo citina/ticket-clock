@@ -49,13 +49,13 @@
   main{max-width:1280px;margin:0 auto;padding:26px 20px 72px}
   a{color:var(--accent-ink)}
   .mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
-  .mast{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
-        color:var(--ink-3);display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
+  .mast{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+        color:var(--ink-2);display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
   .mast a{color:inherit}
   .mast .site{white-space:nowrap}
   .mast .here{color:var(--ink)}
   /* about these pages, with the sister sites, at the end of the page */
-  .about{margin:12px 0 0;font-size:15px;line-height:1.5;color:var(--ink-2)}
+  .about{margin:12px 0 0;font-size:16px;line-height:1.5;color:var(--ink-2)}
   .about b{color:var(--ink);font-weight:600}
   .sibs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:16px 0 0}
   @media (max-width:640px){ .sibs{grid-template-columns:minmax(0,1fr)} }
@@ -63,37 +63,35 @@
   .sib:hover{border-color:var(--ink-3)}
   .sib-name{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:26px;line-height:1.05;color:var(--ink)}
   .sib-name::after{content:" →";color:var(--ink-3);font-weight:600}
-  .sib-txt{font-size:14.5px;line-height:1.5;color:var(--ink-2);margin:6px 0 0}
+  .sib-txt{font-size:15px;line-height:1.5;color:var(--ink-2);margin:6px 0 0}
   h1{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:clamp(44px,8vw,66px);
      line-height:.92;margin:20px 0 12px;text-wrap:balance}
   .lede{font-size:18.5px;line-height:1.5;color:var(--ink-2);max-width:var(--measure);margin:0}
-  .note{font-size:12.5px;line-height:1.45;color:var(--ink-3);max-width:var(--measure);margin:0}
+  .note{font-size:14px;line-height:1.5;color:var(--ink-2);max-width:var(--measure);margin:0}
   .intro{margin:0 0 26px}
-  .lede-note{font-size:16px;line-height:1.5;color:var(--ink-2);margin:12px 0 0}
-  .lede-note b{color:var(--ink);font-weight:600}
-  .note b{color:var(--ink-2);font-weight:500}
+  .note b{color:var(--ink);font-weight:600}
   .note p{margin:0 0 6px;max-width:none}
   .note a{color:inherit}
   .note.end{margin-top:40px;max-width:none}
   h2{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:34px;line-height:1.02;margin:8px 0 14px;text-wrap:balance}
   p{max-width:var(--measure);margin:0 0 14px}
   .code{display:inline-flex;gap:10px;align-items:center;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-        font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+        font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
   .code b{font-weight:600;color:var(--ink-2);border:1px solid var(--edge);border-radius:3px;padding:1px 6px;letter-spacing:.04em}
   section{margin-top:56px;padding-top:28px;border-top:1px solid var(--rule)}
   figure{margin:24px 0 30px}
-  figcaption{font-size:13.5px;line-height:1.5;color:var(--ink-2);margin-top:10px;max-width:var(--measure)}
+  figcaption{font-size:14px;line-height:1.5;color:var(--ink-2);margin-top:10px;max-width:var(--measure)}
   .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
   svg{display:block;max-width:100%;height:auto;overflow:visible}
-  .fig-title{font-weight:600;font-size:15.5px;margin:0 0 2px}
-  .fig-sub{font-size:13.5px;color:var(--ink-2);margin:0 0 12px;text-wrap:pretty}
-  .tick{font:11px "IBM Plex Mono",ui-monospace,Menlo,monospace;fill:var(--ink-3)}
+  .fig-title{font-weight:600;font-size:16px;margin:0 0 2px}
+  .fig-sub{font-size:14px;color:var(--ink-2);margin:0 0 12px;text-wrap:pretty}
+  .tick{font:12px "IBM Plex Mono",ui-monospace,Menlo,monospace;fill:var(--ink-2)}
   .tick.strong{fill:var(--ink);font-weight:600}
-  .lab{font:500 12.5px "Barlow",system-ui,sans-serif;fill:var(--ink-2)}
+  .lab{font:500 14px "Barlow",system-ui,sans-serif;fill:var(--ink-2)}
   .lab.strong{fill:var(--ink);font-weight:600}
   .gridl{stroke:var(--rule);stroke-width:1}
   .axis{stroke:var(--edge);stroke-width:1}
-  .legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin:10px 0 0;padding:0;list-style:none}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--ink-2);margin:10px 0 0;padding:0;list-style:none}
   .legend li{display:inline-flex;align-items:center;gap:6px}
   .sw{width:12px;height:12px;border-radius:3px;display:inline-block;flex:none}
   .sw.bar{width:18px;height:4px;border-radius:2px}
@@ -104,10 +102,12 @@
         font:500 14px "Barlow",system-ui,sans-serif;padding:5px 12px;border-radius:999px;min-height:34px}
   .chip:hover{border-color:var(--ink-3)}
   .chip[aria-pressed="true"]{background:var(--ink);color:var(--plane);border-color:var(--ink)}
-  .chip.sm{font-size:13px;padding:3px 10px;min-height:28px}
-  .ctl-label{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
-  input[type=search]{font:15px "Barlow",system-ui,sans-serif;color:var(--ink);background:var(--surface);border:1px solid var(--edge);
-        border-radius:8px;padding:7px 10px;min-height:38px;width:min(300px,100%)}
+  .chip.sm{font-size:14px;padding:3px 10px;min-height:28px}
+  .ctl-label{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+  .searchbox{position:relative;width:min(300px,100%)}
+  .searchbox>svg{position:absolute;left:11px;top:11px;width:16px;height:16px;color:var(--ink-2);pointer-events:none}
+  input[type=search]{font:16px "Barlow",system-ui,sans-serif;color:var(--ink);background:var(--surface);border:1px solid var(--edge);
+        border-radius:8px;padding:7px 10px 7px 34px;min-height:38px;width:100%}
   :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
   /* ---------- explorer ---------- */
@@ -123,9 +123,9 @@
   .zoom button{width:34px;height:34px;border-radius:8px;border:1px solid var(--edge);background:var(--surface);color:var(--ink);
                font:600 18px/1 "Barlow",sans-serif;cursor:pointer}
   .zoom button.fit{font-size:11px;font-family:"IBM Plex Mono",monospace}
-  .maptag{position:absolute;bottom:6px;font-size:11px;padding:1px 6px;border-radius:4px;color:var(--ink-2);
+  .maptag{position:absolute;bottom:6px;font-size:12px;padding:1px 6px;border-radius:4px;color:var(--ink-2);
           background:color-mix(in oklab,var(--surface) 88%,transparent)}
-  .maptag.r{right:8px} .maptag.l{left:8px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-3)}
+  .maptag.r{right:8px} .maptag.l{left:8px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-2)}
   .maptag .touch{display:none}
   @media (pointer:coarse){ .maptag .mouse{display:none} .maptag .touch{display:inline} }
   @media (max-width:560px){ .maptag.l{top:10px;bottom:auto} }   /* phones: the hint and the credit don't fit on one line */
@@ -133,23 +133,23 @@
   .hit{fill:none;stroke:transparent;stroke-width:16;cursor:pointer}
 
   .panel{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px 18px 6px;scroll-margin-top:12px}
-  .p-eyebrow{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+  .p-eyebrow{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
   .p-title{font-family:"Barlow Condensed","Barlow",sans-serif;font-weight:700;font-size:32px;line-height:1;margin:4px 0 6px}
-  .p-sub{font-size:14px;color:var(--ink-2)}
+  .p-sub{font-size:15px;color:var(--ink-2)}
   .p-nav{display:flex;gap:6px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:thin}
   .p-nav .chip{flex:none}
   .insights{list-style:none;padding:12px 14px;margin:14px 0 2px;display:grid;gap:9px;background:var(--well);border-radius:10px}
-  .insights li{padding-left:15px;position:relative;font-size:14.5px;line-height:1.45}
+  .insights li{padding-left:15px;position:relative;font-size:15px;line-height:1.45}
   .insights li::before{content:"";position:absolute;left:0;top:.52em;width:6px;height:6px;border-radius:50%;background:var(--ink)}
   .card{border-top:1px solid var(--rule);padding:16px 0 14px;margin-top:14px}
-  .card h4{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:11px;font-weight:500;letter-spacing:.1em;
-           text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+  .card h4{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:12px;font-weight:500;letter-spacing:.1em;
+           text-transform:uppercase;color:var(--ink-2);margin:0 0 12px}
   .side + .side{margin-top:18px;padding-top:16px;border-top:1px dashed var(--rule)}
   .side-head{display:grid;grid-template-columns:132px 1fr;gap:14px;align-items:center}
   .side-name{font-weight:600;font-size:15px;margin:0 0 4px}
-  .side-txt{font-size:14px;color:var(--ink-2);line-height:1.45}
+  .side-txt{font-size:15px;color:var(--ink-2);line-height:1.45}
   .side-txt b{color:var(--ink);font-weight:600}
-  .empty{font-size:14px;color:var(--ink-2)}
+  .empty{font-size:15px;color:var(--ink-2)}
   .kv{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:13.5px;margin-top:10px}
   .kv dt{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding-top:2px}
   .kv dd{margin:0}
@@ -175,39 +175,40 @@
   /* narrow: our sign goes under the photo, with the next dates beside it, one a line */
   @media (max-width:600px){ .cmp{flex-direction:column} .cmp-a{align-self:stretch;max-width:none}
     .cmp-sign{display:flex;align-items:center;gap:18px} .cmp-next{margin:0} .cmp-next b span{display:block} .cmp-next i{display:none} }
-  .cmp-k{font:500 11px "IBM Plex Mono",ui-monospace,Menlo,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
-  .cmp-cap{font-size:13.5px;line-height:1.5;color:var(--ink-2);margin:10px 0 22px;max-width:var(--measure)}
+  .cmp-k{font:500 12px "IBM Plex Mono",ui-monospace,Menlo,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin:0 0 8px}
+  .cmp-cap{font-size:14px;line-height:1.5;color:var(--ink-2);margin:10px 0 22px;max-width:var(--measure)}
   .cmp-notes{margin:0;padding-left:18px}
   .cmp-notes li+li{margin-top:3px}
   .sv{position:relative;aspect-ratio:4/3;border-radius:6px;overflow:hidden;background:var(--well);border:1px solid var(--edge)}
   .sv iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 
   .mheat{display:grid;grid-template-columns:30px repeat(24,minmax(0,1fr));gap:2px;margin:4px 0 0}
-  .mheat .hl{font:10px "IBM Plex Mono",monospace;color:var(--ink-3);white-space:nowrap}
+  .mheat .hl{font:12px "IBM Plex Mono",monospace;color:var(--ink-2);white-space:nowrap}
   .mheat .c{height:15px;border-radius:2px}
-  .passes{display:grid;grid-template-columns:34px 1fr;gap:3px 10px;font-size:13.5px;margin:12px 0 0}
-  .passes dt{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3);padding-top:1px}
+  .passes{display:grid;grid-template-columns:34px 1fr;gap:3px 10px;font-size:14px;margin:12px 0 0}
+  .passes dt{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-2);padding-top:1px}
   .passes dd{margin:0}
   .odds-ctl{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:16px 0 6px}
   .readout{display:flex;flex-wrap:wrap;gap:8px 26px;margin:6px 0 4px}
-  .readout .k{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+  .readout .k{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
   .readout .v{font-family:"IBM Plex Mono",monospace;font-size:22px;font-weight:600;line-height:1.15}
-  .readout .v small{font-size:12px;font-weight:400;color:var(--ink-2);margin-left:5px}
+  .readout .v small{font-size:14px;font-weight:400;color:var(--ink-2);margin-left:5px}
 
-  .kinds{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px 12px;font-size:14px}
+  .kinds{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px 12px;font-size:15px}
+  @media (max-width:480px){ .kinds{grid-template-columns:minmax(0,1fr) 76px} }
   .kinds .nm{font-weight:500}
-  .kinds .meta{font-size:12.5px;color:var(--ink-2)}
+  .kinds .meta{font-size:14px;color:var(--ink-2)}
   .kinds .bar{height:6px;border-radius:3px;background:var(--accent);margin-top:7px}
-  .kinds .n{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-2);text-align:right}
+  .kinds .n{font-family:"IBM Plex Mono",monospace;font-size:14px;color:var(--ink-2);text-align:right}
 
   /* ---------- verdict + evidence ---------- */
   .verdict{background:var(--panel);color:var(--panel-ink);border-radius:12px;padding:4px 24px}
   .vrow{display:grid;grid-template-columns:1fr auto;gap:6px 28px;padding:18px 0;align-items:end}
   .vrow + .vrow{border-top:1px solid var(--panel-rule)}
-  .vq{grid-column:1/-1;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--panel-ink-2)}
+  .vq{grid-column:1/-1;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--panel-ink-2)}
   .va{font-size:16px;line-height:1.45;max-width:56ch}
   .vn{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:28px;font-weight:600;text-align:right;line-height:1;white-space:nowrap}
-  .vn small{display:block;font-size:11px;font-weight:400;color:var(--panel-ink-2);margin-top:7px}
+  .vn small{display:block;font-size:12px;font-weight:400;color:var(--panel-ink-2);margin-top:7px}
   @media (max-width:560px){ .vrow{grid-template-columns:1fr} .vn{text-align:left} }
   /* wide screens: the three answers side by side as cards, stat on top */
   @media (min-width:1001px){
@@ -216,28 +217,32 @@
     .vrow + .vrow{border-top:0;border-left:1px solid var(--panel-rule)}
     .vq{order:-2} .vn{order:-1;text-align:left;font-size:36px}
   }
-  .aside{max-width:var(--measure);border-left:3px solid var(--accent);padding:4px 0 4px 16px;margin:26px 0;font-size:15px;color:var(--ink-2)}
+  .aside{max-width:var(--measure);border-left:3px solid var(--accent);padding:4px 0 4px 16px;margin:26px 0;font-size:16px;color:var(--ink-2)}
   .aside b{color:var(--ink)}
   .c-miss{fill:none;stroke:var(--edge);stroke-width:1}
   .c-hol{fill:var(--well);stroke:none}
   #cal svg{max-width:none}
   .heat{display:grid;grid-template-columns:44px repeat(12,minmax(40px,1fr));gap:3px;min-width:560px}
-  .heat .hl{font:11px "IBM Plex Mono",monospace;color:var(--ink-3);display:flex;align-items:center}
+  .heat .hl{font:12px "IBM Plex Mono",monospace;color:var(--ink-2);display:flex;align-items:center}
   .heat .hc{justify-content:center}
   .heat .cell{height:34px;border-radius:3px;display:flex;align-items:center;justify-content:center;
-              font:500 11.5px "IBM Plex Mono",monospace;color:var(--ink);font-variant-numeric:tabular-nums}
+              font:500 12px "IBM Plex Mono",monospace;color:var(--ink);font-variant-numeric:tabular-nums}
   .heat .cell.hi{color:#ffffff}
   .notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px 24px;margin:16px 0 0;padding:0;list-style:none;font-size:14px;color:var(--ink-2)}
   .notes b{color:var(--ink);font-weight:600;display:block}
   .tool{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px}
-  .method{display:grid;grid-template-columns:160px 1fr;gap:12px 22px;font-size:14.5px;margin:18px 0 0;max-width:var(--measure)}
-  .method dt{font-weight:600}
-  .method dd{margin:0;color:var(--ink-2)}
-  @media (max-width:560px){ .method{grid-template-columns:1fr;gap:4px} .method dd{margin-bottom:12px} }
-  footer{margin-top:44px;font-size:13px;color:var(--ink-3)}
-  footer ul{padding-left:18px;margin:6px 0 0}
-  #tip{position:fixed;z-index:20;pointer-events:none;background:var(--panel);color:var(--panel-ink);font-size:12.5px;line-height:1.45;
-       padding:8px 10px;border-radius:6px;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+  /* the method: one row per topic, closed until tapped, so the page ends sooner (as on LA Street Rules) */
+  .method{max-width:var(--measure);margin:18px 0 0}
+  .method details{border-top:1px solid var(--rule)}
+  .method summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:12px;padding:12px 2px;font-weight:600}
+  .method summary::-webkit-details-marker{display:none}
+  .method summary::after{content:"+";color:var(--ink-2);font-weight:400}
+  .method details[open] summary::after{content:"−"}
+  .method details>p,.method details>ul{color:var(--ink-2);margin:0 0 16px}
+  .method details>ul{padding-left:18px;font-size:15px}
+  .method details>ul li+li{margin-top:4px}
+  #tip{position:fixed;z-index:20;pointer-events:none;background:var(--panel);color:var(--panel-ink);font-size:14px;line-height:1.45;
+       padding:8px 10px;border-radius:6px;max-width:280px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
   #tip b{font-weight:600}
   @media (prefers-reduced-motion:no-preference){ .chip{transition:background-color .15s,border-color .15s} }
 </style>
@@ -246,8 +251,7 @@
   <nav class="mast" aria-label="Sister sites"><span><a class="site" href="https://citina.github.io/curb-log/">Curb Log</a> · <span class="site here" aria-current="page">USC Ticket Clock</span> · <a class="site" href="streets/">LA Street Rules</a></span><span><span id="mastRange">Updated weekly</span> · <a href="#about">About</a></span></nav>
   <div class="intro">
   <h1>USC Ticket Clock</h1>
-  <p class="lede" id="lede">Click a street on the map to see when parking enforcement comes by: the street-sweeping schedule and when the officer really shows up, how often meter officers walk past, and what else gets ticketed there.</p>
-  <p class="lede-note"><b>Most LA streets are swept every other week, but the sign may say just "No parking Thursday".</b> This page shows which weeks each street is swept, like the 2nd &amp; 4th Thursdays of the month, and its next sweep dates. <a href="#calFig" id="exLink">See an example</a></p>
+  <p class="lede" id="lede">Pick a street near USC to see its street-sweeping schedule and next sweep dates, when the sweeping officer usually shows up, and how often meter officers walk past. Most LA streets are swept every other week, even where the sign shows only the day. <a href="#calFig" id="exLink">See an example</a></p>
   </div>
 
   <div class="explorer" id="explorer">
@@ -257,7 +261,8 @@
           <button class="chip" aria-pressed="true" data-mode="sweep">Street sweeping</button>
           <button class="chip" aria-pressed="false" data-mode="meter">Meter patrols</button>
         </div>
-        <input type="search" id="q" list="qlist" placeholder="Find a street, e.g. 28th St" autocomplete="off" aria-label="Find a street">
+        <div class="searchbox"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="6.8" cy="6.8" r="5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m10.6 10.6 4.4 4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <input type="search" id="q" list="qlist" placeholder="Enter a street, e.g. 28th St" autocomplete="off" aria-label="Enter a street"></div>
         <datalist id="qlist"></datalist>
       </div>
       <div class="mapwrap" id="mapwrap">
@@ -350,36 +355,34 @@
   <section id="method">
     <div class="code"><b>Method</b> How this was measured</div>
     <h2>How this was measured, and what it can't tell you</h2>
-    <dl class="method">
-      <dt>Data</dt>
-      <dd id="mData"></dd>
-      <dt>Blocks and sides</dt>
-      <dd>I grouped addresses by hundred block and split each block by odd and even street numbers. Each block's line on the map is fitted through its ticket locations. Where odd and even addresses geocode clearly to opposite sides of that line, the panel names the compass side. Otherwise it only says "even" or "odd". A block needs at least 20 tickets of any kind in the two years to get a line on the map.</dd>
-      <dt>Sweeping schedule</dt>
-      <dd>The posted day, weeks and time come from StreetsLA's map of posted sweeping routes. Each route covers an area and is swept on two days, one for each side of the street. A side gets the route day that matches the weekday of most of its sweeping tickets, among the routes those tickets sit inside. A side needs at least 8 sweeping tickets for that. The few tickets written outside the posted time are left off the arrival strip. "Ticketed on X% of sweep days" counts posted days with at least one ticket. It excludes holidays and any day with no sweeping tickets anywhere nearby. The arrival strip shows each sweep day's first and last ticket.</dd>
-      <dt>Meter patrols</dt>
-      <dd>Uses USC class weeks only (fall and spring, spring break excluded), Monday to Saturday. A visit is a group of meter tickets on one block with no gap over 10 minutes. An officer who finds every meter paid leaves no ticket, so I adjust for those empty visits. The adjustment assumes the number of expired cars an officer finds on a visit is random (Poisson), so the average number of tickets per visit we can see tells us what share of visits wrote nothing. The dashed line and the "at least" figures skip that adjustment.</dd>
-      <dt>Limits</dt>
-      <dd>A ticket only appears when someone broke the rule, so quiet blocks look less patrolled than they really are. The meter odds assume you never paid. Officers may skip cars. USC term dates are approximate. Routes and staffing change, and none of this is a promise about next Thursday. Always read the posted sign, and for sweeping, the city's schedule.</dd>
-    </dl>
-    <footer>
-      Sources
-      <ul>
-        <li><a href="https://data.lacity.org/Transportation/Parking-Citations/4f5p-udkv/about_data">LADOT Parking Citations</a> and <a href="https://data.lacity.org/Transportation/LADOT-Metered-Parking-Inventory-Policies/s49e-q6j2/about_data">Metered Parking Inventory</a>, data.lacity.org</li>
-        <li>Basemap © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</li>
-        <li><a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">Posted Street Sweeping Routes</a>, StreetsLA (as of July 2026): each route's area, days, weeks and posted time</li>
-        <li><a href="https://abc7.com/post/street-sweeping-la-streetsla-schedule/10375577/">ABC7</a> and <a href="https://ktla.com/news/local-news/city-of-l-a-to-switch-street-sweeping-to-every-other-week-starting-monday/">KTLA</a> on the switch to sweeping every other week; the city's own lookup is at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a></li>
-        <li><a href="https://ladot.lacity.gov/dotnews/weekly-update-march-4-2021">LADOT's weekly update of March 4, 2021</a> on enforcing street sweeping only on the days streets are swept, and <a href="https://larchmontchronicle.com/to-adhere-to-parking-signs-or-not-to-adhere/">Larchmont Chronicle</a> on LADOT's policy for sweeping signs that still show every week</li>
-        <li><a href="https://citina.github.io/curb-log/">Curb Log</a>, sensor occupancy on Vermont Ave from W 36th St down to about W 37th St (both sides), and on W 36th St just west of Vermont</li>
-      </ul>
-    </footer>
+    <div class="method">
+      <details><summary>Data</summary>
+        <p id="mData"></p></details>
+      <details><summary>Blocks and sides</summary>
+        <p>I grouped addresses by hundred block and split each block by odd and even street numbers. Each block's line on the map is fitted through its ticket locations. Where odd and even addresses geocode clearly to opposite sides of that line, the panel names the compass side. Otherwise it only says "even" or "odd". A block needs at least 20 tickets of any kind in the two years to get a line on the map.</p></details>
+      <details><summary>Sweeping schedule</summary>
+        <p>The posted day, weeks and time come from StreetsLA's map of posted sweeping routes. Each route covers an area and is swept on two days, one for each side of the street. A side gets the route day that matches the weekday of most of its sweeping tickets, among the routes those tickets sit inside. A side needs at least 8 sweeping tickets for that. The few tickets written outside the posted time are left off the arrival strip. "Ticketed on X% of sweep days" counts posted days with at least one ticket. It excludes holidays and any day with no sweeping tickets anywhere nearby. The arrival strip shows each sweep day's first and last ticket.</p></details>
+      <details><summary>Meter patrols</summary>
+        <p>Uses USC class weeks only (fall and spring, spring break excluded), Monday to Saturday. A visit is a group of meter tickets on one block with no gap over 10 minutes. An officer who finds every meter paid leaves no ticket, so I adjust for those empty visits. The adjustment assumes the number of expired cars an officer finds on a visit is random (Poisson), so the average number of tickets per visit we can see tells us what share of visits wrote nothing. The dashed line and the "at least" figures skip that adjustment.</p></details>
+      <details><summary>Limits</summary>
+        <p>A ticket only appears when someone broke the rule, so quiet blocks look less patrolled than they really are. The meter odds assume you never paid. Officers may skip cars. USC term dates are approximate. Routes and staffing change, and none of this is a promise about next Thursday. Always read the posted sign, and for sweeping, the city's schedule.</p></details>
+      <details><summary>Sources</summary>
+        <ul>
+          <li><a href="https://data.lacity.org/Transportation/Parking-Citations/4f5p-udkv/about_data">LADOT Parking Citations</a> and <a href="https://data.lacity.org/Transportation/LADOT-Metered-Parking-Inventory-Policies/s49e-q6j2/about_data">Metered Parking Inventory</a>, data.lacity.org</li>
+          <li>Basemap © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</li>
+          <li><a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">Posted Street Sweeping Routes</a>, StreetsLA (as of July 2026): each route's area, days, weeks and posted time</li>
+          <li><a href="https://abc7.com/post/street-sweeping-la-streetsla-schedule/10375577/">ABC7</a> and <a href="https://ktla.com/news/local-news/city-of-l-a-to-switch-street-sweeping-to-every-other-week-starting-monday/">KTLA</a> on the switch to sweeping every other week; the city's own lookup is at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a></li>
+          <li><a href="https://ladot.lacity.gov/dotnews/weekly-update-march-4-2021">LADOT's weekly update of March 4, 2021</a> on enforcing street sweeping only on the days streets are swept, and <a href="https://larchmontchronicle.com/to-adhere-to-parking-signs-or-not-to-adhere/">Larchmont Chronicle</a> on LADOT's policy for sweeping signs that still show every week</li>
+          <li><a href="https://citina.github.io/curb-log/">Curb Log</a>, sensor occupancy on Vermont Ave from W 36th St down to about W 37th St (both sides), and on W 36th St just west of Vermont</li>
+        </ul></details>
+    </div>
   </section>
   <section id="about">
     <div class="code"><b>About</b> These pages</div>
     <p class="about">Made by <a href="https://github.com/citina">Citina Liang</a>, a PhD candidate in Industrial &amp; Systems Engineering at USC Viterbi who models how people behave and how diseases spread. It started when she missed the deadline for a campus parking pass. <a href="https://citina.github.io/curb-log/">Curb Log</a> came first, to learn <b>when the meters near her office have space</b>. Its grid showed the hardest days were <b>when the side streets are swept</b>, which raised the next question: <b>when does enforcement actually come?</b> USC Ticket Clock answers that from the city's own tickets, and <a href="streets/">LA Street Rules</a> does it for every block in Los Angeles. All from the city's open data, and it updates itself. Built with Claude Code in about a week; the code is on <a href="https://github.com/citina/ticket-clock">GitHub</a>.</p>
     <div class="sibs">
-      <a class="sib" href="streets/"><div class="sib-name">LA Street Rules</div><div class="sib-txt">Any block in the City of Los Angeles: search a street or use your location for its sweeping day, hours and weeks, how often meter officers come by, and what else gets ticketed there.</div></a>
-      <a class="sib" href="https://citina.github.io/curb-log/"><div class="sib-name">Curb Log</div><div class="sib-txt">How many parking spaces are available right now on Vermont Ave from W 36th St down to about W 37th St (both sides) and on W 36th St just west of Vermont, and how that usually changes by the half hour on weekdays, from LADOT's parking sensors.</div></a>
+      <a class="sib" href="streets/"><div class="sib-name">LA Street Rules</div><div class="sib-txt">Every block in the City of Los Angeles: its sweeping schedule, its meters, and what gets ticketed there.</div></a>
+      <a class="sib" href="https://citina.github.io/curb-log/"><div class="sib-name">Curb Log</div><div class="sib-txt">Available parking right now on Vermont Ave by W 36th St, and how it usually changes on weekdays, from LADOT's parking sensors.</div></a>
     </div>
   </section>
   <div class="note end">
@@ -401,17 +404,20 @@ const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], DAYLONG=['Monday','Tuesd
 const pct=x=>Math.round(x*100)+'%';
 function fmtT(m){ m=Math.round(m); const h=Math.floor(m/60)%24, mm=m%60, ap=h>=12?'pm':'am', h12=h%12||12; return mm?`${h12}:${String(mm).padStart(2,'0')} ${ap}`:`${h12} ${ap}`; }
 function fmtRange(a,b){ const s=fmtT(a), e=fmtT(b); return s.slice(-2)===e.slice(-2) ? s.slice(0,-3)+'–'+e : s+'–'+e; }
-function usual(r){ return r.map(([a,b])=>fmtRange(a,b)).join(' or '); }
+function usual(r){ return r.map(([a,b])=>fmtRange(a,b).replace(/ /g,'\u00a0').replace('–','\u2060–\u2060')).join(' or '); }
 function fmtDate(s, y){ return new Date(s+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',day:'numeric',month:'short',year:y?'numeric':undefined}); }
 function ord(n){ return n+({1:'st',2:'nd',3:'rd'}[n]||'th'); }
 const median=a=>{ const s=[...a].sort((x,y)=>x-y); return s.length? s[Math.floor(s.length/2)] : 0; };
 const q=(a,p)=>{ const s=[...a].sort((x,y)=>x-y); return s.length? s[Math.min(s.length-1,Math.floor(p*s.length))] : 0; };
 function barPath(x,y0,w,h,r){ if(h<=0) return ''; r=Math.min(r,w/2,h); return `M${x},${y0}V${y0-h+r}Q${x},${y0-h} ${x+r},${y0-h}H${x+w-r}Q${x+w},${y0-h} ${x+w},${y0-h+r}V${y0}Z`; }
 const tip=$('#tip');
-function showTip(e, html){ tip.innerHTML=html; tip.hidden=false; const r=tip.getBoundingClientRect(); let x=e.clientX+14, y=e.clientY+14;
-  if(x+r.width>innerWidth-8) x=e.clientX-r.width-14; if(y+r.height>innerHeight-8) y=e.clientY-r.height-14; tip.style.left=x+'px'; tip.style.top=y+'px'; }
+// measured at the top left, where it can take its full width (measured where it last was, near an edge, it came out narrow and tall), then kept on screen
+function showTip(e, html){ tip.innerHTML=html; tip.style.left=tip.style.top='0px'; tip.hidden=false; const r=tip.getBoundingClientRect(); let x=e.clientX+14, y=e.clientY+14;
+  if(x+r.width>innerWidth-8) x=e.clientX-r.width-14; if(y+r.height>innerHeight-8) y=e.clientY-r.height-14;
+  tip.style.left=Math.max(8,Math.min(x,innerWidth-r.width-8))+'px'; tip.style.top=Math.max(8,Math.min(y,innerHeight-r.height-8))+'px'; }
 function hideTip(){ tip.hidden=true; }
-function hover(el, fn){ el.addEventListener('pointermove', e=>showTip(e, fn())); el.addEventListener('pointerleave', hideTip); }
+// a mouse only: on a touch screen a finger scrolling past would flash it
+function hover(el, fn){ el.addEventListener('pointermove', e=>{ if(e.pointerType==='mouse') showTip(e, fn()); }); el.addEventListener('pointerleave', hideTip); }
 
 const W=D.frame.W, Hh=D.frame.H, BL=D.blocks;
 const DAYCOL={1:'var(--s1)',2:'var(--s2)',3:'var(--s3)',4:'var(--s4)'};
@@ -452,7 +458,7 @@ BL.forEach((b,i)=>{
 });
 // a block with no inferred schedule: none at all, or too few to tell
 function fewSweep(b){ return b.sweep_n ? `only ${b.sweep_n} sweeping ticket${b.sweep_n>1?'s':''}, too few to work out a schedule` : 'no sweeping tickets'; }
-function legendNote(lg, txt){ const li=H('li',{textContent:txt},lg); li.style.cssText='flex-basis:100%;font-size:12px;color:var(--ink-3)'; }
+function legendNote(lg, txt){ const li=H('li',{textContent:txt},lg); li.style.flexBasis='100%'; }
 function quick(b){
   const sw=b.sweep.map(s=>`${DAYS[s.dow]} ${fmtRange(s.s0,s.s1)} (${phaseTxt(s.on)})`);
   const u=[...new Set(sw)];
@@ -594,14 +600,14 @@ function arrivalStrip(host, s, arr, fin){
     const n={}; a.forEach(m=>{ const k=col(m); n[k]=(n[k]||0)+1; });
     const tall=Math.max(3,...Object.values(n)), step=Math.min(7,63/tall);
     return {a,c,nm,dash,step,h:Math.round(tall*step+6)}; });
-  let y=0; lanes.forEach(L=>{ L.y0=y+20; L.base=L.y0+L.h; y=L.base+8; });
+  let y=0; lanes.forEach(L=>{ L.y0=y+22; L.base=L.y0+L.h; y=L.base+8; });
   const axis=lanes[1].base+4, Hd=axis+20;
   const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,role:'img','aria-label':'First and last sweeping ticket times on each sweep day'},host);
   lanes.forEach(L=>{ const md=median(L.a), cnt={};
     S('rect',{x:x(0),y:L.y0,width:x(span)-x(0),height:L.h,rx:4,class:'win'},g);
     L.a.forEach(m=>{ const k=col(m), c=cnt[k]=(cnt[k]||0)+1;
       S('circle',{cx:k*bw+bw/2,cy:L.base-3.5-(c-1)*L.step,r:3.2},g).style.fill=L.c; });
-    S('line',{x1:x(md),x2:x(md),y1:L.y0-3,y2:L.base,stroke:'var(--ink)','stroke-width':1.5,'stroke-dasharray':L.dash},g);
+    S('line',{x1:x(md),x2:x(md),y1:L.y0,y2:L.base,stroke:'var(--ink)','stroke-width':1.5,'stroke-dasharray':L.dash},g);
     S('circle',{cx:x(0)+4,cy:L.y0-9,r:4},g).style.fill=L.c;
     const tt=S('text',{x:x(0)+13,y:L.y0-5,class:'lab'},g); T('tspan',{},tt,`${L.nm}: usually `); T('tspan',{class:'lab strong'},tt,fmtT(t0+md)); });
   S('line',{x1:0,x2:Wd,y1:axis,y2:axis,class:'axis'},g);
@@ -649,7 +655,7 @@ function meterCard(host, b){
     S('path',{d:est.map((v,i)=>(i?'L':'M')+x(i)+','+y(v)).join(''),fill:'none',stroke:'var(--accent)','stroke-width':2.2,'stroke-linejoin':'round'},g);
     const cross=S('line',{y1:t,y2:y(0),stroke:'var(--ink-3)'},g); cross.style.display='none';
     const hit=S('rect',{x:l,y:t,width:Wd-l-r,height:Hd-t-bb,fill:'transparent'},g);
-    hit.addEventListener('pointermove',e=>{ const bbx=g.getBoundingClientRect(), vx=(e.clientX-bbx.left)*Wd/bbx.width, i=Math.max(0,Math.min(23,Math.round((vx-l)/((Wd-l-r)/23))));
+    hit.addEventListener('pointermove',e=>{ if(e.pointerType!=='mouse') return; const bbx=g.getBoundingClientRect(), vx=(e.clientX-bbx.left)*Wd/bbx.width, i=Math.max(0,Math.min(23,Math.round((vx-l)/((Wd-l-r)/23))));
       cross.setAttribute('x1',x(i)); cross.setAttribute('x2',x(i)); cross.style.display='';
       showTip(e,`<b>Arrive ${fmtT(480+i*30)}, stay ${['30 min','1 hr','2 hr'][st.stay]}</b><br>Estimate ${pct(est[i])} · at least ${pct(low[i])}`); });
     hit.addEventListener('pointerleave',()=>{ cross.style.display='none'; hideTip(); });
@@ -686,9 +692,9 @@ function select(i, focus){
     H('div',{className:'side-txt',innerHTML:`Ticketed on <b>${pct(rate)}</b> of sweep days in the past two years (${g[0].days} days), about ${(n/Math.max(1,arr.length/g.length)).toFixed(0)} tickets each time.<br>Next: <b>${nextDays(s,2).join(' · ')}</b>`},txt);
     H('div',{className:'fig-sub',style:'margin:14px 0 8px',textContent:'When the first and last tickets land on each sweep day'},box);
     arrivalStrip(box, s, arr, fin);
-    if(n<20) H('div',{className:'empty',style:'font-size:12.5px',textContent:`Only ${n} tickets on this side, so treat the schedule as rough.`},box); });
-  if(sweepGroups(b).some(g=>g.length===1)) H('div',{className:'empty',style:'font-size:12.5px;margin-top:12px',textContent:'Odd and even mean house numbers: one side of the street has the odd addresses, the other side the even ones, and each side can have its own sweeping day.'},sc);
-  if(b.sweep.length) H('div',{className:'empty',style:'font-size:12px;margin-top:10px',innerHTML:'*Signs often show only the day. Weeks and times are from <a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">StreetsLA\'s posted routes</a>; check your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.'},sc);
+    if(n<20) H('div',{className:'empty',style:'font-size:14px',textContent:`Only ${n} tickets on this side, so treat the schedule as rough.`},box); });
+  if(sweepGroups(b).some(g=>g.length===1)) H('div',{className:'empty',style:'font-size:14px;margin-top:12px',textContent:'Odd and even mean house numbers: one side of the street has the odd addresses, the other side the even ones, and each side can have its own sweeping day.'},sc);
+  if(b.sweep.length) H('div',{className:'empty',style:'font-size:14px;margin-top:10px',innerHTML:'*Signs often show only the day. Weeks and times are from <a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">StreetsLA\'s posted routes</a>; check your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.'},sc);
   if(b.meter) meterCard(H('div',{className:'card'},p), b);
   // everything ticketed here
   const kc=H('div',{className:'card'},p); H('h4',{textContent:'What gets ticketed here'},kc);

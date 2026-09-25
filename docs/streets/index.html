@@ -10,14 +10,14 @@
   :root{
     color-scheme:light;
     --plane:#f2f2ef; --surface:#fcfcfb; --well:#e8e8e2;
-    --ink:#14140f; --ink-2:#56554f; --ink-3:#8a8880;
+    --ink:#14140f; --ink-2:#56554f; --ink-3:#65645e;
     --rule:#e1e0d9; --edge:#c9c8c0;
     --accent:#2a78d6; --accent-ink:#1c5cab;
     --panel:#1a1a19; --panel-ink:#fcfcfb;
     --sign:#ffffff; --sign-red:#c8102e; --sign-ink:#111111;
     --measure:760px;  /* one width for blocks of text, so their right edges line up; sources and the closing note use the full width */
     /* the map stays light in dark mode too (Citina's choice), so its colors aren't repeated in the dark blocks */
-    --map-bg:#fcfcfb; --map-line:#7fb2ee; --map-sel:#14140f; --map-halo:rgba(20,20,15,.28);
+    --map-bg:#fcfcfb; --map-line:#7fb2ee; --map-sel:#14140f; --map-halo:rgba(20,20,15,.28); --map-you:#d62828;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
@@ -47,13 +47,13 @@
        font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
   main{max-width:1280px;margin:0 auto;padding:26px 20px 72px}
   a{color:var(--accent-ink)}
-  .mast{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
-        color:var(--ink-3);display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
+  .mast{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+        color:var(--ink-2);display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
   .mast a{color:inherit}
   .mast .site{white-space:nowrap}
   .mast .here{color:var(--ink)}
   /* about these pages, with the sister sites, at the end of the page */
-  .about{margin:12px 0 0;font-size:15px;line-height:1.5;color:var(--ink-2)}
+  .about{margin:12px 0 0;font-size:16px;line-height:1.5;color:var(--ink-2)}
   .about b{color:var(--ink);font-weight:600}
   .sibs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:16px 0 0}
   @media (max-width:640px){ .sibs{grid-template-columns:minmax(0,1fr)} }
@@ -61,33 +61,31 @@
   .sib:hover{border-color:var(--ink-3)}
   .sib-name{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:26px;line-height:1.05;color:var(--ink)}
   .sib-name::after{content:" →";color:var(--ink-3);font-weight:600}
-  .sib-txt{font-size:14.5px;line-height:1.5;color:var(--ink-2);margin:6px 0 0}
+  .sib-txt{font-size:15px;line-height:1.5;color:var(--ink-2);margin:6px 0 0}
   h1{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:clamp(44px,8vw,66px);
      line-height:.92;margin:20px 0 12px;text-wrap:balance}
   .lede{font-size:18.5px;line-height:1.5;color:var(--ink-2);max-width:var(--measure);margin:0}
-  .note{font-size:12.5px;line-height:1.45;color:var(--ink-3);max-width:var(--measure);margin:0}
+  .note{font-size:14px;line-height:1.5;color:var(--ink-2);max-width:var(--measure);margin:0}
   .intro{margin:0 0 26px}
-  .lede-note{font-size:16px;line-height:1.5;color:var(--ink-2);margin:12px 0 0}
-  .lede-note b{color:var(--ink);font-weight:600}
-  .note b{color:var(--ink-2);font-weight:500}
+  .note b{color:var(--ink);font-weight:600}
   .note p{margin:0 0 6px;max-width:none}
   .note a{color:inherit}
   .note.end{margin-top:40px;max-width:none}
   h2{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;font-weight:700;font-size:34px;line-height:1.02;margin:8px 0 14px;text-wrap:balance}
   p{max-width:var(--measure);margin:0 0 14px}
   .code{display:inline-flex;gap:10px;align-items:center;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-        font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+        font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
   .code b{font-weight:600;color:var(--ink-2);border:1px solid var(--edge);border-radius:3px;padding:1px 6px;letter-spacing:.04em}
   section{margin-top:56px;padding-top:28px;border-top:1px solid var(--rule)}
   svg{display:block;max-width:100%;height:auto;overflow:visible}
-  .legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin:10px 0 0;padding:0;list-style:none}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--ink-2);margin:10px 0 0;padding:0;list-style:none}
   .legend li{display:inline-flex;align-items:center;gap:6px}
   .sw{width:18px;height:4px;border-radius:2px;display:inline-block;flex:none}
   .chip{appearance:none;cursor:pointer;border:1px solid var(--edge);background:var(--surface);color:var(--ink);
         font:500 14px "Barlow",system-ui,sans-serif;padding:5px 12px;border-radius:999px;min-height:34px}
   .chip:hover{border-color:var(--ink-3)}
   .chip[aria-pressed="true"]{background:var(--ink);color:var(--plane);border-color:var(--ink)}
-  .chip.sm{font-size:13px;padding:3px 10px;min-height:30px}
+  .chip.sm{font-size:14px;padding:3px 10px;min-height:30px}
   :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
   /* ---------- finder + map ---------- */
@@ -99,15 +97,17 @@
           font:600 15px "Barlow",system-ui,sans-serif;padding:7px 14px;border-radius:8px;min-height:40px}
   .locbtn:disabled{opacity:.6;cursor:progress}
   .locbtn svg{width:16px;height:16px;flex:none}
+  .loc-note{font-size:14px;color:var(--ink-2);margin:8px 0 0}
   .searchbox{position:relative;flex:1 1 260px;max-width:420px}
-  .searchbox input{font:15px "Barlow",system-ui,sans-serif;color:var(--ink);background:var(--surface);border:1px solid var(--edge);
-        border-radius:8px;padding:8px 10px;min-height:40px;width:100%}
+  .searchbox>svg{position:absolute;left:11px;top:12px;width:16px;height:16px;color:var(--ink-2);pointer-events:none}
+  .searchbox input{font:16px "Barlow",system-ui,sans-serif;color:var(--ink);background:var(--surface);border:1px solid var(--edge);
+        border-radius:8px;padding:8px 10px 8px 34px;min-height:40px;width:100%}
   .sugg{position:absolute;z-index:10;left:0;right:0;top:calc(100% + 4px);margin:0;padding:4px;list-style:none;background:var(--surface);
         border:1px solid var(--edge);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.12)}
   .sugg li{padding:7px 10px;border-radius:6px;cursor:pointer;font-size:15px;display:flex;justify-content:space-between;gap:12px}
-  .sugg li small{color:var(--ink-3);font-size:12.5px;white-space:nowrap}
+  .sugg li small{color:var(--ink-2);font-size:14px;white-space:nowrap}
   .sugg li[aria-selected="true"],.sugg li:hover{background:var(--well)}
-  .find-msg{font-size:14.5px;line-height:1.5;margin:12px 0 0;max-width:var(--measure)}
+  .find-msg{font-size:15px;line-height:1.5;margin:12px 0 0;max-width:var(--measure)}
   .find-msg:empty{display:none}
   .cands{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;max-height:132px;overflow-y:auto}
   .cands:empty{display:none}
@@ -132,26 +132,26 @@
                font:600 18px/1 "Barlow",sans-serif;cursor:pointer}
   .zoom button.fit{font-size:11px;font-family:"IBM Plex Mono",monospace}
   .zoom button.north svg{width:20px;height:20px;margin:0 auto}   /* its needle turns with the map */
-  .maptag{position:absolute;bottom:6px;font-size:11px;padding:1px 6px;border-radius:4px;color:var(--ink-2);
+  .maptag{position:absolute;bottom:6px;font-size:12px;padding:1px 6px;border-radius:4px;color:var(--ink-2);
           background:color-mix(in oklab,var(--surface) 88%,transparent)}
   .maptag.r{right:8px}
-  .maptag.hint{left:50%;top:10px;bottom:auto;transform:translateX(-50%);font-size:13px;padding:4px 10px;color:var(--ink);white-space:nowrap}
+  .maptag.hint{left:50%;top:10px;bottom:auto;transform:translateX(-50%);font-size:14px;padding:4px 10px;color:var(--ink);white-space:nowrap}
 
   /* ---------- the rules card ---------- */
   .panel{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px 18px 6px;scroll-margin-top:12px}
-  .p-eyebrow{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+  .p-eyebrow{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
   .p-title{font-family:"Barlow Condensed","Barlow",sans-serif;font-weight:700;font-size:32px;line-height:1;margin:4px 0 6px}
-  .p-sub{font-size:14px;color:var(--ink-2)}
+  .p-sub{font-size:15px;color:var(--ink-2)}
   .card{border-top:1px solid var(--rule);padding:16px 0 14px;margin-top:14px}
-  .card h4{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:11px;font-weight:500;letter-spacing:.1em;
-           text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+  .card h4{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:12px;font-weight:500;letter-spacing:.1em;
+           text-transform:uppercase;color:var(--ink-2);margin:0 0 12px}
   .side + .side{margin-top:18px;padding-top:16px;border-top:1px dashed var(--rule)}
   .side-head{display:grid;grid-template-columns:132px 1fr;gap:14px;align-items:center}
   .side-name{font-weight:600;font-size:15px;margin:0 0 4px}
-  .side-txt{font-size:14px;color:var(--ink-2);line-height:1.45}
-  .rule-line{font-size:14.5px;line-height:1.45}
+  .side-txt{font-size:15px;color:var(--ink-2);line-height:1.45}
+  .rule-line{font-size:15px;line-height:1.45}
   .rule-line b{font-weight:600}
-  .evid{font-size:13px;line-height:1.5;color:var(--ink-2);margin-top:10px}
+  .evid{font-size:14px;line-height:1.5;color:var(--ink-2);margin-top:10px}
   .signs{display:flex;flex-wrap:wrap;gap:14px 16px;margin:12px 0 4px}
   .signs>div{width:132px}
   .signs .side-txt{margin-top:8px}
@@ -163,26 +163,28 @@
   .sign .s5{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:9.5px;letter-spacing:.06em;margin-top:6px;color:var(--sign-ink)}
   .odds6{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:6px 0 0}
   .odds6 div{background:var(--well);border-radius:6px;padding:5px 0 6px;text-align:center}
-  .odds6 .k{display:block;font:10.5px "IBM Plex Mono",monospace;letter-spacing:.06em;color:var(--ink-3)}
+  .odds6 .k{display:block;font:12px "IBM Plex Mono",monospace;letter-spacing:.06em;color:var(--ink-2)}
   .odds6 .v{display:block;font:600 15px "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
-  .kinds{display:grid;gap:2px;font-size:14px}
+  .kinds{display:grid;gap:2px;font-size:15px}
   .krow{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px 12px;width:100%;text-align:left;
         appearance:none;border:0;background:none;color:inherit;font:inherit;cursor:pointer;border-radius:8px;padding:6px 8px}
   .krow:hover,.krow[aria-expanded="true"]{background:var(--well)}
+  @media (max-width:480px){ .krow{grid-template-columns:minmax(0,1fr) 76px} }
   .krow.flat,.krow.flat:hover{cursor:default;background:none}   /* data from before the kinds could be opened */
   .krow.flat .nm::after{content:""}
   .krow .nm{font-weight:500}
   .krow .nm::after{content:"›";color:var(--ink-3);font-weight:400;margin-left:6px}
   .krow[aria-expanded="true"] .nm::after{content:"⌄"}
-  .krow .meta{font-size:12.5px;color:var(--ink-2)}
+  .krow .meta{font-size:14px;color:var(--ink-2)}
   .krow .bar{height:6px;border-radius:3px;background:var(--accent);margin-top:7px}
-  .krow .n{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-2);text-align:right}
+  .krow .n{font-family:"IBM Plex Mono",monospace;font-size:14px;color:var(--ink-2);text-align:right}
   .kdet{padding:2px 8px 12px}
-  .knote{font-size:13.5px;line-height:1.5;margin-bottom:3px}
-  .kcode{font-size:13px;color:var(--ink-2);line-height:1.5}
+  .knote{font-size:14px;line-height:1.5;margin-bottom:3px}
+  .kcode{font-size:14px;color:var(--ink-2);line-height:1.5}
+  .kchart-t{font-size:14px;font-weight:600;margin:12px 0 6px}
   .kcode b{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:12px;font-weight:600;color:var(--ink);
            border:1px solid var(--edge);border-radius:3px;padding:0 5px;white-space:nowrap}
-  .tick{font:11px "IBM Plex Mono",ui-monospace,Menlo,monospace;fill:var(--ink-3)}
+  .tick{font:12px "IBM Plex Mono",ui-monospace,Menlo,monospace;fill:var(--ink-2)}
   .axis{stroke:var(--edge);stroke-width:1}
   /* posted sweeping time behind the dots; mixed from ink so it holds up in dark mode */
   .win{fill:color-mix(in oklab, var(--ink) 10%, var(--surface))}
@@ -190,7 +192,7 @@
 
   /* one block side's sweep weekday for two years, as on the USC page */
   figure{margin:24px 0 30px}
-  figcaption{font-size:13.5px;line-height:1.5;color:var(--ink-2);margin-top:10px;max-width:var(--measure)}
+  figcaption{font-size:14px;line-height:1.5;color:var(--ink-2);margin-top:10px;max-width:var(--measure)}
   .fig-lead{font-size:16px;line-height:1.55;color:var(--ink-2);margin:0 0 16px}
   .fig-lead b{color:var(--ink);font-weight:600}
   .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -207,7 +209,7 @@
   /* narrow: our sign goes under the photo, with the next dates beside it, one a line */
   @media (max-width:600px){ .cmp{flex-direction:column} .cmp-a{align-self:stretch;max-width:none}
     .cmp-sign{display:flex;align-items:center;gap:18px} .cmp-next{margin:0} .cmp-next b span{display:block} .cmp-next i{display:none} }
-  .cmp-k{font:500 11px "IBM Plex Mono",ui-monospace,Menlo,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+  .cmp-k{font:500 12px "IBM Plex Mono",ui-monospace,Menlo,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin:0 0 8px}
   .cmp-notes{margin:0;padding-left:18px}
   .cmp-notes li+li{margin-top:3px}
   .sv{position:relative;aspect-ratio:4/3;border-radius:6px;overflow:hidden;background:var(--well);border:1px solid var(--edge)}
@@ -216,16 +218,20 @@
   .c-miss{fill:none;stroke:var(--edge);stroke-width:1}
   .c-hol{fill:var(--well);stroke:none}
 
-  .aside{max-width:var(--measure);border-left:3px solid var(--accent);padding:4px 0 4px 16px;margin:26px 0;font-size:15px;color:var(--ink-2)}
+  .aside{max-width:var(--measure);border-left:3px solid var(--accent);padding:4px 0 4px 16px;margin:26px 0;font-size:16px;color:var(--ink-2)}
   .aside b{color:var(--ink)}
-  .method{display:grid;grid-template-columns:160px 1fr;gap:12px 22px;font-size:14.5px;margin:18px 0 0;max-width:var(--measure)}
-  .method dt{font-weight:600}
-  .method dd{margin:0;color:var(--ink-2)}
-  @media (max-width:560px){ .method{grid-template-columns:1fr;gap:4px} .method dd{margin-bottom:12px} }
-  footer{margin-top:44px;font-size:13px;color:var(--ink-3)}
-  footer ul{padding-left:18px;margin:6px 0 0}
-  #tip{position:fixed;z-index:20;pointer-events:none;background:var(--panel);color:var(--panel-ink);font-size:12.5px;line-height:1.45;
-       padding:8px 10px;border-radius:6px;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+  /* the method: one row per topic, closed until tapped, so the page ends sooner */
+  .method{max-width:var(--measure);margin:18px 0 0}
+  .method details{border-top:1px solid var(--rule)}
+  .method summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:12px;padding:12px 2px;font-weight:600}
+  .method summary::-webkit-details-marker{display:none}
+  .method summary::after{content:"+";color:var(--ink-2);font-weight:400}
+  .method details[open] summary::after{content:"−"}
+  .method details>p,.method details>ul{color:var(--ink-2);margin:0 0 16px}
+  .method details>ul{padding-left:18px;font-size:15px}
+  .method details>ul li+li{margin-top:4px}
+  #tip{position:fixed;z-index:20;pointer-events:none;background:var(--panel);color:var(--panel-ink);font-size:14px;line-height:1.45;
+       padding:8px 10px;border-radius:6px;max-width:280px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
   @media (prefers-reduced-motion:no-preference){ .chip{transition:background-color .15s,border-color .15s} }
 </style>
 
@@ -233,20 +239,21 @@
   <nav class="mast" aria-label="Sister sites"><span><a class="site" href="https://citina.github.io/curb-log/">Curb Log</a> · <a class="site" href="../">USC Ticket Clock</a> · <span class="site here" aria-current="page">LA Street Rules</span></span><span><span id="mastRange">Updated weekly</span> · <a href="#about">About</a></span></nav>
   <div class="intro">
     <h1>LA Street Rules</h1>
-    <p class="lede">Find a block in the City of Los Angeles to see the parking rules its tickets point to: the street-sweeping day, hours and weeks, how often meter officers come by, and what else gets ticketed there.</p>
-    <p class="lede-note"><b>Most LA streets are swept every other week, but the sign may say just "No parking Thursday".</b> This page shows which weeks each block is swept, like the 2nd &amp; 4th Thursdays of the month, and its next sweep dates. <a href="#sweep" id="exLink" hidden>See an example</a></p>
+    <p class="lede">Enter an LA address to see its street-sweeping schedule and next sweep dates, its meters, and recent parking-ticket patterns. Most LA streets are swept every other week, even where the sign shows only the day. <a href="#sweep" id="exLink" hidden>See an example</a></p>
   </div>
 
   <div class="explorer">
     <div class="mapcol">
       <div class="findbar">
-        <button class="locbtn" id="locBtn"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/><path d="M8 0v2.6M8 13.4V16M0 8h2.6M13.4 8H16" stroke="currentColor" stroke-width="1.6"/></svg>Use my location</button>
+        <button class="locbtn" id="locBtn" aria-describedby="locNote"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2" fill="currentColor"/><path d="M8 0v2.6M8 13.4V16M0 8h2.6M13.4 8H16" stroke="currentColor" stroke-width="1.6"/></svg>Show blocks near me</button>
         <div class="searchbox">
-          <input type="search" id="q" placeholder="Street, address or neighborhood" autocomplete="off" spellcheck="false"
-                 role="combobox" aria-label="Find a street, address or neighborhood" aria-expanded="false" aria-controls="sugg" aria-autocomplete="list">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="6.8" cy="6.8" r="5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m10.6 10.6 4.4 4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <input type="search" id="q" placeholder="Enter an address or neighborhood" autocomplete="off" spellcheck="false"
+                 role="combobox" aria-label="Enter a street, address or neighborhood" aria-expanded="false" aria-controls="sugg" aria-autocomplete="list">
           <ul class="sugg" id="sugg" role="listbox" hidden></ul>
         </div>
       </div>
+      <p class="loc-note" id="locNote">“Show blocks near me” only centers the map. The page doesn't send or save your location.</p>
       <div aria-live="polite"><p class="find-msg" id="findMsg"></p><div class="cands" id="cands"></div></div>
       <div class="mapwrap" id="mapwrap">
         <div class="zoom"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button><button id="zfit" class="fit" aria-label="Show all of Los Angeles">LA</button><button id="znorth" class="north" aria-label="Turn the map back to north up" title="Turn north back up" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1.5 13.6 10H6.4Z" fill="var(--sign-red)"/><path d="M10 18.5 6.4 10h7.2Z" fill="currentColor" fill-opacity=".4"/></svg></button></div>
@@ -288,38 +295,36 @@
   <section id="method">
     <div class="code"><b>Method</b> How this was measured</div>
     <h2>How this was measured, and what it can't tell you</h2>
-    <dl class="method">
-      <dt>Data</dt>
-      <dd id="mData">LADOT parking citations (data.lacity.org, dataset 4f5p-udkv) from the last two years, rebuilt every week.</dd>
-      <dt>Blocks and sides</dt>
-      <dd>Each ticket's address is matched to the City of Los Angeles street centerlines (LA GeoHub), which list the house numbers on each side of every stretch of street. A block is one street's hundred block, and its line on the map is the part of the street those numbers cover. Tickets written at an intersection, like "5th St / Wall St", have no house number and are left out, and so are streets outside the City of Los Angeles. The centerlines also say which side of the street has the even numbers, so the card names the compass side.</dd>
-      <dt>Sweeping schedule</dt>
-      <dd>The posted day, weeks and time come from StreetsLA's map of posted sweeping routes. Each route covers an area and is swept on two days, one for each side of the street. A side gets the route day that matches the weekday of most of its sweeping tickets, among the routes those tickets sit inside. A side needs at least 8 sweeping tickets for that. The card also counts how many of a side's sweeping tickets on its sweep day fell in its posted weeks, since signs often show only the day. A few routes, like Downtown's, are swept every week; one with no fixed time is left out. Tickets written outside the posted time aren't counted. When neither side is matched, the card lists the posted route days around the block instead (tested a few metres to each side of the street), without saying which side gets which, or says that no posted route covers it. "Tickets were written on X% of sweep days" counts posted days with at least one ticket, leaving out holidays and any day with no sweeping tickets anywhere in the city.</dd>
-      <dt>Meter patrols</dt>
-      <dd>Monday to Saturday, 8 am to 8 pm, holidays left out. A visit is a group of meter tickets on one block with no gap over 10 minutes. An officer who finds every meter paid leaves no ticket, so the visit rate is adjusted for those empty visits, assuming the number of expired cars an officer finds on a visit is random (Poisson). A block needs at least 20 meter tickets. Which blocks have meters comes from LADOT's meter inventory (dataset s49e-q6j2).</dd>
-      <dt>Ticket kinds</dt>
-      <dd>LADOT's handheld devices write the same rule in different ways, like "STANDNG IN ALLEY" or "8069B NO PARK ST CLN", so tickets are grouped by violation code under one plain name. The no-stopping codes, including the rush-hour ones, all become "No stopping", and the usual hours show when they're written. Fines are the median of the tickets that list one. Tapping a kind shows what the rule is and the ticket code LADOT writes most often for it. For the block's most ticketed kind, and any kind with at least 50 tickets there, it also opens a dot chart of the half hour each ticket was written.</dd>
-      <dt>Limits</dt>
-      <dd>A ticket only appears when someone broke the rule, so quiet blocks look less enforced than they are, and a rule nobody was ticketed for doesn't show up at all. Addresses that couldn't be matched are left out. Routes and staffing change, and none of this is a promise about next week. Always read the posted signs, and for sweeping, the city's schedule.</dd>
-    </dl>
-    <footer>
-      Sources
-      <ul>
-        <li><a href="https://data.lacity.org/Transportation/Parking-Citations/4f5p-udkv/about_data">LADOT Parking Citations</a> and <a href="https://data.lacity.org/Transportation/LADOT-Metered-Parking-Inventory-Policies/s49e-q6j2/about_data">Metered Parking Inventory</a>, data.lacity.org</li>
-        <li><a href="https://geohub.lacity.org/datasets/d3cd48afaacd4913b923fd98c6591276">Streets (Centerline)</a>, City of Los Angeles GeoHub</li>
-        <li><a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">Posted Street Sweeping Routes</a>, StreetsLA (as of July 2026): each route's area, days, weeks and posted time</li>
-        <li>Map © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, loaded from openstreetmap.org</li>
-        <li><a href="https://www.arcgis.com/home/item.html?id=d6c55385a0e749519f238b77135eafac">LA Times Neighborhood Boundaries</a>, Los Angeles Times via LA GeoHub (CC BY 4.0): the neighborhood outlines on the map</li>
-        <li><a href="https://ladot.lacity.gov/dotnews/weekly-update-march-4-2021">LADOT's weekly update of March 4, 2021</a> on enforcing street sweeping only on the days streets are swept, and <a href="https://larchmontchronicle.com/to-adhere-to-parking-signs-or-not-to-adhere/">Larchmont Chronicle</a> on LADOT's policy for sweeping signs that still show every week; the city's own lookup is at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a></li>
-      </ul>
-    </footer>
+    <div class="method">
+      <details><summary>Data</summary>
+        <p id="mData">LADOT parking citations (data.lacity.org, dataset 4f5p-udkv) from the last two years, rebuilt every week.</p></details>
+      <details><summary>Blocks and sides</summary>
+        <p>Each ticket's address is matched to the City of Los Angeles street centerlines (LA GeoHub), which list the house numbers on each side of every stretch of street. A block is one street's hundred block, and its line on the map is the part of the street those numbers cover. Tickets written at an intersection, like "5th St / Wall St", have no house number and are left out, and so are streets outside the City of Los Angeles. The centerlines also say which side of the street has the even numbers, so the card names the compass side.</p></details>
+      <details><summary>Sweeping schedule</summary>
+        <p>The posted day, weeks and time come from StreetsLA's map of posted sweeping routes. Each route covers an area and is swept on two days, one for each side of the street. A side gets the route day that matches the weekday of most of its sweeping tickets, among the routes those tickets sit inside. A side needs at least 8 sweeping tickets for that. The card also counts how many of a side's sweeping tickets on its sweep day fell in its posted weeks, since signs often show only the day. A few routes, like Downtown's, are swept every week; one with no fixed time is left out. Tickets written outside the posted time aren't counted. When neither side is matched, the card lists the posted route days around the block instead (tested a few metres to each side of the street), without saying which side gets which, or says that no posted route covers it. "Tickets were written on X% of sweep days" counts posted days with at least one ticket, leaving out holidays and any day with no sweeping tickets anywhere in the city.</p></details>
+      <details><summary>Meter patrols</summary>
+        <p>Monday to Saturday, 8 am to 8 pm, holidays left out. A visit is a group of meter tickets on one block with no gap over 10 minutes. An officer who finds every meter paid leaves no ticket, so the visit rate is adjusted for those empty visits, assuming the number of expired cars an officer finds on a visit is random (Poisson). A block needs at least 20 meter tickets. Which blocks have meters comes from LADOT's meter inventory (dataset s49e-q6j2).</p></details>
+      <details><summary>Ticket kinds</summary>
+        <p>LADOT's handheld devices write the same rule in different ways, like "STANDNG IN ALLEY" or "8069B NO PARK ST CLN", so tickets are grouped by violation code under one plain name. The no-stopping codes, including the rush-hour ones, all become "No stopping", and the usual hours show when they're written. Fines are the median of the tickets that list one. Tapping a kind shows what the rule is and the ticket code LADOT writes most often for it. For the block's most ticketed kind, and any kind with at least 50 tickets there, it also opens a dot chart of the half hour each ticket was written.</p></details>
+      <details><summary>Limits</summary>
+        <p>A ticket only appears when someone broke the rule, so quiet blocks look less enforced than they are, and a rule nobody was ticketed for doesn't show up at all. Addresses that couldn't be matched are left out. Routes and staffing change, and none of this is a promise about next week. Always read the posted signs, and for sweeping, the city's schedule.</p></details>
+      <details><summary>Sources</summary>
+        <ul>
+          <li><a href="https://data.lacity.org/Transportation/Parking-Citations/4f5p-udkv/about_data">LADOT Parking Citations</a> and <a href="https://data.lacity.org/Transportation/LADOT-Metered-Parking-Inventory-Policies/s49e-q6j2/about_data">Metered Parking Inventory</a>, data.lacity.org</li>
+          <li><a href="https://geohub.lacity.org/datasets/d3cd48afaacd4913b923fd98c6591276">Streets (Centerline)</a>, City of Los Angeles GeoHub</li>
+          <li><a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">Posted Street Sweeping Routes</a>, StreetsLA (as of July 2026): each route's area, days, weeks and posted time</li>
+          <li>Map © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, loaded from openstreetmap.org</li>
+          <li><a href="https://www.arcgis.com/home/item.html?id=d6c55385a0e749519f238b77135eafac">LA Times Neighborhood Boundaries</a>, Los Angeles Times via LA GeoHub (CC BY 4.0): the neighborhood outlines on the map</li>
+          <li><a href="https://ladot.lacity.gov/dotnews/weekly-update-march-4-2021">LADOT's weekly update of March 4, 2021</a> on enforcing street sweeping only on the days streets are swept, and <a href="https://larchmontchronicle.com/to-adhere-to-parking-signs-or-not-to-adhere/">Larchmont Chronicle</a> on LADOT's policy for sweeping signs that still show every week; the city's own lookup is at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a></li>
+        </ul></details>
+    </div>
   </section>
   <section id="about">
     <div class="code"><b>About</b> These pages</div>
     <p class="about">Made by <a href="https://github.com/citina">Citina Liang</a>, a PhD candidate in Industrial &amp; Systems Engineering at USC Viterbi who models how people behave and how diseases spread. It started when she missed the deadline for a campus parking pass. <a href="https://citina.github.io/curb-log/">Curb Log</a> came first, to learn <b>when the meters near her office have space</b>. Its grid showed the hardest days were <b>when the side streets are swept</b>, which raised the next question: <b>when does enforcement actually come?</b> <a href="../">USC Ticket Clock</a> answers that from the city's own tickets, and LA Street Rules does it for every block in Los Angeles. All from the city's open data, and it updates itself. Built with Claude Code in about a week; the code is on <a href="https://github.com/citina/ticket-clock">GitHub</a>.</p>
     <div class="sibs">
-      <a class="sib" href="../"><div class="sib-name">USC Ticket Clock</div><div class="sib-txt">The streets around USC in more detail: each side's sweeping schedule, when the first and last sweeping tickets usually land, and how often meter officers walk past, by half hour and weekday.</div></a>
-      <a class="sib" href="https://citina.github.io/curb-log/"><div class="sib-name">Curb Log</div><div class="sib-txt">How many parking spaces are available right now on Vermont Ave from W 36th St down to about W 37th St (both sides) and on W 36th St just west of Vermont, and how that usually changes by the half hour on weekdays, from LADOT's parking sensors.</div></a>
+      <a class="sib" href="../"><div class="sib-name">USC Ticket Clock</div><div class="sib-txt">The streets around USC in more detail: when sweeping tickets land and how often meter officers come by.</div></a>
+      <a class="sib" href="https://citina.github.io/curb-log/"><div class="sib-name">Curb Log</div><div class="sib-txt">Available parking right now on Vermont Ave by W 36th St, and how it usually changes on weekdays, from LADOT's parking sensors.</div></a>
     </div>
   </section>
   <div class="note end">
@@ -338,12 +343,14 @@ const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], DAYLONG=['Monday','Tuesd
 const pct=x=>Math.round(x*100)+'%';
 function fmtT(m){ m=Math.round(m); const h=Math.floor(m/60)%24, mm=m%60, ap=h>=12?'pm':'am', h12=h%12||12; return mm?`${h12}:${String(mm).padStart(2,'0')} ${ap}`:`${h12} ${ap}`; }
 function fmtRange(a,b){ const s=fmtT(a), e=fmtT(b); return s.slice(-2)===e.slice(-2) ? s.slice(0,-3)+'–'+e : s+'–'+e; }
-function usual(r){ return r.map(([a,b])=>fmtRange(a,b)).join(' or '); }
+function usual(r){ return r.map(([a,b])=>fmtRange(a,b).replace(/ /g,'\u00a0').replace('–','\u2060–\u2060')).join(' or '); }
 function fmtDate(s){ return new Date(s+'T12:00:00').toLocaleDateString('en-US',{day:'numeric',month:'short',year:'numeric'}); }
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const tip=$('#tip');
-function showTip(e, html){ tip.innerHTML=html; tip.hidden=false; const r=tip.getBoundingClientRect(); let x=e.clientX+14, y=e.clientY+14;
-  if(x+r.width>innerWidth-8) x=e.clientX-r.width-14; if(y+r.height>innerHeight-8) y=e.clientY-r.height-14; tip.style.left=x+'px'; tip.style.top=y+'px'; }
+// measured at the top left, where it can take its full width (measured where it last was, near an edge, it came out narrow and tall), then kept on screen
+function showTip(e, html){ tip.innerHTML=html; tip.style.left=tip.style.top='0px'; tip.hidden=false; const r=tip.getBoundingClientRect(); let x=e.clientX+14, y=e.clientY+14;
+  if(x+r.width>innerWidth-8) x=e.clientX-r.width-14; if(y+r.height>innerHeight-8) y=e.clientY-r.height-14;
+  tip.style.left=Math.max(8,Math.min(x,innerWidth-r.width-8))+'px'; tip.style.top=Math.max(8,Math.min(y,innerHeight-r.height-8))+'px'; }
 function hideTip(){ tip.hidden=true; }
 const stacked=()=>matchMedia('(max-width:1000px)').matches;
 const msg=html=>{ $('#findMsg').innerHTML=html; };
@@ -477,7 +484,8 @@ function between(b){ const n=b.x.map(i=>META.names[i]); return n.length===2?`Bet
 function drawHalo(){ gHalo.innerHTML=''; if(!selected) return;
   S('path',{d:selected.d,class:'blk',style:'stroke:var(--map-sel);stroke-width:16'},gHalo); S('path',{d:selected.d,class:'blk',style:'stroke-width:12'},gHalo); }
 function drawYou(){ gYou.innerHTML=''; if(!fix) return; const u=vb.w/(wrap.clientWidth||600);
-  S('circle',{cx:fix[0],cy:fix[1],r:7*u,fill:'var(--accent)',stroke:'var(--map-bg)','stroke-width':2.5,'vector-effect':'non-scaling-stroke'},gYou); }
+  S('circle',{cx:fix[0],cy:fix[1],r:16*u,fill:'var(--map-you)','fill-opacity':.18,stroke:'var(--map-you)','stroke-opacity':.45,'stroke-width':1,'vector-effect':'non-scaling-stroke'},gYou);
+  S('circle',{cx:fix[0],cy:fix[1],r:7*u,fill:'var(--map-you)',stroke:'#fff','stroke-width':3,'vector-effect':'non-scaling-stroke'},gYou); }
 function blockCentre(b){ const xs=[], ys=[]; b.g.forEach(ln=>{ for(let i=0;i<ln.length;i+=2){ xs.push(ln[i]+b.ox); ys.push(ln[i+1]+b.oy); } });
   return [(Math.min(...xs)+Math.max(...xs))/2,(Math.min(...ys)+Math.max(...ys))/2]; }
 
@@ -586,26 +594,30 @@ function timeDots(host, b, ki, hh){
   const mx=Math.max(...c), per=[1,2,5,10,20,50,100,200,500,1000,2000,5000,10000].find(v=>mx/v<=10.5)||20000;
   const Wd=Math.max(260,Math.round(host.clientWidth)||380), l=0, r=0, cw=(Wd-l-r)/48, rad=Math.min(3.2,cw*.42), step=Math.min(7,rad*2+.8);
   const top=4, base=top+10*step+4, Hd=base+22, x=j=>l+j*cw;
+  H('div',{className:'kchart-t',textContent:'What time of day these tickets were written'},host);
   const g=S('svg',{viewBox:`0 0 ${Wd} ${Hd}`,role:'img','aria-label':`${kind} tickets on this block by the half hour they were written`},host);
   const wins=kind==='Street cleaning'&&b.w?[...new Set((b.w||[]).map(s=>s[2]+'-'+s[3]))].map(k=>k.split('-').map(Number)):[];
   wins.forEach(([s0,s1])=>S('rect',{x:x(s0/30),y:top,width:x(s1/30)-x(s0/30),height:base-top,rx:3,class:'win'},g));
   c.forEach((n,j)=>{ const dots=n?Math.max(1,Math.round(n/per)):0;
     for(let i=0;i<dots;i++) S('circle',{cx:x(j)+cw/2,cy:base-rad-1-i*step,r:rad},g).style.fill='var(--accent)'; });
   S('line',{x1:l,x2:Wd-r,y1:base,y2:base,class:'axis'},g);
-  for(let h=0;h<=24;h+=3){ S('line',{x1:x(h*2),x2:x(h*2),y1:base,y2:base+4,class:'axis'},g);
-    const t=S('text',{x:x(h*2),y:base+16,'text-anchor':h===0?'start':h===24?'end':'middle',class:'tick'},g); t.textContent=fmtT(h*60%1440).replace(' am','a').replace(' pm','p'); }
+  // a tick every 3 hours; on a narrow chart (a phone) a label only every 6, so "12am" and "3am" don't run together
+  for(let h=0;h<=24;h+=3){ S('line',{x1:x(h*2),x2:x(h*2),y1:base,y2:base+4,class:'axis'},g); if(Wd<340&&h%6) continue;
+    const t=S('text',{x:x(h*2),y:base+16,'text-anchor':h===0?'start':h===24?'end':'middle',class:'tick'},g); t.textContent=h===12?'noon':fmtT(h*60%1440).replace(' ',''); }
   const hit=S('rect',{x:l,y:0,width:Wd-l-r,height:Hd,fill:'transparent'},g);
   hit.addEventListener('pointermove',e=>{ if(e.pointerType!=='mouse') return; const bb=g.getBoundingClientRect(), j=Math.max(0,Math.min(47,Math.floor(((e.clientX-bb.left)*Wd/bb.width-l)/cw)));
     showTip(e,`<b>${fmtRange(j*30,j*30+30)}</b><br>${c[j].toLocaleString()} ${esc(kind.toLowerCase())} ticket${c[j]===1?'':'s'}`); });
   hit.addEventListener('pointerleave',hideTip);
-  H('div',{className:'evid',style:'margin-top:6px',innerHTML:`${per===1?'Each dot is one ticket':`Each dot is about ${per} tickets`}, placed at the half hour it was written.${wins.length?' <span style="white-space:nowrap"><span class="sw win" style="height:10px;vertical-align:-1px"></span> posted sweeping time</span>.':''}`},host);
+  H('div',{className:'evid',style:'margin-top:6px',innerHTML:`${per===1?'Each dot is one ticket':`Each dot is about ${per} tickets`}, stacked by the half hour.${wins.length?' <span style="white-space:nowrap"><span class="sw win" style="height:10px;vertical-align:-1px"></span> posted sweeping time</span>.':''}`},host);
 }
 const when=t=>`${t[5]>=.85?'mostly weekdays':'most often '+DAYLONG[t[3]]+'s'}, usually ${usual(t[4])}`;
 // no side matched to a route: the posted route days around the block (b.wr), without which side gets which, or none
 function noSchedule(host, b, n){
   const lookup=' Look up your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.';
   const tix=n?`${n.toLocaleString()} sweeping ticket${n>1?'s were':' was'} written here since ${since()}`:`No sweeping tickets were written here since ${since()}`;
-  if(!b.wr){ H('div',{className:'rule-line',innerHTML:`<b>No sweeping schedule found.</b> None of StreetsLA's posted sweeping routes covers this block. ${tix}.${lookup}`},host); return; }
+  if(!b.wr){ H('div',{className:'rule-line',innerHTML:`<b>No sweeping schedule found.</b> This block isn't on any of StreetsLA's posted sweeping routes, `
+    +(n?`though ${n.toLocaleString()} sweeping ticket${n>1?'s have':' has'} been written here since ${since()}.`:`and no sweeping tickets have been written here since ${since()}.`)
+    +` Check your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.`},host); return; }
   const g=new Map(); b.wr.forEach(([dows,s0,s1,on])=>{ const k=`${on}|${s0}|${s1}`; if(!g.has(k)) g.set(k,new Set()); dows.forEach(d=>g.get(k).add(d)); });
   const parts=[...g].map(([k,set])=>{ const [on,s0,s1]=k.split('|').map(Number); return {on,s0,s1,ds:[...set].sort((a,c)=>a-c)}; });
   const split=parts.length>1||parts.some(x=>x.on&&x.ds.length>1);
@@ -622,11 +634,11 @@ function noSchedule(host, b, n){
 function renderCard(b){
   const p=$('#panel'); p.innerHTML='';
   if(!b){ H('div',{className:'p-eyebrow',textContent:'Street rules'},p); H('div',{className:'p-title',textContent:'Pick a block'},p);
-    H('p',{className:'p-sub',style:'margin:8px 0 14px',textContent:'Use your location, search for a street, or pick a neighborhood on the map, then tap a block. Its sweeping day, hours and weeks, its meters, and what else gets ticketed there show up here.'},p); return; }
+    H('p',{className:'p-sub',style:'margin:8px 0 14px',textContent:'Show the blocks near you, search for a street, or pick a neighborhood on the map, then tap a block. Its sweeping day, hours and weeks, its meters, and what else gets ticketed there show up here.'},p); return; }
   H('div',{className:'p-eyebrow',textContent:'Street rules'},p);
   H('div',{className:'p-title',textContent:blockName(b)},p);
   if(b.x.length) H('div',{className:'p-sub',textContent:between(b)},p);
-  H('div',{className:'p-sub',style:'margin-top:2px',textContent:`Worked out from ${b.n.toLocaleString()} LADOT ticket${b.n>1?'s':''} since ${since()}`},p);
+  H('div',{className:'p-sub',style:'margin-top:2px',textContent:`${b.n.toLocaleString()} LADOT ticket${b.n>1?'s':''} since ${since()}`},p);
 
   const sc=H('div',{className:'card'},p); H('h4',{textContent:'Street sweeping'},sc);
   const groups=sweepGroups(b), sw=b.k.find(t=>META.kinds[t[0]]==='Street cleaning');
@@ -653,9 +665,9 @@ function renderCard(b){
 
   const mc=H('div',{className:'card'},p); H('h4',{textContent:'Meters'},mc);
   const mt=b.k.some(t=>META.kinds[t[0]]==='Meter expired'), m=b.m;
-  if(!b.sp&&!mt) H('div',{className:'rule-line',textContent:'No metered spaces on this block in LADOT\'s meter list, and no meter tickets.'},mc);
+  if(!b.sp&&!mt) H('div',{className:'rule-line',textContent:`No meters appear in LADOT's inventory for this block, and no meter tickets since ${since()}.`},mc);
   else {
-    H('div',{className:'rule-line',innerHTML:b.sp?`<b>${b.sp} metered space${b.sp>1?'s':''}</b> on this block. ${b.sp>1?'Their hours are on the meters':'Its hours are on the meter'}.`:`<b>No metered spaces listed</b> for this block in LADOT's meter list, though meter tickets were written at its addresses.`},mc);
+    H('div',{className:'rule-line',innerHTML:b.sp?`<b>${b.sp} metered space${b.sp>1?'s':''}</b> on this block.`:`<b>No meters appear in LADOT's inventory</b> for this block, though meter tickets were written at its addresses.`},mc);
     if(m){ H('div',{className:'side-txt',style:'margin-top:6px',textContent:`About ${m[0]} officer visit${m[0]===1?'':'s'} a weekday, most often ${fmtRange(480+m[1]*30,600+m[1]*30)}.`},mc);
       H('div',{className:'evid',style:'margin-top:14px',textContent:'Chance of a meter ticket if a car stays unpaid from 8 am to 8 pm:'},mc);
       const o=H('div',{className:'odds6'},mc);
@@ -665,7 +677,7 @@ function renderCard(b){
   const kc=H('div',{className:'card'},p); H('h4',{textContent:'What gets ticketed here'},kc);
   const cur=charts(b), tappable=!!(META.kind_src||cur.size);
   if(tappable) H('div',{className:'evid',style:'margin:0',textContent:'Tap a kind for its ticket code and the times of day it gets ticketed here.'},kc);
-  const kg=H('div',{className:'kinds',style:'margin-top:6px'},kc), kmax=b.k[0][1], FEW=8;
+  const kg=H('div',{className:'kinds',style:'margin-top:6px'},kc), kmax=b.k[0][1], FEW=5;
   const extra=[];
   b.k.forEach((t,i)=>{ const kind=META.kinds[t[0]], src=(META.kind_src||[])[t[0]];
     const row=tappable?H('button',{className:'krow',type:'button'},kg):H('div',{className:'krow flat'},kg), a=H('div',{},row);
@@ -685,14 +697,11 @@ function renderCard(b){
         if(codeLine) H('div',{className:'kcode',innerHTML:codeLine},det);
         if(cur.has(t[0])) timeDots(det,b,t[0],cur.get(t[0]));
         else H('div',{className:'evid',style:'margin-top:6px',textContent:`Too few tickets here for its own chart (under ${META.chart_min||50}).`},det); } };
-    if(src) row.addEventListener('pointermove',e=>{ if(e.pointerType==='mouse')
-      showTip(e,`<b>${esc(kind)}</b>${note?'<br>'+esc(note):''}${src[0][0]==='?'?'':`<br>Ticket code ${esc(src[0][0])}`}`); });
-    row.addEventListener('pointerleave',hideTip);
     if(i>=FEW) extra.push(row,det); });
   if(extra.length){ const more=H('button',{className:'chip sm',style:'margin-top:12px'},kc); let open=false;
     const set=()=>{ extra.forEach(e=>{ e.hidden=!open||(e.classList.contains('kdet')&&e.previousElementSibling.getAttribute('aria-expanded')!=='true'||e.classList.contains('kdet')&&!e.childElementCount); }); more.textContent=open?'Show fewer':`Show all ${b.k.length} kinds`; more.setAttribute('aria-expanded',open); };
     more.onclick=()=>{ open=!open; set(); if(!open&&more.getBoundingClientRect().top<0) more.scrollIntoView({block:'center'}); }; set(); }
-  H('div',{className:'evid',style:'margin:4px 0 14px;padding-top:12px;border-top:1px solid var(--rule)',textContent:'This card is worked out from LADOT tickets, not read from the signs, so a rule nobody was ticketed for doesn\'t show up. Check the posted signs where you park.'},p);
+  H('div',{className:'evid',style:'margin:4px 0 14px;padding-top:12px;border-top:1px solid var(--rule)',textContent:`This card is worked out from LADOT citations recorded since ${since()}. Ticket history may not include every rule that applies here.`},p);
 }
 
 /* ============ search: a street, or a house number and a street ============ */
@@ -846,9 +855,9 @@ function legend(){ const near=vb.w*PX_M<=SHOW_M, key=[near,!!selected,!!fix,!!HO
     if(selected) item('height:12px;border-radius:6px;background:var(--map-line);border:2px solid var(--map-sel);box-shadow:0 0 0 2px var(--map-bg)','The block you picked');
     if(HOODS) item(`height:0;border-top:2px dashed ${edge};box-shadow:0 0 0 3px var(--map-bg)`,'Neighborhood edge'); }
   else if(HOODS) item(`width:16px;height:12px;border-radius:2px;border:1.5px solid ${edge};background:color-mix(in oklab,var(--map-line) 20%,var(--map-bg))`,'Neighborhood');
-  if(fix) item('width:12px;height:12px;border-radius:50%;background:var(--accent)','Your location');
+  if(fix) item('width:14px;height:14px;border-radius:50%;background:var(--map-you);border:2.5px solid #fff;box-shadow:0 0 0 3px color-mix(in oklab,var(--map-you) 25%,transparent)','Your location');
   const li=H('li',{textContent:`${near?'No line: no tickets were found for that street. ':''}Other cities, like Beverly Hills, Culver City and Santa Monica, aren't covered: they write their own tickets.`},lg);
-  li.style.cssText='flex-basis:100%;font-size:12px;color:var(--ink-3)'; }
+  li.style.flexBasis='100%'; }
 
 /* ============ start ============ */
 renderCard(null);
