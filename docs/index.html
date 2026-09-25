@@ -297,7 +297,7 @@
     <h2>Street sweeping runs every other week, and the officer usually comes in the first hour</h2>
     <p id="sweepIntro"></p>
     <div class="aside">
-      <b>Street sweeping signs.</b> Many signs were never updated for the every-other-week schedule and still show only the day, like "No parking Thursday". LADOT says parking is legal on a street's off weeks, and when the change began it said officers would enforce street sweeping only on days that sweeping happens (<a href="https://ladot.lacity.gov/dotnews/weekly-update-march-4-2021">LADOT, March 2021</a>). The weeks on this page are from <a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">StreetsLA's list</a> of posted routes. For the official schedule, look up your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.
+      <b>Street sweeping signs.</b> LADOT says parking is legal on a street's off weeks, even where the sign shows only the day, and said officers would enforce street sweeping only on days that sweeping happens (<a href="https://ladot.lacity.gov/dotnews/weekly-update-march-4-2021">LADOT, March 2021</a>). The weeks on this page are from <a href="https://www.arcgis.com/home/item.html?id=0e16fa641a0846a3ae29bffb150314dc">StreetsLA's list</a> of posted routes; for the official schedule, look up your street at <a href="https://streets.lacity.gov/services/street-sweeping">streets.lacity.gov</a>.
     </div>
     <figure id="calFig">
       <div class="fig-title">One block, every Tuesday for two years</div>
@@ -720,7 +720,7 @@ select(start,true);
 })();
 
 /* ============ sweeping evidence ============ */
-$('#sweepIntro').innerHTML=`In March 2021, LA cut street sweeping to every other week. Each posted route is now swept on either the 1st and 3rd or the 2nd and 4th time its weekday comes up in a month. Street cleaning is ${pct(D.share.sweep)} of all tickets here, and meters are ${pct(D.share.meter)}.`;
+$('#sweepIntro').innerHTML=`Since March 2021, each street here has been swept on either the 1st &amp; 3rd or the 2nd &amp; 4th time its weekday comes up in a month. Street cleaning is ${pct(D.share.sweep)} of all tickets here, and meters are ${pct(D.share.meter)}.`;
 // squares grow to fill the column (22-44px); on narrow screens they stay 22px and the box scrolls
 { const cal=D.cal;   // the even side of the 600 block of W 28th St, every Tuesday
   const all=cal.reduce((a,c)=>a+c[2],0), inw=cal.reduce((a,c)=>a+(c[1]===1||c[1]===3?c[2]:0),0);
